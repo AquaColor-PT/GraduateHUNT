@@ -4,7 +4,7 @@ import {
   getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, sendPasswordResetEmail 
 } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
 import { 
-  getFirestore, collection, addDoc, getDocs, query, where, orderBy, doc, serverTimestamp, updateDoc, deleteDoc 
+  getFirestore, collection, addDoc, query, where, orderBy, updateDoc, deleteDoc, doc, serverTimestamp, onSnapshot 
 } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
 
 // ---------------- FIREBASE CONFIG ----------------
@@ -99,7 +99,7 @@ onAuthStateChanged(auth, user => {
     logoutBtn.classList.remove("hidden");
     registerBtn.disabled = true;
     loginBtn.disabled = true;
-    loadJobs(user.uid);
+    loadJobsRealtime(user.uid);
   } else {
     jobForm.classList.add("hidden");
     logoutBtn.classList.add("hidden");
@@ -116,15 +116,12 @@ function checkFields() {
 }
 inputs.forEach(input => input.addEventListener("input", checkFields));
 
-// ---------------- JOB POST ----------------
+// ---------------- POST JOB ----------------
 jobForm.addEventListener("submit", async (e) => {
   e.preventDefault();
   
   const user = auth.currentUser;
-  if (!user) {
-    alert("⚠️ You must be logged in to post a job");
-    return;
-  }
+  if (!user) return alert("⚠️ You must be logged in to post a job");
 
   const title = document.getElementById("jobTitle").value.trim();
   const company = document.getElementById("company").value.trim();
@@ -143,40 +140,44 @@ jobForm.addEventListener("submit", async (e) => {
       postedAt: serverTimestamp(),
       visible: true
     });
-    alert("✅ Job Posted!");
     jobForm.reset();
     checkFields();
-    loadJobs(user.uid);
   } catch (err) {
-    console.error("Error posting job:", err);
+    console.error(err);
     alert("❌ " + err.message);
   }
 });
 
-// ---------------- LOAD JOBS ----------------
-async function loadJobs(uid) {
-  jobList.innerHTML = "";
-  const q = query(collection(db, "jobs"), where("recruiterId", "==", uid), orderBy("postedAt", "desc"));
-  const snap = await getDocs(q);
+// ---------------- LOAD JOBS REALTIME ----------------
+function loadJobsRealtime(uid) {
+  const q = query(
+    collection(db, "jobs"),
+    where("recruiterId", "==", uid),
+    orderBy("postedAt", "desc")
+  );
 
-  snap.forEach(docSnap => {
-    const job = docSnap.data();
-    const li = document.createElement("li");
-    li.innerHTML = `
-      <strong>${job.title}</strong> @ ${job.company} (${job.type})<br>
-      <small>${job.location}</small><br>
-      <p>${job.description}</p>
-      <button class="editBtn">Edit</button>
-      <button class="deleteBtn">Delete</button>
-      <button class="viewApps">View Applications</button>
-    `;
+  onSnapshot(q, (snap) => {
+    jobList.innerHTML = "";
+    snap.forEach(docSnap => {
+      const job = docSnap.data();
+      const li = document.createElement("li");
+      li.innerHTML = `
+        <strong>${job.title}</strong> @ ${job.company} (${job.type})<br>
+        <small>${job.location}</small><br>
+        <p>${job.description}</p>
+        <div class="job-buttons">
+          <button class="editBtn">Edit</button>
+          <button class="deleteBtn">Delete</button>
+          <button class="viewApps">View Applications</button>
+        </div>
+      `;
 
-    // ---------------- BUTTON EVENTS ----------------
-    li.querySelector(".editBtn").onclick = () => editJob(docSnap.id, job);
-    li.querySelector(".deleteBtn").onclick = () => deleteJob(docSnap.id);
-    li.querySelector(".viewApps").onclick = () => loadApplications(docSnap.id);
+      li.querySelector(".editBtn").onclick = () => editJob(docSnap.id, job);
+      li.querySelector(".deleteBtn").onclick = () => deleteJob(docSnap.id);
+      li.querySelector(".viewApps").onclick = () => loadApplications(docSnap.id);
 
-    jobList.appendChild(li);
+      jobList.appendChild(li);
+    });
   });
 }
 
@@ -191,7 +192,6 @@ function editJob(jobId, job) {
 
   postJobBtn.textContent = "Update Job";
 
-  // Remove previous submit listener and add new one
   jobForm.onsubmit = async (e) => {
     e.preventDefault();
     const title = document.getElementById("jobTitle").value.trim();
@@ -202,21 +202,30 @@ function editJob(jobId, job) {
 
     try {
       await updateDoc(doc(db, "jobs", jobId), { title, company, location, type, description });
-      alert("✅ Job Updated!");
       jobForm.reset();
       postJobBtn.textContent = "Post Job";
       checkFields();
-      jobForm.onsubmit = submitNewJob; // restore default submit
-      loadJobs(auth.currentUser.uid);
+      jobForm.onsubmit = defaultPostJob;
     } catch (err) {
-      console.error("Error updating job:", err);
+      console.error(err);
       alert("❌ " + err.message);
     }
   };
 }
 
-// Default submit for new jobs
-async function submitNewJob(e) {
+// ---------------- DELETE JOB ----------------
+async function deleteJob(jobId) {
+  if (!confirm("Are you sure you want to delete this job?")) return;
+  try {
+    await deleteDoc(doc(db, "jobs", jobId));
+  } catch (err) {
+    console.error(err);
+    alert("❌ " + err.message);
+  }
+}
+
+// ---------------- DEFAULT POST JOB ----------------
+async function defaultPostJob(e) {
   e.preventDefault();
   const user = auth.currentUser;
   if (!user) return alert("⚠️ You must be logged in");
@@ -232,32 +241,18 @@ async function submitNewJob(e) {
       title, company, location, type, description,
       recruiterId: user.uid, postedAt: serverTimestamp(), visible: true
     });
-    alert("✅ Job Posted!");
     jobForm.reset();
     checkFields();
-    loadJobs(user.uid);
   } catch (err) {
-    console.error("Error posting job:", err);
+    console.error(err);
     alert("❌ " + err.message);
   }
 }
-jobForm.onsubmit = submitNewJob;
-
-// ---------------- DELETE JOB ----------------
-async function deleteJob(jobId) {
-  if (!confirm("Are you sure you want to delete this job?")) return;
-  try {
-    await deleteDoc(doc(db, "jobs", jobId));
-    alert("🗑 Job deleted");
-    loadJobs(auth.currentUser.uid);
-  } catch (err) {
-    console.error("Error deleting job:", err);
-    alert("❌ " + err.message);
-  }
-}
+jobForm.onsubmit = defaultPostJob;
 
 // ---------------- LOAD APPLICATIONS ----------------
 async function loadApplications(jobId) {
+  const { getDocs, collection, query, where } = await import("https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js");
   applicationsList.innerHTML = "Loading...";
   const q = query(collection(db, "applications"), where("jobId", "==", jobId));
   const snap = await getDocs(q);
@@ -277,6 +272,5 @@ async function loadApplications(jobId) {
       applicationsList.appendChild(li);
     });
   }
-
   appModal.style.display = "flex";
 }
