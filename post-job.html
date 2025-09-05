@@ -49,22 +49,13 @@
       <option value="Permanent (No Experience)">Permanent (No Experience)</option>
     </select>
     <textarea id="description" placeholder="Job Description" rows="4" required></textarea>
-    <button type="submit" class="postJob" id="postJobBtn" disabled>Post Job</button>
+    <button type="submit" id="postJobBtn" disabled>Post Job</button>
   </form>
   
   <h3>Your Posted Jobs</h3>
   <ul id="jobList"></ul>
 
 </section>
-
-<!-- Applications Modal -->
-<div id="appModal" class="modal">
-  <div class="modal-content">
-    <h3>Applications</h3>
-    <ul id="applicationsList"></ul>
-    <button onclick="document.getElementById('appModal').style.display='none'">Close</button>
-  </div>
-</div>
 
 <script type="module" src="post-job.js"></script>
 </body>
