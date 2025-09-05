@@ -1,89 +1,26 @@
-// Import Firebase
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
-import { 
-  getFirestore, collection, addDoc, getDocs, query, where, orderBy, serverTimestamp 
-} from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+import { getFirestore, collection, query, where, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
 
-// Firebase Config (same as recruiter)
-const firebaseConfig = {
-  apiKey: "AIzaSyAyIVMDstj2KWRvj1cHv0x0JCMVRWMteAw",
-  authDomain: "graduateinhunt.firebaseapp.com",
-  projectId: "graduateinhunt",
-  storageBucket: "graduateinhunt.appspot.com",
-  messagingSenderId: "49490866745",
-  appId: "1:49490866745:web:df722a8a68eae051cb53e8",
-  measurementId: "G-2L0JMXNT2Y"
-};
-
-// Init Firebase
+// Firebase config (same as before)
+const firebaseConfig = { /* your config */ };
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-// Elements
-const jobFeed = document.getElementById("jobFeed");
-const applyModal = document.getElementById("applyModal");
-const applyForm = document.getElementById("applyForm");
+const jobsContainer = document.getElementById("jobsContainer");
 
-let selectedJobId = null;
+const q = query(collection(db, "jobs"), where("visible", "==", true), orderBy("postedAt", "desc"));
 
-// ---------------- LOAD JOBS ----------------
-async function loadJobs() {
-  jobFeed.innerHTML = "";
-  const q = query(collection(db, "jobs"), orderBy("postedAt", "desc"));
-  const snap = await getDocs(q);
-
+onSnapshot(q, (snap) => {
+  jobsContainer.innerHTML = "";
   snap.forEach(docSnap => {
     const job = docSnap.data();
-    if(job.visible !== false) {  // Show only visible jobs
-      const li = document.createElement("li");
-      li.className = "job-card";
-      li.innerHTML = `
-        <strong>${job.title}</strong> @ ${job.company} (${job.type})<br>
-        <small>${job.location}</small><br>
-        <p>${job.description}</p>
-        <button class="applyBtn">Apply</button>
-      `;
-
-      // Open application modal
-      li.querySelector(".applyBtn").onclick = () => {
-        selectedJobId = docSnap.id;
-        applyModal.style.display = "flex";
-      };
-
-      jobFeed.appendChild(li);
-    }
+    const div = document.createElement("div");
+    div.classList.add("job");
+    div.innerHTML = `
+      <h4>${job.title} @ ${job.company}</h4>
+      <small>${job.location} | ${job.type}</small>
+      <p>${job.description}</p>
+    `;
+    jobsContainer.appendChild(div);
   });
-}
-
-loadJobs();
-
-// ---------------- SUBMIT APPLICATION ----------------
-applyForm.addEventListener("submit", async (e) => {
-  e.preventDefault();
-  if(!selectedJobId){ alert("⚠️ No job selected"); return; }
-
-  const name = document.getElementById("appName").value.trim();
-  const email = document.getElementById("appEmail").value.trim();
-  const cvURL = document.getElementById("cvURL").value.trim();
-
-  if(!name || !email || !cvURL){
-    return alert("⚠️ Fill in all fields");
-  }
-
-  try {
-    await addDoc(collection(db, "applications"), {
-      jobId: selectedJobId,
-      name,
-      email,
-      cvURL,
-      appliedAt: serverTimestamp()
-    });
-
-    alert("✅ Application submitted!");
-    applyForm.reset();
-    applyModal.style.display = "none";
-
-  } catch (err) {
-    alert("❌ " + err.message);
-  }
 });
