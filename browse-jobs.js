@@ -17,10 +17,10 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
 // ---------------- ELEMENT ----------------
-const jobList = document.getElementById("jobList");
+const publicJobList = document.getElementById("publicJobList");
 
-// ---------------- LOAD JOBS REALTIME ----------------
-function loadJobsRealtime() {
+// ---------------- LOAD PUBLIC JOBS ----------------
+function loadPublicJobs() {
   const q = query(
     collection(db, "jobs"),
     where("visible", "==", true),
@@ -28,9 +28,9 @@ function loadJobsRealtime() {
   );
 
   onSnapshot(q, snap => {
-    jobList.innerHTML = "";
-    if (snap.empty) {
-      jobList.innerHTML = "<li>No jobs available</li>";
+    publicJobList.innerHTML = "";
+    if(snap.empty){
+      publicJobList.innerHTML = "<li>No jobs available at the moment.</li>";
       return;
     }
 
@@ -42,9 +42,10 @@ function loadJobsRealtime() {
         <small>${job.location}</small><br>
         <p>${job.description}</p>
       `;
-      jobList.appendChild(li);
+      publicJobList.appendChild(li);
     });
   });
 }
 
-loadJobsRealtime();
+// Call on page load
+loadPublicJobs();
