@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Graduate Job Portal</title>
+<style>
+body { font-family: Arial, sans-serif; margin: 0; padding: 0; background: #f4f4f4; }
+header { background: #0066cc; color: white; padding: 20px 0; }
+.container { width: 90%; max-width: 900px; margin: 0 auto; }
+nav ul { list-style: none; display: flex; justify-content: flex-end; gap: 20px; padding: 0; flex-wrap: wrap; }
+nav ul li a { color: white; text-decoration: none; font-weight: bold; }
+.hero { background: #eaf3ff; padding: 60px 20px; text-align: center; }
+.hero h2 { margin-bottom: 15px; font-size: 2em; }
+.hero p { font-size: 1.1em; margin-bottom: 25px; color: #333; max-width: 600px; margin-left: auto; margin-right: auto; }
+.cta-button { display: inline-block; padding: 15px 30px; background: #0066cc; color: white; font-weight: bold; border-radius: 8px; text-decoration: none; transition: background 0.3s; }
+.cta-button:hover { background: #0052a3; }
+.how-it-works { padding: 50px 20px; background: white; text-align: center; }
+.steps { display: flex; flex-direction: column; gap: 20px; max-width: 800px; margin: 0 auto; }
+.step { background: #f1f1f1; padding: 20px; border-radius: 8px; }
+footer { background: #0066cc; color: white; text-align: center; padding: 20px 0; margin-top: 40px; }
+@media (min-width: 600px) { .steps { flex-direction: row; justify-content: space-between; } .step { flex: 1; margin: 0 10px; } }
+@media (max-width: 400px) { .hero h2 { font-size: 1.5em; } .hero p { font-size: 1em; } .cta-button { padding: 12px 25px; font-size: 0.95em; } nav ul { justify-content: center; gap: 10px; } }
+</style>
+</head>
+<body>
+
+<header>
+<div class="container">
+<h1>Graduate Job Portal</h1>
+<nav>
+<ul>
+<li><a href="homepage.html">Home</a></li>
+<li><a href="browse-jobs.html">Browse Jobs</a></li>
+<li><a href="post-job.html">Post a Job</a></li>
+</ul>
+</nav>
+</div>
+</header>
+
+<section class="hero">
+<div class="container">
+<h2>No Experience? No Problem.</h2>
+<p>Find internships, learnerships, training programs, and entry-level jobs tailored just for graduates.</p>
+<a href="browse-jobs.html" class="cta-button">Browse Jobs</a>
+</div>
+</section>
+
+<section class="how-it-works">
+<div class="container">
+<h3>How It Works</h3>
+<div class="steps">
+<div class="step">
+<h4>🎓 Graduates</h4>
+<p>Register and start applying to jobs with no experience required.</p>
+</div>
+<div class="step">
+<h4>🏢 Recruiters</h4>
+<p>Post job opportunities to help young talent get started.</p>
+</div>
+</div>
+</div>
+</section>
+
+<footer>
+<div class="container">
+<p>&copy; 2025 Graduate Job Portal. All rights reserved.</p>
+</div>
+</footer>
+
+</body>
+</html>
