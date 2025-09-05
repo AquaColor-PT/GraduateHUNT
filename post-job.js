@@ -111,35 +111,42 @@ onAuthStateChanged(auth, user => {
 
 // ---------------- ENABLE POST BUTTON ----------------
 function checkFields() {
-  const allFilled = inputs.every(input => input.value.trim() !== "" && input.value !== "");
+  const allFilled = inputs.every(input => input.value.trim() !== "");
   postJobBtn.disabled = !allFilled;
 }
 inputs.forEach(input => input.addEventListener("input", checkFields));
 
-// ---------------- POST JOB ----------------
+// ---------------- POST OR UPDATE JOB ----------------
+let editingJobId = null;
+
 jobForm.addEventListener("submit", async (e) => {
   e.preventDefault();
-  
   const user = auth.currentUser;
-  if (!user) return alert("⚠️ You must be logged in to post a job");
+  if (!user) return alert("⚠️ You must login first");
 
-  const title = document.getElementById("jobTitle").value.trim();
-  const company = document.getElementById("company").value.trim();
-  const location = document.getElementById("location").value.trim();
-  const type = document.getElementById("jobType").value;
-  const description = document.getElementById("description").value.trim();
+  const jobData = {
+    title: document.getElementById("jobTitle").value.trim(),
+    company: document.getElementById("company").value.trim(),
+    location: document.getElementById("location").value.trim(),
+    type: document.getElementById("jobType").value,
+    description: document.getElementById("description").value.trim(),
+  };
 
   try {
-    await addDoc(collection(db, "jobs"), {
-      title,
-      company,
-      location,
-      type,
-      description,
-      recruiterId: user.uid,
-      postedAt: serverTimestamp(),
-      visible: true
-    });
+    if (editingJobId) {
+      // Update job
+      await updateDoc(doc(db, "jobs", editingJobId), jobData);
+      editingJobId = null;
+      postJobBtn.textContent = "Post Job";
+    } else {
+      // Add new job
+      await addDoc(collection(db, "jobs"), {
+        ...jobData,
+        recruiterId: user.uid,
+        postedAt: serverTimestamp(),
+        visible: true
+      });
+    }
     jobForm.reset();
     checkFields();
   } catch (err) {
@@ -156,8 +163,10 @@ function loadJobsRealtime(uid) {
     orderBy("postedAt", "desc")
   );
 
-  onSnapshot(q, (snap) => {
+  onSnapshot(q, snap => {
     jobList.innerHTML = "";
+    if (snap.empty) jobList.innerHTML = "<li>No jobs posted yet</li>";
+
     snap.forEach(docSnap => {
       const job = docSnap.data();
       const li = document.createElement("li");
@@ -189,28 +198,8 @@ function editJob(jobId, job) {
   document.getElementById("jobType").value = job.type;
   document.getElementById("description").value = job.description;
   checkFields();
-
+  editingJobId = jobId;
   postJobBtn.textContent = "Update Job";
-
-  jobForm.onsubmit = async (e) => {
-    e.preventDefault();
-    const title = document.getElementById("jobTitle").value.trim();
-    const company = document.getElementById("company").value.trim();
-    const location = document.getElementById("location").value.trim();
-    const type = document.getElementById("jobType").value;
-    const description = document.getElementById("description").value.trim();
-
-    try {
-      await updateDoc(doc(db, "jobs", jobId), { title, company, location, type, description });
-      jobForm.reset();
-      postJobBtn.textContent = "Post Job";
-      checkFields();
-      jobForm.onsubmit = defaultPostJob;
-    } catch (err) {
-      console.error(err);
-      alert("❌ " + err.message);
-    }
-  };
 }
 
 // ---------------- DELETE JOB ----------------
@@ -224,35 +213,8 @@ async function deleteJob(jobId) {
   }
 }
 
-// ---------------- DEFAULT POST JOB ----------------
-async function defaultPostJob(e) {
-  e.preventDefault();
-  const user = auth.currentUser;
-  if (!user) return alert("⚠️ You must be logged in");
-
-  const title = document.getElementById("jobTitle").value.trim();
-  const company = document.getElementById("company").value.trim();
-  const location = document.getElementById("location").value.trim();
-  const type = document.getElementById("jobType").value;
-  const description = document.getElementById("description").value.trim();
-
-  try {
-    await addDoc(collection(db, "jobs"), {
-      title, company, location, type, description,
-      recruiterId: user.uid, postedAt: serverTimestamp(), visible: true
-    });
-    jobForm.reset();
-    checkFields();
-  } catch (err) {
-    console.error(err);
-    alert("❌ " + err.message);
-  }
-}
-jobForm.onsubmit = defaultPostJob;
-
 // ---------------- LOAD APPLICATIONS ----------------
 async function loadApplications(jobId) {
-  const { getDocs, collection, query, where } = await import("https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js");
   applicationsList.innerHTML = "Loading...";
   const q = query(collection(db, "applications"), where("jobId", "==", jobId));
   const snap = await getDocs(q);
