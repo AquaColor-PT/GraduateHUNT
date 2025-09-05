@@ -79,7 +79,7 @@ function checkFields(){
 inputs.forEach(i => i.addEventListener("input", checkFields));
 
 // ---------------- DEFAULT POST JOB ----------------
-async function defaultPostJob(e){
+async function postJob(e){
   e.preventDefault();
   const user = auth.currentUser;
   if(!user) return alert("⚠️ Login required");
@@ -98,7 +98,7 @@ async function defaultPostJob(e){
     checkFields();
   }catch(err){ console.error(err); alert("❌ "+err.message); }
 }
-jobForm.onsubmit = defaultPostJob;
+jobForm.onsubmit = postJob;
 
 // ---------------- AUTH STATE ----------------
 onAuthStateChanged(auth,user=>{
@@ -160,4 +160,20 @@ function editJob(jobId,job){
         title: inputs[0].value.trim(),
         company: inputs[1].value.trim(),
         location: inputs[2].value.trim(),
-        type: inputs[3].
+        type: inputs[3].value,
+        description: inputs[4].value.trim()
+      });
+      jobForm.reset();
+      postJobBtn.textContent = "Post Job";
+      jobForm.onsubmit = postJob;
+      checkFields();
+    }catch(err){ console.error(err); alert("❌ "+err.message); }
+  };
+}
+
+// ---------------- DELETE JOB ----------------
+async function deleteJob(jobId){
+  if(!confirm("Delete this job?")) return;
+  try{ await deleteDoc(doc(db,"jobs",jobId)); } 
+  catch(err){ console.error(err); alert("❌ "+err.message); }
+}
