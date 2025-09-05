@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Recruiter Dashboard - Graduateinhunt</title>
+<link rel="stylesheet" href="post-job.css">
+</head>
+<body>
+
+<header>
+  <div class="container">
+    <h1>Graduateinhunt - Recruiter</h1>
+    <nav>
+      <ul>
+        <li><a href="homepage.html">Home</a></li>
+        <li><a href="browse-jobs.html">Browse Jobs</a></li>
+        <li><a href="post-job.html">Post a Job</a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<section class="container">
+
+  <!-- Auth Section -->
+  <div id="authBox">
+    <h3>Recruiter Account</h3>
+    <input type="email" id="email" placeholder="Email" required/>
+    <input type="password" id="password" placeholder="Password" required/>
+    <div class="auth-buttons">
+      <button id="registerBtn">Register</button>
+      <button id="loginBtn">Login</button>
+      <button id="forgotBtn">Forgot Password</button>
+      <button id="logoutBtn" class="hidden">Logout</button>
+    </div>
+  </div>
+   
+  <!-- Post Job Form -->
+  <form id="jobForm" class="hidden">
+    <input type="text" id="jobTitle" placeholder="Job Title" required/>
+    <input type="text" id="company" placeholder="Company Name" required/>
+    <input type="text" id="location" placeholder="Location" required/>
+    <select id="jobType" required>
+      <option value="">-- Select Type --</option>
+      <option value="Internship">Internship</option>
+      <option value="Learnership">Learnership</option>
+      <option value="Training Program">Training Program</option>
+      <option value="Permanent (No Experience)">Permanent (No Experience)</option>
+    </select>
+    <textarea id="description" placeholder="Job Description" rows="4" required></textarea>
+    <button type="submit" class="postJob">Post Job</button>
+  </form>
+  
+  <h3>Your Posted Jobs</h3>
+  <ul id="jobList"></ul>
+
+</section>
+
+<!-- Applications Modal -->
+<div id="appModal" class="modal">
+  <div class="modal-content">
+    <h3>Applications</h3>
+    <ul id="applicationsList"></ul>
+    <button onclick="document.getElementById('appModal').style.display='none'">Close</button>
+  </div>
+</div>
+
+<script type="module" src="post-job.js"></script>
+</body>
+</html>
