@@ -4,7 +4,7 @@ import {
   getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, sendPasswordResetEmail 
 } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
 import { 
-  getFirestore, collection, addDoc, getDocs, query, where, orderBy, updateDoc, doc, serverTimestamp 
+  getFirestore, collection, addDoc, getDocs, query, where, orderBy, doc, serverTimestamp, updateDoc, deleteDoc 
 } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
 
 // ---------------- FIREBASE CONFIG ----------------
@@ -35,6 +35,15 @@ const jobForm = document.getElementById("jobForm");
 const jobList = document.getElementById("jobList");
 const appModal = document.getElementById("appModal");
 const applicationsList = document.getElementById("applicationsList");
+
+const postJobBtn = document.getElementById("postJobBtn");
+const inputs = [
+  document.getElementById("jobTitle"),
+  document.getElementById("company"),
+  document.getElementById("location"),
+  document.getElementById("jobType"),
+  document.getElementById("description")
+];
 
 // ---------------- AUTH FUNCTIONS ----------------
 registerBtn.onclick = async () => {
@@ -83,27 +92,63 @@ forgotBtn.onclick = async () => {
   }
 };
 
+// ---------------- AUTH STATE ----------------
+onAuthStateChanged(auth, user => {
+  if (user) {
+    jobForm.classList.remove("hidden");
+    logoutBtn.classList.remove("hidden");
+    registerBtn.disabled = true;
+    loginBtn.disabled = true;
+    loadJobs(user.uid);
+  } else {
+    jobForm.classList.add("hidden");
+    logoutBtn.classList.add("hidden");
+    registerBtn.disabled = false;
+    loginBtn.disabled = false;
+    jobList.innerHTML = "";
+  }
+});
+
+// ---------------- ENABLE POST BUTTON ----------------
+function checkFields() {
+  const allFilled = inputs.every(input => input.value.trim() !== "" && input.value !== "");
+  postJobBtn.disabled = !allFilled;
+}
+inputs.forEach(input => input.addEventListener("input", checkFields));
+
 // ---------------- JOB POST ----------------
 jobForm.addEventListener("submit", async (e) => {
   e.preventDefault();
+  
   const user = auth.currentUser;
-  if (!user) return alert("⚠️ Please login first");
+  if (!user) {
+    alert("⚠️ You must be logged in to post a job");
+    return;
+  }
+
+  const title = document.getElementById("jobTitle").value.trim();
+  const company = document.getElementById("company").value.trim();
+  const location = document.getElementById("location").value.trim();
+  const type = document.getElementById("jobType").value;
+  const description = document.getElementById("description").value.trim();
 
   try {
     await addDoc(collection(db, "jobs"), {
-      title: document.getElementById("jobTitle").value,
-      company: document.getElementById("company").value,
-      location: document.getElementById("location").value,
-      type: document.getElementById("jobType").value,
-      description: document.getElementById("description").value,
+      title,
+      company,
+      location,
+      type,
+      description,
       recruiterId: user.uid,
       postedAt: serverTimestamp(),
       visible: true
     });
     alert("✅ Job Posted!");
     jobForm.reset();
+    checkFields();
     loadJobs(user.uid);
   } catch (err) {
+    console.error("Error posting job:", err);
     alert("❌ " + err.message);
   }
 });
@@ -121,12 +166,94 @@ async function loadJobs(uid) {
       <strong>${job.title}</strong> @ ${job.company} (${job.type})<br>
       <small>${job.location}</small><br>
       <p>${job.description}</p>
+      <button class="editBtn">Edit</button>
+      <button class="deleteBtn">Delete</button>
       <button class="viewApps">View Applications</button>
     `;
 
+    // ---------------- BUTTON EVENTS ----------------
+    li.querySelector(".editBtn").onclick = () => editJob(docSnap.id, job);
+    li.querySelector(".deleteBtn").onclick = () => deleteJob(docSnap.id);
     li.querySelector(".viewApps").onclick = () => loadApplications(docSnap.id);
+
     jobList.appendChild(li);
   });
+}
+
+// ---------------- EDIT JOB ----------------
+function editJob(jobId, job) {
+  document.getElementById("jobTitle").value = job.title;
+  document.getElementById("company").value = job.company;
+  document.getElementById("location").value = job.location;
+  document.getElementById("jobType").value = job.type;
+  document.getElementById("description").value = job.description;
+  checkFields();
+
+  postJobBtn.textContent = "Update Job";
+
+  // Remove previous submit listener and add new one
+  jobForm.onsubmit = async (e) => {
+    e.preventDefault();
+    const title = document.getElementById("jobTitle").value.trim();
+    const company = document.getElementById("company").value.trim();
+    const location = document.getElementById("location").value.trim();
+    const type = document.getElementById("jobType").value;
+    const description = document.getElementById("description").value.trim();
+
+    try {
+      await updateDoc(doc(db, "jobs", jobId), { title, company, location, type, description });
+      alert("✅ Job Updated!");
+      jobForm.reset();
+      postJobBtn.textContent = "Post Job";
+      checkFields();
+      jobForm.onsubmit = submitNewJob; // restore default submit
+      loadJobs(auth.currentUser.uid);
+    } catch (err) {
+      console.error("Error updating job:", err);
+      alert("❌ " + err.message);
+    }
+  };
+}
+
+// Default submit for new jobs
+async function submitNewJob(e) {
+  e.preventDefault();
+  const user = auth.currentUser;
+  if (!user) return alert("⚠️ You must be logged in");
+
+  const title = document.getElementById("jobTitle").value.trim();
+  const company = document.getElementById("company").value.trim();
+  const location = document.getElementById("location").value.trim();
+  const type = document.getElementById("jobType").value;
+  const description = document.getElementById("description").value.trim();
+
+  try {
+    await addDoc(collection(db, "jobs"), {
+      title, company, location, type, description,
+      recruiterId: user.uid, postedAt: serverTimestamp(), visible: true
+    });
+    alert("✅ Job Posted!");
+    jobForm.reset();
+    checkFields();
+    loadJobs(user.uid);
+  } catch (err) {
+    console.error("Error posting job:", err);
+    alert("❌ " + err.message);
+  }
+}
+jobForm.onsubmit = submitNewJob;
+
+// ---------------- DELETE JOB ----------------
+async function deleteJob(jobId) {
+  if (!confirm("Are you sure you want to delete this job?")) return;
+  try {
+    await deleteDoc(doc(db, "jobs", jobId));
+    alert("🗑 Job deleted");
+    loadJobs(auth.currentUser.uid);
+  } catch (err) {
+    console.error("Error deleting job:", err);
+    alert("❌ " + err.message);
+  }
 }
 
 // ---------------- LOAD APPLICATIONS ----------------
@@ -153,16 +280,3 @@ async function loadApplications(jobId) {
 
   appModal.style.display = "flex";
 }
-
-// ---------------- AUTH STATE ----------------
-onAuthStateChanged(auth, user => {
-  if (user) {
-    jobForm.classList.remove("hidden");
-    logoutBtn.classList.remove("hidden");
-    loadJobs(user.uid);
-  } else {
-    jobForm.classList.add("hidden");
-    logoutBtn.classList.add("hidden");
-    jobList.innerHTML = "";
-  }
-});
