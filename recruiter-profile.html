@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Recruiter Profile</title>
+<style>
+body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f4f6f9; margin:0; padding:0; }
+.navbar { display:flex; justify-content:flex-end; padding:15px 30px; background:#0066cc; }
+.navbar button { padding:8px 16px; margin-left:10px; background:white; color:#0066cc; border:1px solid #0066cc; border-radius:20px; cursor:pointer; }
+.navbar button:hover { background:#0052a3; color:white; border-color:#0052a3; }
+
+.container { max-width:600px; margin:40px auto; background:white; padding:40px; border-radius:15px; box-shadow:0 6px 18px rgba(0,0,0,0.1); }
+h2 { text-align:center; color:#0066cc; margin-bottom:20px; }
+.profile-info label { display:block; margin:10px 0 5px; font-weight:500; }
+.profile-info input { width:100%; padding:8px; border-radius:6px; border:1px solid #ccc; }
+.profile-info input.readonly { background-color:#f0f0f0; cursor:not-allowed; }
+.profile-info img { display:block; margin-top:10px; max-width:120px; border-radius:50%; }
+.profile-info button { margin-top:20px; padding:12px 20px; background:#0066cc; color:white; border:none; border-radius:6px; cursor:pointer; font-size:16px; }
+.profile-info button:hover { background:#0052a3; }
+</style>
+</head>
+<body>
+
+<div class="navbar">
+  <button id="homeBtn">Your dashboard</button>
+  <button id="logoutBtn">Logout</button>
+</div>
+
+<div class="container">
+  <h2>Your Profile</h2>
+  <div class="profile-info">
+    <label for="name">Full Name</label>
+    <input type="text" id="name" class="readonly" readonly>
+
+    <label for="email">Email</label>
+    <input type="email" id="email" class="readonly" readonly>
+
+    <label for="company">Company Name</label>
+    <input type="text" id="company" class="readonly" readonly>
+
+    <label for="password">Password</label>
+    <input type="password" id="password" placeholder="Enter new password">
+
+    <label for="profilePic">Profile Picture (PNG/JPG)</label>
+    <input type="file" id="profilePic" accept="image/png, image/jpeg">
+    <img id="profilePicPreview" src="#" alt="Profile Picture Preview">
+
+    <button id="saveBtn">Save Changes</button>
+  </div>
+</div>
+
+<script type="module" src="recruiter-profile.js"></script>
+<script>
+document.getElementById("homeBtn").addEventListener("click", () => {
+  window.location.href = "recruiter-dashboard.html";
+});
+</script>
+</body>
+</html>

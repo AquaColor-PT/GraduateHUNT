@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Graduate Registration</title>
+<style>
+body { font-family: Arial, sans-serif; background: #f4f6f9; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
+.register-container { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); width: 400px; }
+h2 { text-align: center; color: #0066cc; margin-bottom: 20px; }
+input { width: 100%; padding: 8px; margin-top: 10px; border-radius: 6px; border: 1px solid #ccc; }
+button { margin-top: 20px; width: 100%; padding: 12px; background: #0066cc; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 16px; }
+button:hover { background: #0052a3; }
+#message { text-align: center; margin-top: 10px; }
+</style>
+</head>
+<body>
+
+<div class="register-container">
+  <h2>Graduate Registration</h2>
+  <form id="registerForm">
+    <input type="email" id="email" placeholder="Email" required>
+    <input type="password" id="password" placeholder="Password" required>
+    <button type="submit">Register</button>
+  </form>
+  <p id="message"></p>
+</div>
+
+<script type="module" src="graduate-register.js"></script>
+</body>
+</html>

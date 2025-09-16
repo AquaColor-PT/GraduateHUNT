@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Recruiter Dashboard</title>
+<style>
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #f4f6f9;
+    margin: 0; padding: 0; color: #333;
+}
+/* Header */
+header {
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    background:#0066cc;
+    color:white;
+    padding:15px 30px;
+}
+header h1 { margin:0;font-size:22px; }
+header nav a {
+    color:white;
+    text-decoration:none;
+    margin-left:20px;
+    font-weight:500;
+}
+header nav a:hover { text-decoration:underline; }
+
+/* Layout */
+.main {
+    display:flex;
+    max-width:1200px;
+    margin:20px auto;
+    gap:20px;
+}
+/* Left Panel */
+.left-panel {
+    flex:1;
+    background:white;
+    border-radius:12px;
+    padding:20px;
+    box-shadow:0 6px 18px rgba(0,0,0,0.1);
+    text-align:center;
+}
+.left-panel img, #profilePicContainer {
+    display: block;
+    margin: 0 auto 10px; /* center horizontally */
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    object-fit: cover;
+    text-align: center;
+}
+
+
+/* Right Panel */
+.right-panel {
+    flex:2;
+    display:flex;
+    flex-direction:column;
+    gap:20px;
+}
+
+/* Job Form */
+#jobForm {
+    background:white;
+    padding:20px;
+    border-radius:12px;
+    box-shadow:0 6px 18px rgba(0,0,0,0.1);
+}
+#jobForm input, #jobForm select, #jobForm textarea {
+    width:100%;
+    padding:10px;
+    margin:10px 0;
+    border-radius:6px;
+    border:1px solid #ccc;
+}
+#jobForm button {
+    width:100%;
+    padding:12px;
+    background:#0066cc;
+    color:white;
+    border:none;
+    border-radius:6px;
+    font-size:16px;
+    cursor:pointer;
+}
+
+/* Job List */
+#jobList {
+    background:white;
+    border-radius:12px;
+    padding:20px;
+    box-shadow:0 6px 18px rgba(0,0,0,0.1);
+}
+.job-item {
+    padding:12px;
+    border-bottom:1px solid #eee;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
+.job-item:last-child { border-bottom:none; }
+.job-item button {
+    margin-left:10px;
+    padding:6px 12px;
+    border:none;
+    border-radius:6px;
+    cursor:pointer;
+}
+.editBtn { background:#28a745;color:white; }
+.deleteBtn { background:#dc3545;color:white; }
+
+.profile-info img {
+    display: block;
+    margin: 10px auto 0; /* top 10px, auto left/right, no bottom margin */
+    max-width: 120px;
+    border-radius: 50%;
+}
+
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Recruiter Dashboard</h1>
+  <nav>
+    <a href="recruiter-profile.html">Update Profile</a>
+    <a href="homepage-for-recruiters.html">View Graduates</a>
+    <a href="recruiter-applications.html">View Applications</a> <!-- New link -->
+    <a href="#" id="logoutBtn">Logout</a>
+  </nav>
+</header>
+
+
+<!-- Left Panel -->
+
+<!-- Left Panel -->
+<div class="left-panel">
+    <!-- Colorful placeholder if no profile pic -->
+    <div id="profilePicContainer" style="
+        width:120px; 
+        height:120px; 
+        border-radius:50%; 
+        margin:0 auto 10px; 
+        display:flex; 
+        align-items:center; 
+        justify-content:center; 
+        font-weight:bold; 
+        font-size:14px; 
+        color:white; 
+        background: linear-gradient(135deg, #6a11cb, #2575fc);
+    ">
+        No Profile Pic
+    </div>
+
+    <!-- Actual profile picture -->
+    <img id="profilePic" src="" alt="Profile Picture" style="
+        display:none; 
+        width:120px; 
+        height:120px; 
+        border-radius:50%; 
+        object-fit:cover; 
+        margin-bottom:10px;
+    ">
+
+    <h2 id="profileName">Recruiter Name</h2>
+    <p id="profileCompany">Company/Agency</p>
+    <p id="profileCredits">Credits: 0</p>
+</div>
+
+
+
+    <!-- Right Panel -->
+<!-- Right Panel -->
+<div class="right-panel">
+    <!-- Job Form -->
+    <form id="jobForm" novalidate>
+        <input type="text" id="jobTitle" placeholder="Job Title" required>
+        <input type="text" id="location" placeholder="Location" required>
+        <input type="text" id="jobCompany" placeholder="Company / Agency Name" required>
+        <select id="jobType" required>
+            <option value="">-- Select Type --</option>
+            <option value="Internship">Internship</option>
+            <option value="Learnership">Learnership</option>
+            <option value="Training Program">Training Program</option>
+            <option value="Permanent (No Experience)">Permanent (No Experience)</option>
+        </select>
+        <textarea id="description" placeholder="Job Description" rows="4" required></textarea>
+        <button type="submit" id="postJobBtn">Post Job</button>
+    </form>
+
+    <!-- View Applications Button -->
+    
+
+    <!-- Jobs Posted -->
+    <div id="jobList">
+        <!-- Dynamically filled with posted jobs -->
+    </div>
+</div>
+
+
+<script type="module" src="recruiter-dashboard.js"></script>
+</body>
+</html>

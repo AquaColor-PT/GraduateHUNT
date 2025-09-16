@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Apply for Job</title>
+<style>
+  body { font-family: Arial, sans-serif; background: #f4f4f4; margin: 0; padding: 0; }
+  header {
+    background: #0066cc;
+    color: white;
+    padding: 15px 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  header h1 {
+    margin: 0;
+    font-size: 20px;
+  }
+  header nav a {
+    color: white;
+    text-decoration: none;
+    margin-left: 20px;
+    font-weight: 500;
+  }
+  header nav a:hover {
+    text-decoration: underline;
+  }
+
+  main { max-width: 600px; margin: 30px auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+  h2 { text-align: center; }
+  label { display: block; margin-top: 15px; font-weight: bold; }
+  input[type="text"], input[type="email"], input[type="tel"], input[type="file"], textarea { 
+    width: 100%; padding: 8px; margin-top: 5px; border-radius: 4px; border: 1px solid #ccc; 
+  }
+  textarea { resize: vertical; min-height: 100px; }
+  .radio-group { display: flex; gap: 20px; margin-top: 10px; }
+  button { margin-top: 20px; padding: 10px 20px; border: none; border-radius: 4px; background: #0066cc; color: white; cursor: pointer; }
+  button:hover { background: #004999; }
+  .job-title { text-align: center; margin-bottom: 20px; font-size: 1.2em; color: #333; }
+  #newCV:disabled { background: #eee; cursor: not-allowed; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>GraduateInHunt</h1>
+  <nav>
+    <a href="homepage.html">Home</a>
+    <a href="graduate-profile.html">Profile</a>
+    <a href="browse-jobs.html">Browse Jobs</a>
+  </nav>
+</header>
+
+<main>
+  <h2>Job Application</h2>
+  <div class="job-title" id="jobTitle"></div>
+
+  <form id="applicationForm">
+    <label for="name">Full Name</label>
+    <input type="text" id="name" required>
+
+    <label for="email">Email</label>
+    <input type="email" id="email" required>
+
+    <label for="cellnumber">Cell Number</label>
+    <input type="tel" id="cellnumber" required>
+
+    <label>Choose CV</label>
+    <div class="radio-group">
+      <label><input type="radio" name="cvOption" id="cvDefault" value="default" checked> Use Default CV</label>
+      <label><input type="radio" name="cvOption" id="cvNew" value="new"> Upload New CV</label>
+    </div>
+
+    <input type="file" id="newCV" accept="application/pdf" disabled>
+
+    <label for="coverLetter">Cover Letter (Optional)</label>
+    <textarea id="coverLetter" placeholder="Write your cover letter here..."></textarea>
+
+    <button type="button" id="previewCV">Preview CV</button>
+    <button type="submit">Submit Application</button>
+  </form>
+</main>
+
+<script type="module" src="applicationform.js"></script>
+</body>
+</html>

@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Select User Type</title>
+<style>
+body { font-family: Arial, sans-serif; margin: 0; padding: 0; display: flex; justify-content: center; align-items: center; height: 100vh; background: #f4f6f9; }
+.container { text-align: center; background: white; padding: 40px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); max-width: 400px; width: 90%; }
+h2 { margin-bottom: 25px; color: #0066cc; }
+.user-type-btn { display: block; width: 100%; padding: 15px; margin: 15px 0; font-size: 16px; border: none; border-radius: 8px; cursor: pointer; color: white; transition: background 0.3s; }
+.user-type-btn:hover { opacity: 0.9; }
+.graduate { background: #28a745; }
+.recruiter { background: #17a2b8; }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <h2>Select Your Type</h2>
+  <button class="user-type-btn graduate" id="graduateBtn">Graduate</button>
+  <button class="user-type-btn recruiter" id="recruiterBtn">Recruiter</button>
+</div>
+
+<script>
+  // Get mode from query string (?mode=register or ?mode=login)
+  const params = new URLSearchParams(window.location.search);
+  const mode = params.get('mode') || 'register'; // default to register
+
+  document.getElementById('graduateBtn').addEventListener('click', () => {
+    if (mode === 'register') window.location.href = 'graduate-register.html';
+    else window.location.href = 'graduate-login.html';
+  });
+
+  document.getElementById('recruiterBtn').addEventListener('click', () => {
+    if (mode === 'register') window.location.href = 'recruiter-register.html';
+    else window.location.href = 'recruiter-login.html';
+  });
+</script>
+
+</body>
+</html>

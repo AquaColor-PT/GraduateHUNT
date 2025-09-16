@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Recruiter Registration</title>
+<style>
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #f4f6f9;
+    margin: 0;
+    padding: 0;
+  }
+  .container {
+    max-width: 500px;
+    margin: 50px auto;
+    background: white;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.1);
+  }
+  h2 {
+    text-align: center;
+    color: #0066cc;
+    margin-bottom: 25px;
+  }
+  input {
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+  }
+  button {
+    width: 100%;
+    padding: 12px;
+    background: #0066cc;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 16px;
+    cursor: pointer;
+    margin-top: 15px;
+  }
+  button:hover {
+    background: #0052a3;
+  }
+  p.message {
+    margin-top: 10px;
+    text-align: center;
+    font-weight: 500;
+  }
+  p.message.error {
+    color: #dc3545;
+  }
+  p.message.success {
+    color: #28a745;
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <h2>Recruiter Registration</h2>
+  <input type="text" id="firstName" placeholder="First Name" required>
+  <input type="text" id="lastName" placeholder="Last Name" required>
+  <input type="email" id="email" placeholder="Email" required>
+  <input type="password" id="password" placeholder="Password" required>
+  <input type="text" id="company" placeholder="Company Name" required>
+  <input type="text" id="registrationNumber" placeholder="Company Registration Number" required>
+  <input type="text" id="contact" placeholder="Contact Number" required>
+  <button id="registerBtn">Register</button>
+  <p id="message" class="message"></p>
+</div>
+
+<script type="module" src="recruiter-register.js"></script>
+
+</body>
+</html>

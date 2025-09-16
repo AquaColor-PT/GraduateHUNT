@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Graduate Registration</title>
+<style>
+body { font-family: Arial, sans-serif; background: #f4f6f9; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
+.register-container { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); width: 400px; }
+h2 { text-align: center; color: #0066cc; margin-bottom: 20px; }
+input { width: 100%; padding: 8px; margin-top: 10px; border-radius: 6px; border: 1px solid #ccc; }
+button { margin-top: 20px; width: 100%; padding: 12px; background: #0066cc; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 16px; }
+button:hover { background: #0052a3; }
+#message { text-align: center; margin-top: 10px; }
+</style>
+</head>
+<body>
+
+<div class="register-container">
+  <h2>Graduate Registration</h2>
+  <form id="registerForm">
+    <input type="text" id="name" placeholder="Full Name" required>
+    <input type="email" id="email" placeholder="Email" required>
+    <input type="password" id="password" placeholder="Password" required>
+    <input type="text" id="phone" placeholder="Phone Number" required>
+    <input type="text" id="qualification" placeholder="Qualification" required>
+    <input type="file" id="cv" accept="application/pdf" required>
+    <button type="submit">Register</button>
+  </form>
+  <p id="message"></p>
+</div>
+
+<script type="module">
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+
+const SUPABASE_URL = 'https://euclknvsppptbfclwxqq.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV1Y2xrbnZzcHBwdGJmY2x3eHFxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc2Mjc2NTQsImV4cCI6MjA3MzIwMzY1NH0.HlGW3kZJ4CPnF2JuZGs_4ObkhxwVFTSedb7O8HHDEag';
+const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+const form = document.getElementById('registerForm');
+const msg = document.getElementById('message');
+
+form.addEventListener('submit', async (e) => {
+  e.preventDefault();
+
+  const fullName = document.getElementById('name').value.trim();
+  const email = document.getElementById('email').value.trim().toLowerCase();
+  const password = document.getElementById('password').value;
+  const phone = document.getElementById('phone').value.trim();
+  const qualification = document.getElementById('qualification').value.trim();
+  const cvFile = document.getElementById('cv').files[0];
+
+  if (!cvFile || cvFile.type !== 'application/pdf') {
+    msg.style.color = 'red';
+    msg.textContent = "Please upload a PDF file.";
+    return;
+  }
+
+  try {
+    // Sign up user
+    const { data: userData, error: signUpError } = await supabase.auth.signUp({ email, password });
+    if (signUpError) throw signUpError;
+    if (!userData.user) throw new Error("User not created. Check your email to confirm.");
+
+    const userId = userData.user.id;
+
+    // Upload CV
+    const filePath = `graduates/${userId}/${cvFile.name}`;
+    const { error: storageError } = await supabase.storage.from('cv_bucket').upload(filePath, cvFile, { upsert: true });
+    if (storageError) throw storageError;
+
+    const { data: cvData } = supabase.storage.from('cv_bucket').getPublicUrl(filePath);
+    const cvUrl = cvData.publicUrl;
+
+    // Insert into graduates table
+    const { error: profileError } = await supabase.from('graduates').insert({
+      id: userId,
+      full_name: fullName,
+      email: email,
+      phone: phone,
+      qualification: qualification,
+      cv_url: cvUrl
+    });
+    if (profileError) throw profileError;
+
+    msg.style.color = 'green';
+    msg.textContent = "Registration successful! Redirecting...";
+    setTimeout(() => window.location.href = 'graduate-login.html', 2000);
+
+  } catch (err) {
+    console.error("Registration error:", err);
+    msg.style.color = 'red';
+    msg.textContent = "Error: " + err.message;
+  }
+});
+</script>
+
+</body>
+</html>

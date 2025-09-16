@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin - Verify Recruiters</title>
+<style>
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    background: #f4f6f9;
+    padding: 20px;
+  }
+  h1 {
+    text-align: center;
+    color: #0066cc;
+  }
+  #pendingCount {
+    text-align: center;
+    margin: 10px 0;
+    font-weight: bold;
+    color: #dc3545;
+  }
+  input#search {
+    display: block;
+    margin: 0 auto 20px auto;
+    padding: 10px;
+    width: 300px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+    background: white;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  }
+  th, td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+  }
+  th {
+    background: #0066cc;
+    color: white;
+  }
+  tr.unverified {
+    background-color: #fff3cd;
+  }
+  tr:hover {
+    background-color: #f1f1f1;
+  }
+  button.verifyBtn {
+    background: #28a745;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: 0.3s;
+  }
+  button.verifyBtn.unverify {
+    background: #dc3545;
+  }
+  button.verifyBtn:hover {
+    opacity: 0.85;
+  }
+  p.message {
+    margin-top: 15px;
+    text-align: center;
+    font-weight: 500;
+  }
+  p.message.success {
+    color: #28a745;
+  }
+  p.message.error {
+    color: #dc3545;
+  }
+</style>
+</head>
+<body>
+
+<h1>Verify Recruiters</h1>
+<p id="pendingCount">Loading pending recruiters...</p>
+<input type="text" id="search" placeholder="Search by name, company, or registration #">
+<p id="message" class="message"></p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Email</th>
+      <th>Company</th>
+      <th>Registration #</th>
+      <th>Contact</th>
+      <th>Status</th>
+      <th>Action</th>
+    </tr>
+  </thead>
+  <tbody id="recruiterTableBody">
+    <!-- Recruiters will be dynamically loaded here -->
+  </tbody>
+</table>
+
+<script type="module" src="admin.js"></script>
+</body>
+</html>

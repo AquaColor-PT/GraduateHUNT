@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Job Applications - Recruiter Dashboard</title>
+<style>
+  body { font-family: Arial, sans-serif; background-color: #f4f6f9; margin: 0; padding: 0; color: #333; }
+  header { display:flex; justify-content:space-between; align-items:center; background:#0066cc; color:white; padding:15px 30px; }
+  header h1 { margin:0; font-size:22px; }
+  header nav a { color:white; text-decoration:none; margin-left:20px; font-weight:500; }
+  header nav a:hover { text-decoration:underline; }
+
+  .container { max-width: 1000px; margin: 20px auto; padding: 0 15px; }
+  h2 { margin-bottom: 10px; color: #0066cc; }
+
+  #jobSearch { margin-bottom: 20px; padding:8px 12px; width: 100%; font-size: 16px; border-radius:5px; border:1px solid #ccc; }
+
+  .job-group { margin-bottom: 30px; }
+  .job-title { font-size: 18px; font-weight:600; margin-bottom: 10px; color:#0073e6; }
+
+  .applicationsList { display:flex; flex-direction:column; gap:15px; }
+
+  .application-item { background:white; padding:15px 20px; border-radius:10px; box-shadow:0 3px 6px rgba(0,0,0,0.1); transition: transform 0.2s, box-shadow 0.2s; }
+  .application-item:hover { transform: translateY(-2px); box-shadow:0 5px 12px rgba(0,0,0,0.15); }
+  .application-item div { font-size: 14px; margin-bottom: 6px; color: #555; }
+  .application-item button { margin-right: 10px; padding: 5px 10px; border:none; border-radius:5px; cursor:pointer; }
+  .accept-btn { background: #28a745; color:white; }
+  .reject-btn { background: #ffc107; color:white; }
+  .delete-btn { background: #dc3545; color:white; }
+
+  .no-applications, .loading, .error { font-style: italic; color: #555; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Recruiter Dashboard</h1>
+  <nav>
+    <a href="recruiter-dashboard.html">Back to Dashboard</a>
+    <a href="#" id="logoutBtn">Logout</a>
+  </nav>
+</header>
+
+<section class="container">
+  <h2>Applications Received</h2>
+  <input type="text" id="jobSearch" placeholder="Search jobs..." />
+  <div id="applicationsContainer">
+    <p class="loading">Loading applications...</p>
+  </div>
+</section>
+
+<script type="module" src="recruiter-applications.js"></script>
+</body>
+</html>

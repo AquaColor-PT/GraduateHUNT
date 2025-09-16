@@ -1,0 +1,39 @@
+body { font-family: Arial, sans-serif; margin:0; padding:0; background:#f4f4f4; }
+header { background:#0066cc; color:white; padding:20px 0; }
+.container { width:90%; max-width:900px; margin:0 auto; }
+nav ul { list-style:none; display:flex; justify-content:flex-end; gap:20px; padding:0; }
+nav ul li a { color:white; text-decoration:none; font-weight:bold; }
+section { padding:40px 0; }
+
+/* Auth Section */
+#authBox { display:flex; flex-direction:column; gap:10px; margin-bottom:20px; }
+#authBox input { padding:10px; border:1px solid #ccc; border-radius:5px; width:100%; }
+.auth-buttons { display:flex; gap:10px; flex-wrap:wrap; }
+.auth-buttons button { flex:1; padding:10px; border:none; border-radius:5px; cursor:pointer; background:#0066cc; color:#fff; }
+.auth-buttons button:hover { background:#0052a3; }
+
+/* Job Form */
+form { display:flex; flex-direction:column; gap:15px; padding:20px; background:white; border-radius:8px; box-shadow:0 0 10px rgba(0,0,0,0.1); }
+input, select, textarea { padding:10px; border:1px solid #ccc; border-radius:5px; width:100%; }
+button.postJob { background:#28a745; color:#fff; padding:10px; border-radius:5px; cursor:pointer; }
+button.postJob:hover { background:#218838; }
+
+/* Job List */
+#jobList { list-style:none; padding:0; margin-top:20px; }
+.job-card { background:white; padding:15px; margin-bottom:10px; border-radius:5px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; box-shadow:0 2px 5px rgba(0,0,0,0.1); }
+.job-card span { font-weight:bold; margin-bottom:5px; }
+.job-card button { margin-left:5px; padding:5px 10px; border:none; border-radius:5px; cursor:pointer; }
+
+/* Individual Button Colors */
+.job-card button.toggle { background:#28a745; color:#fff; }
+.job-card button.viewApps { background:#17a2b8; color:#fff; }
+.job-card button.edit { background:#ffc107; color:#000; }
+.job-card button.edit:hover { background:#e0a800; }
+.job-card button.delete { background:#dc3545; color:#fff; }
+
+/* Hidden */
+.hidden { display:none; }
+
+/* Modal */
+.modal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); justify-content:center; align-items:center; }
+.modal-content { background:white; padding:20px; border-radius:8px; max-width:500px; width:90%; display:flex; flex-direction:column; gap:10px; }

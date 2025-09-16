@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Graduate Profile</title>
+<style>
+  body { 
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+    background: #f4f6f9; 
+    margin: 0; padding: 0; color: #333;
+  }
+
+  /* Navigation */
+  .navbar {
+    display: flex;
+    justify-content: flex-end;
+    padding: 15px 30px;
+    background: #0066cc;
+  }
+  .navbar button {
+    padding: 8px 16px;
+    margin-left: 10px;
+    background: white;
+    color: #0066cc;
+    border: 1px solid #0066cc;
+    border-radius: 20px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: 0.3s;
+  }
+  .navbar button:hover {
+    background: #0052a3;
+    color: white;
+    border-color: #0052a3;
+  }
+
+  /* Profile container */
+  .container { 
+    max-width: 700px; 
+    margin: 40px auto; 
+    background: white; 
+    padding: 40px; 
+    border-radius: 15px; 
+    box-shadow: 0 6px 18px rgba(0,0,0,0.1); 
+  }
+  h2 { 
+    color: #0066cc; 
+    text-align: center; 
+    margin-bottom: 20px;
+    font-size: 28px;
+  }
+
+  /* Profile info */
+  .profile-info { 
+    margin-top: 20px; 
+    padding: 20px; 
+    background: #f9fbfd; 
+    border-radius: 12px; 
+    border: 1px solid #e1e8f0;
+  }
+  .profile-info label {
+    display: block;
+    margin: 10px 0 5px;
+    font-weight: 500;
+  }
+  .profile-info input {
+    width: 100%;
+    padding: 8px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+  }
+  .profile-info a {
+    color: #0066cc;
+    font-weight: 500;
+    text-decoration: none;
+  }
+  .profile-info a:hover {
+    text-decoration: underline;
+  }
+  .profile-info button {
+    margin-top: 20px;
+    padding: 12px 20px;
+    background: #0066cc;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 16px;
+  }
+  .profile-info button:hover {
+    background: #0052a3;
+  }
+
+  #profilePicPreview {
+    display: none;
+    max-width: 120px;
+    margin-top: 10px;
+    border-radius: 8px;
+  }
+</style>
+</head>
+<body>
+
+<!-- Navigation -->
+<div class="navbar">
+  <button id="homeBtn">Home</button>
+  <button id="browseJobsBtn">Browse Jobs</button>
+  <button id="logoutBtn">Logout</button>
+</div>
+
+<!-- Profile Container -->
+<div class="container">
+  <h2>Your Profile</h2>
+  <div class="profile-info">
+    <label for="name">Full Name</label>
+    <input type="text" id="name">
+
+    <label>Email</label>
+    <p id="email"></p>
+
+    <label for="phone">Phone</label>
+    <input type="text" id="phone">
+
+    <label for="qualification">Qualification</label>
+    <input type="text" id="qualification">
+
+    <label for="skills">Skills (comma-separated)</label>
+    <input type="text" id="skills">
+
+    <label for="profilePic">Upload Profile Picture (PNG/JPG)</label>
+    <input type="file" id="profilePic" accept="image/png, image/jpeg">
+    <img id="profilePicPreview" src="#" alt="Profile Picture Preview">
+
+    <label for="cvFile">Upload CV (PDF)</label>
+    <input type="file" id="cvFile" accept="application/pdf">
+    <p><strong>Current CV:</strong> <a id="cvLink" href="#" target="_blank">View CV</a></p>
+
+    <button id="saveBtn">Save Changes</button>
+  </div>
+</div>
+
+<script type="module" src="graduate-profile.js"></script>
+<script>
+  // Navigation buttons
+  document.getElementById("homeBtn").addEventListener("click", () => {
+    window.location.href = "homepageregistereduser.html";
+  });
+  document.getElementById("browseJobsBtn").addEventListener("click", () => {
+    window.location.href = "browse-jobs.html";
+  });
+</script>
+</body>
+</html>
