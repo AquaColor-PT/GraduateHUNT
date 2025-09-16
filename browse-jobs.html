@@ -16,15 +16,6 @@
   #publicJobList div, #publicJobList p { color:#555; margin-bottom:6px; }
   .applyBtn { display:inline-block; padding:10px 18px; background-color:#28a745; color:#fff; border:none; border-radius:6px; cursor:pointer; font-weight:bold; transition:0.2s; margin-top:10px; }
   .applyBtn:hover { background-color:#218838; transform:translateY(-2px); }
-
-  /* Modal styles */
-  #applyModal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); justify-content:center; align-items:center; z-index:999; }
-  #applyModalContent { background:#fff; padding:20px; border-radius:10px; width:400px; max-width:90%; position:relative; }
-  #applyModalContent h3 { margin-top:0; }
-  #applyModalContent input, #applyModalContent textarea, #applyModalContent select { width:100%; padding:8px; margin:8px 0; border-radius:6px; border:1px solid #ccc; }
-  #applyModalContent button { padding:10px; background:#0073e6; color:#fff; border:none; border-radius:6px; cursor:pointer; width:100%; }
-  #closeModal { position:absolute; top:10px; right:15px; cursor:pointer; font-weight:bold; font-size:18px; }
-  #uploadedCV { display:none; }
 </style>
 </head>
 <body>
@@ -48,25 +39,6 @@
     <li class="loading">Loading jobs...</li>
   </ul>
 </section>
-
-<!-- Apply Modal -->
-<div id="applyModal">
-  <div id="applyModalContent">
-    <span id="closeModal">&times;</span>
-    <h3>Apply for Job</h3>
-    <form id="applicationForm">
-      <input type="text" id="applicantName" placeholder="Full Name" required>
-      <input type="text" id="applicantPhone" placeholder="Cellphone Number" required>
-      <input type="email" id="applicantEmail" placeholder="Email" required>
-      <div>
-        <label><input type="radio" name="cvOption" value="default" checked> Use default CV</label><br>
-        <label><input type="radio" name="cvOption" value="upload"> Upload new CV</label>
-      </div>
-      <input type="file" id="uploadedCV" accept=".pdf,.doc,.docx">
-      <button type="submit">Submit Application</button>
-    </form>
-  </div>
-</div>
 
 <script type="module" src="browse-jobs.js"></script>
 </body>
