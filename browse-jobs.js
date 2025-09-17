@@ -43,9 +43,8 @@ async function loadJobs() {
 
         // Redirect to applicationform.html with jobId and jobTitle as query parameters
        // Instead of opening modal
-applyBtn.onclick = () => {
-    // Redirect to application form page with job_id and title in URL
-    const url = new URL("applicationform.html", window.location.origin);
+    applyBtn.onclick = () => {
+    const url = new URL("applicationform.html", window.location.href);
     url.searchParams.set("job_id", job.id);
     url.searchParams.set("job_title", job.title);
     window.location.href = url.toString();
@@ -58,3 +57,4 @@ applyBtn.onclick = () => {
 
 // Load jobs on page load
 loadJobs();
+
