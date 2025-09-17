@@ -3,6 +3,36 @@ import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js
 const SUPABASE_URL = 'https://euclknvsppptbfclwxqq.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV1Y2xrbnZzcHBwdGJmY2x3eHFxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc2Mjc2NTQsImV4cCI6MjA3MzIwMzY1NH0.HlGW3kZJ4CPnF2JuZGs_4ObkhxwVFTSedb7O8HHDEag';
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+async function checkJobValidity() {
+    if (!jobId) {
+        alert("No job selected.");
+        window.location.href = "homepage.html";
+        return false;
+    }
+
+    const { data: jobData, error } = await supabase
+        .from("jobs")
+        .select("*")
+        .eq("id", jobId)
+        .single();
+
+    if (error || !jobData) {
+        alert("Sorry, this job has just been closed or removed.");
+        // Disable the form
+        form.querySelectorAll("input, textarea, button, select").forEach(el => el.disabled = true);
+        // Optionally redirect after a few seconds
+        setTimeout(() => window.location.href = "homepage.html", 3000);
+        return false;
+    }
+
+    // Optionally show job title if available
+    if (jobData.title) jobTitleEl.textContent = `Applying for: ${jobData.title}`;
+
+    return true;
+}
+
+// Call it right after DOM loads
+checkJobValidity();
 
 // Wrap everything so DOM elements are guaranteed to exist
 document.addEventListener('DOMContentLoaded', () => {
