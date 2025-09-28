@@ -1,1 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Recruiter To-Do List</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  body {
+    font-family: 'Inter', sans-serif;
+    background: #f4f6f9;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    min-height: 100vh;
+    padding: 40px 20px;
+    margin: 0;
+  }
 
+  .todo-container {
+    background: white;
+    padding: 30px 40px;
+    border-radius: 16px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+    width: 100%;
+    max-width: 450px;
+  }
+
+  h2 {
+    text-align: center;
+    color: #1e3a8a;
+    margin-bottom: 25px;
+  }
+
+  ul {
+    list-style: none;
+    padding: 0;
+  }
+
+  li {
+    padding: 12px 15px;
+    border-radius: 10px;
+    margin-bottom: 10px;
+    background: #f0f4ff;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    transition: background 0.3s;
+  }
+
+  li:hover {
+    background: #e0e8ff;
+  }
+
+  li.completed {
+    text-decoration: line-through;
+    color: #6b7280;
+    background: #d1d5db;
+  }
+
+  input[type="checkbox"] {
+    margin-right: 15px;
+    transform: scale(1.2);
+    cursor: pointer;
+  }
+</style>
+</head>
+<body>
+
+<div class="todo-container">
+  <h2>Recruiter Site To-Do List</h2>
+  <ul id="todoList">
+    <li><input type="checkbox"> Recruiter Registration & Login</li>
+    <li><input type="checkbox"> Create Job Posting</li>
+    <li><input type="checkbox"> Edit/Delete Job Posting</li>
+    <li><input type="checkbox"> View Candidate Applications</li>
+    <li><input type="checkbox"> Filter & Search Candidates</li>
+    <li><input type="checkbox"> Download CVs</li>
+    <li><input type="checkbox"> Shortlist/Reject Candidates</li>
+    <li><input type="checkbox"> Analytics & Reports</li>
+    <li><input type="checkbox"> Messaging Candidates</li>
+    <li><input type="checkbox"> Update Company Profile</li>
+  </ul>
+</div>
+
+<script>
+const todoList = document.getElementById('todoList');
+
+todoList.addEventListener('change', (e) => {
+  if(e.target.tagName === 'INPUT') {
+    const li = e.target.parentElement;
+    if(e.target.checked){
+      li.classList.add('completed');
+    } else {
+      li.classList.remove('completed');
+    }
+  }
+});
+</script>
+
+</body>
+</html>

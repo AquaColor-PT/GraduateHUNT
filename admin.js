@@ -9,12 +9,34 @@ const searchInput = document.getElementById('search');
 const messageEl = document.getElementById('message');
 const pendingCountEl = document.getElementById('pendingCount');
 
+// Helper: check if current user is admin
+async function isAdmin() {
+  const { data: user } = await supabase.auth.getUser();
+  if (!user || !user.user) return false;
+
+  const { data, error } = await supabase
+    .from('users')
+    .select('role')
+    .eq('id', user.user.id)
+    .single();
+
+  if (error || !data) return false;
+  return data.role === 'admin';
+}
+
 // Load all recruiters
 async function loadRecruiters() {
+  const admin = await isAdmin();
+  if (!admin) {
+    messageEl.textContent = 'You must be an admin to view this page.';
+    messageEl.className = 'message error';
+    return;
+  }
+
   const { data, error } = await supabase
     .from('recruiters')
     .select('*')
-    .order('created_at', { ascending: false }); // newest first
+    .order('created_at', { ascending: false });
 
   if (error) {
     messageEl.textContent = 'Error loading recruiters: ' + error.message;
@@ -22,13 +44,10 @@ async function loadRecruiters() {
     return;
   }
 
-  // Count pending recruiters
   const pending = data.filter(r => !r.verified).length;
-  if (pending > 0) {
-    pendingCountEl.textContent = `${pending} recruiter(s) awaiting verification`;
-  } else {
-    pendingCountEl.textContent = "All recruiters are verified ✅";
-  }
+  pendingCountEl.textContent = pending > 0
+    ? `${pending} recruiter(s) awaiting verification`
+    : 'All recruiters are verified ✅';
 
   renderTable(data);
 }
@@ -39,21 +58,16 @@ function renderTable(data) {
   recruiterTableBody.innerHTML = '';
 
   data
-    .filter(r => {
-      return (
-        r.first_name.toLowerCase().includes(searchTerm) ||
-        r.last_name.toLowerCase().includes(searchTerm) ||
-        r.company_name.toLowerCase().includes(searchTerm) ||
-        (r.registration_number || '').toLowerCase().includes(searchTerm)
-      );
-    })
+    .filter(r =>
+      r.first_name.toLowerCase().includes(searchTerm) ||
+      r.last_name.toLowerCase().includes(searchTerm) ||
+      r.company_name.toLowerCase().includes(searchTerm) ||
+      (r.registration_number || '').toLowerCase().includes(searchTerm)
+    )
     .forEach(r => {
       const tr = document.createElement('tr');
       const isVerified = r.verified;
-
-      if (!isVerified) {
-        tr.classList.add('unverified'); // highlight unverified recruiters
-      }
+      if (!isVerified) tr.classList.add('unverified');
 
       const actionBtnText = isVerified ? 'Unverify' : 'Verify';
       const btnClass = isVerified ? 'verifyBtn unverify' : 'verifyBtn';
@@ -76,6 +90,13 @@ function renderTable(data) {
       const recruiterId = btn.getAttribute('data-id');
       const currentlyVerified = btn.getAttribute('data-verified') === 'true';
 
+      const admin = await isAdmin();
+      if (!admin) {
+        messageEl.textContent = 'Only admins can verify recruiters.';
+        messageEl.className = 'message error';
+        return;
+      }
+
       const { error } = await supabase
         .from('recruiters')
         .update({ verified: !currentlyVerified })
@@ -94,9 +115,7 @@ function renderTable(data) {
 }
 
 // Search functionality
-searchInput.addEventListener('input', () => {
-  loadRecruiters();
-});
+searchInput.addEventListener('input', () => loadRecruiters());
 
 // Initial load
 loadRecruiters();

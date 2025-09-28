@@ -4,21 +4,71 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Select Role</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
 <style>
-body { font-family: Arial, sans-serif; background: #f4f6f9; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-.container { background: white; padding: 40px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); text-align: center; }
-button { padding: 15px 30px; margin: 15px; font-size: 16px; border: none; border-radius: 8px; cursor: pointer; color: white; }
-.graduate { background: #0066cc; }
-.graduate:hover { background: #0052a3; }
-.recruiter { background: #28a745; }
-.recruiter:hover { background: #218838; }
+  body {
+    font-family: 'Inter', sans-serif;
+    background-color: #f4f7fb;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    padding: 20px;
+  }
+
+  .container {
+    background: white;
+    padding: 50px 40px;
+    border-radius: 16px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+    text-align: center;
+    max-width: 400px;
+    width: 100%;
+  }
+
+  h2 {
+    color: #1e3a8a;
+    margin-bottom: 30px;
+    font-weight: 600;
+    font-size: 1.8rem;
+  }
+
+  button {
+    padding: 16px 32px;
+    margin: 15px 0;
+    font-size: 1rem;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: 600;
+    width: 100%;
+    transition: background 0.3s;
+    color: white;
+  }
+
+  .graduate {
+    background: #1e3a8a;
+  }
+  .graduate:hover {
+    background: #16275f;
+  }
+
+  .recruiter {
+    background: #28a745;
+  }
+  .recruiter:hover {
+    background: #218838;
+  }
 </style>
 </head>
 <body>
+
 <div class="container">
-<h2>Register as:</h2>
-<button class="graduate" onclick="window.location.href='graduate-register.html'">Graduate</button>
-<button class="recruiter" onclick="window.location.href='recruiter-register.html'">Recruiter</button>
+  <h2>Register as:</h2>
+  <button class="graduate" onclick="window.location.href='graduate-register.html'">Graduate</button>
+  <button class="recruiter" onclick="window.location.href='recruiter-register.html'">Recruiter</button>
 </div>
+
 </body>
 </html>

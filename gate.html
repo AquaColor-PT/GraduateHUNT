@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Private Access</title>
+  <style>
+    :root{--bg:#f4f7fb;--card:#fff;--accent:#0ea5e9}
+    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;display:flex;align-items:center;justify-content:center;height:100vh;margin:0;background:linear-gradient(180deg,#eef7fb, #f4f7fb)}
+    .card{width:360px;max-width:90%;background:var(--card);padding:28px;border-radius:12px;box-shadow:0 6px 20px rgba(11,22,35,0.08);text-align:center}
+    h1{margin:0 0 8px;font-size:20px;color:#0b2233}
+    p{margin:0 0 18px;color:#4b5563;font-size:14px}
+    input[type="password"]{width:100%;padding:12px 14px;border:1px solid #d1d5db;border-radius:8px;font-size:15px;box-sizing:border-box}
+    button{width:100%;margin-top:14px;padding:12px;border-radius:8px;border:0;background:var(--accent);color:#fff;font-weight:600;cursor:pointer}
+    button:disabled{opacity:.6;cursor:not-allowed}
+    .msg{margin-top:12px;height:20px;font-size:13px}
+    .error{color:#b91c1c}
+    .success{color:#065f46}
+    small{display:block;margin-top:8px;color:#6b7280}
+  </style>
+</head>
+<body>
+  <div class="card" role="main" aria-labelledby="title">
+    <h1 id="title">Private Access</h1>
+    <p>Enter the access password to continue to the website.</p>
+
+    <input id="pw" type="password" placeholder="Enter password" autocomplete="off" />
+    <button id="btn">Enter</button>
+
+    <div class="msg" id="msg" aria-live="polite"></div>
+    <small>After 5 wrong tries, input will be locked for 30 seconds.</small>
+  </div>
+
+  <script>
+    // === Configuration ===
+    // The password to accept (plain text). You asked for "Tokollo1234".
+    // NOTE: client-side protection is not secure for sensitive use.
+    const REDIRECT_URL = '/homepage.html'; // change this to your homepage
+    const PLAIN_PASSWORD = 'Tokollo1234';
+
+    // === Simple obfuscation (not security) ===
+    // store as base64 in case you want to avoid immediate plaintext in the source.
+    const STORED = btoa(PLAIN_PASSWORD); // 'encoded' password
+    const MAX_ATTEMPTS = 5;
+    const LOCK_SECONDS = 30;
+
+    // === State ===
+    const input = document.getElementById('pw');
+    const btn = document.getElementById('btn');
+    const msg = document.getElementById('msg');
+    let attempts = 0;
+    let lockedUntil = null;
+
+    function setMessage(text, cls='') {
+      msg.textContent = text;
+      msg.className = cls ? 'msg ' + cls : 'msg';
+    }
+
+    function lockFor(seconds) {
+      lockedUntil = Date.now() + seconds * 1000;
+      input.disabled = true;
+      btn.disabled = true;
+      updateLockUI();
+      const interval = setInterval(() => {
+        if (Date.now() >= lockedUntil) {
+          clearInterval(interval);
+          lockedUntil = null;
+          attempts = 0;
+          input.disabled = false;
+          btn.disabled = false;
+          setMessage('You can try again.', ''); 
+          input.focus();
+        } else {
+          updateLockUI();
+        }
+      }, 500);
+    }
+
+    function updateLockUI() {
+      if (!lockedUntil) return;
+      const secs = Math.ceil((lockedUntil - Date.now()) / 1000);
+      setMessage(`Too many wrong attempts. Try again in ${secs}s.`, 'error');
+      btn.textContent = `Locked (${secs}s)`;
+    }
+
+    async function tryPassword() {
+      if (lockedUntil && Date.now() < lockedUntil) return;
+      const val = input.value || '';
+      // compare base64-encoded values (slightly less obvious in raw source)
+      if (btoa(val) === STORED) {
+        setMessage('Password correct — redirecting...', 'success');
+        // tiny delay so user sees message
+        setTimeout(() => {
+          window.location.href = REDIRECT_URL;
+        }, 600);
+      } else {
+        attempts++;
+        if (attempts >= MAX_ATTEMPTS) {
+          lockFor(LOCK_SECONDS);
+        } else {
+          setMessage(`Wrong password. ${MAX_ATTEMPTS - attempts} tries left.`, 'error');
+        }
+        input.value = '';
+        input.focus();
+      }
+    }
+
+    // handle enter key + button
+    btn.addEventListener('click', tryPassword);
+    input.addEventListener('keydown', e => {
+      if (e.key === 'Enter') tryPassword();
+    });
+
+    // focus field on load
+    input.focus();
+  </script>
+</body>
+</html>

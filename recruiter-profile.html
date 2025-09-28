@@ -4,28 +4,125 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Recruiter Profile</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
-body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f4f6f9; margin:0; padding:0; }
-.navbar { display:flex; justify-content:flex-end; padding:15px 30px; background:#0066cc; }
-.navbar button { padding:8px 16px; margin-left:10px; background:white; color:#0066cc; border:1px solid #0066cc; border-radius:20px; cursor:pointer; }
-.navbar button:hover { background:#0052a3; color:white; border-color:#0052a3; }
+  body {
+    font-family: 'Inter', sans-serif;
+    background: #f5f7fa;
+    margin: 0;
+    padding: 0;
+    color: #333;
+  }
 
-.container { max-width:600px; margin:40px auto; background:white; padding:40px; border-radius:15px; box-shadow:0 6px 18px rgba(0,0,0,0.1); }
-h2 { text-align:center; color:#0066cc; margin-bottom:20px; }
-.profile-info label { display:block; margin:10px 0 5px; font-weight:500; }
-.profile-info input { width:100%; padding:8px; border-radius:6px; border:1px solid #ccc; }
-.profile-info input.readonly { background-color:#f0f0f0; cursor:not-allowed; }
-.profile-info img { display:block; margin-top:10px; max-width:120px; border-radius:50%; }
-.profile-info button { margin-top:20px; padding:12px 20px; background:#0066cc; color:white; border:none; border-radius:6px; cursor:pointer; font-size:16px; }
-.profile-info button:hover { background:#0052a3; }
+  /* Header */
+  header {
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    background: linear-gradient(90deg,#1e3a8a,#3b82f6);
+    color:white;
+    padding:20px 30px;
+    border-radius:0 0 20px 20px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  }
+
+  header h1 { margin:0; font-weight:700; font-size:1.5rem; }
+
+  header nav a {
+    color:white;
+    text-decoration:none;
+    margin-left:20px;
+    font-weight:600;
+    transition:0.2s;
+  }
+
+  header nav a:hover { color:#ffd700; }
+
+  /* Profile Container */
+  .container {
+    max-width:650px;
+    margin:40px auto;
+    background:white;
+    padding:35px;
+    border-radius:20px;
+    box-shadow:0 8px 22px rgba(0,0,0,0.08);
+  }
+
+  h2 {
+    text-align:center;
+    color:#1e3a8a;
+    margin-bottom:25px;
+    font-weight:700;
+  }
+
+  .profile-info label {
+    display:block;
+    margin:12px 0 6px;
+    font-weight:600;
+    color:#444;
+  }
+
+  .profile-info input {
+    width:100%;
+    padding:12px;
+    border-radius:10px;
+    border:1px solid #ccc;
+    font-size:1rem;
+    transition:border 0.25s ease, box-shadow 0.25s ease;
+  }
+
+  .profile-info input:focus {
+    border-color:#3b82f6;
+    box-shadow:0 0 8px rgba(59,130,246,0.4);
+    outline:none;
+  }
+
+  .profile-info input.readonly {
+    background:#f0f0f0;
+    cursor:not-allowed;
+  }
+
+  /* Profile Picture */
+  .profile-info img {
+    display:block;
+    margin-top:15px;
+    max-width:140px;
+    border-radius:50%;
+    box-shadow:0 6px 16px rgba(0,0,0,0.1);
+    object-fit:cover;
+  }
+
+  /* Save Button */
+  .profile-info button {
+    margin-top:28px;
+    padding:14px 20px;
+    background: linear-gradient(90deg,#1e3a8a,#3b82f6);
+    color:white;
+    border:none;
+    border-radius:10px;
+    cursor:pointer;
+    font-size:1rem;
+    font-weight:600;
+    width:100%;
+    transition:0.3s;
+  }
+
+  .profile-info button:hover {
+    background: linear-gradient(90deg,#16275f,#2563eb);
+  }
 </style>
 </head>
 <body>
 
-<div class="navbar">
-  <button id="homeBtn">Your dashboard</button>
-  <button id="logoutBtn">Logout</button>
-</div>
+<header>
+  <h1>Recruiter Profile</h1>
+  <nav>
+    <a href="recruiter-dashboard.html">Dashboard</a>
+    <a href="homepage-for-recruiters.html">View Graduates</a>
+    <a href="recruiter-applications.html">Applications</a>
+    <a href="homepage.html" id="logoutBtn">Logout</a>
+  </nav>
+</header>
 
 <div class="container">
   <h2>Your Profile</h2>
@@ -44,7 +141,7 @@ h2 { text-align:center; color:#0066cc; margin-bottom:20px; }
 
     <label for="profilePic">Profile Picture (PNG/JPG)</label>
     <input type="file" id="profilePic" accept="image/png, image/jpeg">
-    <img id="profilePicPreview" src="#" alt="Profile Picture Preview">
+    <img id="profilePicPreview" src="#" alt="Profile Picture Preview" style="display:none;">
 
     <button id="saveBtn">Save Changes</button>
   </div>
@@ -52,9 +149,19 @@ h2 { text-align:center; color:#0066cc; margin-bottom:20px; }
 
 <script type="module" src="recruiter-profile.js"></script>
 <script>
-document.getElementById("homeBtn").addEventListener("click", () => {
-  window.location.href = "recruiter-dashboard.html";
-});
+  // Profile Picture Preview
+  document.getElementById("profilePic").addEventListener("change", (event) => {
+    const file = event.target.files[0];
+    const preview = document.getElementById("profilePicPreview");
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = e => {
+        preview.src = e.target.result;
+        preview.style.display = "block";
+      };
+      reader.readAsDataURL(file);
+    }
+  });
 </script>
 </body>
 </html>

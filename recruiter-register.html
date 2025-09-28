@@ -4,76 +4,175 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Recruiter Registration</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
 <style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
   body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-family: 'Inter', sans-serif;
     background: #f4f6f9;
-    margin: 0;
-    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
   }
-  .container {
-    max-width: 500px;
-    margin: 50px auto;
+
+  .register-container {
     background: white;
-    padding: 30px;
-    border-radius: 12px;
-    box-shadow: 0 6px 18px rgba(0,0,0,0.1);
+    padding: 40px 30px;
+    border-radius: 16px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+    width: 100%;
+    max-width: 450px;
   }
+
   h2 {
     text-align: center;
-    color: #0066cc;
-    margin-bottom: 25px;
+    color: #1e3a8a;
+    margin-bottom: 30px;
+    font-weight: 600;
   }
+
+  label {
+    display: block;
+    margin-top: 15px;
+    font-weight: 600;
+    font-size: 0.95rem;
+  }
+
+  .input-wrapper {
+    position: relative;
+    margin-top: 5px;
+  }
+
   input {
     width: 100%;
-    padding: 10px;
-    margin: 10px 0;
-    border-radius: 6px;
+    padding: 12px 14px;
+    padding-right: 50px;
+    border-radius: 10px;
     border: 1px solid #ccc;
+    font-size: 1rem;
   }
+
+  input:focus {
+    border-color: #1e3a8a;
+    outline: none;
+    box-shadow: 0 0 6px rgba(30,58,138,0.2);
+  }
+
+  .toggle-password {
+    position: absolute;
+    top: 50%;
+    right: 14px;
+    transform: translateY(-50%);
+    cursor: pointer;
+    font-size: 0.9rem;
+    color: #555;
+    user-select: none;
+  }
+
   button {
+    margin-top: 25px;
     width: 100%;
     padding: 12px;
-    background: #0066cc;
+    background: #1e3a8a;
     color: white;
     border: none;
-    border-radius: 6px;
-    font-size: 16px;
+    border-radius: 10px;
     cursor: pointer;
-    margin-top: 15px;
+    font-size: 1rem;
+    font-weight: 600;
+    transition: background 0.3s, transform 0.2s;
   }
+
   button:hover {
-    background: #0052a3;
+    background: #16275f;
+    transform: translateY(-2px);
   }
-  p.message {
+
+  #goBackBtn {
     margin-top: 10px;
+    background: #6b7280;
+  }
+
+  #goBackBtn:hover {
+    background: #4b5563;
+  }
+
+  #message {
     text-align: center;
+    margin-top: 15px;
     font-weight: 500;
-  }
-  p.message.error {
-    color: #dc3545;
-  }
-  p.message.success {
-    color: #28a745;
   }
 </style>
 </head>
 <body>
 
-<div class="container">
+<div class="register-container">
   <h2>Recruiter Registration</h2>
-  <input type="text" id="firstName" placeholder="First Name" required>
-  <input type="text" id="lastName" placeholder="Last Name" required>
-  <input type="email" id="email" placeholder="Email" required>
-  <input type="password" id="password" placeholder="Password" required>
-  <input type="text" id="company" placeholder="Company Name" required>
-  <input type="text" id="registrationNumber" placeholder="Company Registration Number" required>
-  <input type="text" id="contact" placeholder="Contact Number" required>
+
+  <label for="firstName">First Name</label>
+  <div class="input-wrapper">
+    <input type="text" id="firstName" placeholder="First Name" required>
+  </div>
+
+  <label for="lastName">Last Name</label>
+  <div class="input-wrapper">
+    <input type="text" id="lastName" placeholder="Last Name" required>
+  </div>
+
+  <label for="email">Email</label>
+  <div class="input-wrapper">
+    <input type="email" id="email" placeholder="Email" required>
+  </div>
+
+  <label for="password">Password</label>
+  <div class="input-wrapper">
+    <input type="password" id="password" placeholder="Password" required>
+    <span class="toggle-password" id="togglePassword">Show</span>
+  </div>
+
+  <label for="company">Company Name</label>
+  <div class="input-wrapper">
+    <input type="text" id="company" placeholder="Company Name" required>
+  </div>
+
+  <label for="registrationNumber">Company Registration Number</label>
+  <div class="input-wrapper">
+    <input type="text" id="registrationNumber" placeholder="Registration Number" required>
+  </div>
+
+  <label for="contact">Contact Number</label>
+  <div class="input-wrapper">
+    <input type="text" id="contact" placeholder="Contact Number" required>
+  </div>
+
   <button id="registerBtn">Register</button>
-  <p id="message" class="message"></p>
+  <button id="goBackBtn" type="button">Go Back</button>
+  <p id="message"></p>
 </div>
 
 <script type="module" src="recruiter-register.js"></script>
+<script>
+  // Go Back button
+  const goBackBtn = document.getElementById('goBackBtn');
+  goBackBtn.addEventListener('click', () => {
+    history.back();
+  });
+
+  // Toggle password visibility
+  const togglePassword = document.getElementById('togglePassword');
+  const passwordInput = document.getElementById('password');
+  togglePassword.addEventListener('click', () => {
+    if (passwordInput.type === "password") {
+      passwordInput.type = "text";
+      togglePassword.textContent = "Hide";
+    } else {
+      passwordInput.type = "password";
+      togglePassword.textContent = "Show";
+    }
+  });
+</script>
 
 </body>
 </html>

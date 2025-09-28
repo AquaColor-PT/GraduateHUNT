@@ -6,26 +6,42 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 const publicJobList = document.getElementById('publicJobList');
 
-// Load jobs
 async function loadJobs() {
     publicJobList.innerHTML = '<li class="loading">Loading jobs...</li>';
 
-    const { data, error } = await supabase
+    // Get logged-in student
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session?.user) {
+        publicJobList.innerHTML = '<li>Please log in to view jobs.</li>';
+        return;
+    }
+    const studentId = session.user.id;
+
+    // Fetch jobs
+    const { data: jobs, error: jobsError } = await supabase
         .from('jobs')
         .select('*')
         .order('created_at', { ascending: false });
 
-    if(error) { 
-        publicJobList.innerHTML = `<li class="error">Error: ${error.message}</li>`; 
+    if (jobsError) { 
+        publicJobList.innerHTML = `<li class="error">Error: ${jobsError.message}</li>`; 
         return; 
     }
-    if(!data || data.length === 0) { 
+    if (!jobs || jobs.length === 0) { 
         publicJobList.innerHTML = '<li>No jobs available</li>'; 
         return; 
     }
 
+    // Fetch applications for this student
+    const { data: applications } = await supabase
+        .from('applications')
+        .select('job_id')
+        .eq('student_id', studentId);
+
+    const appliedJobIds = applications ? applications.map(a => a.job_id) : [];
+
     publicJobList.innerHTML = '';
-    data.forEach(job => {
+    jobs.forEach(job => {
         const li = document.createElement('li');
         li.innerHTML = `
             <h4>${job.title}</h4>
@@ -33,22 +49,27 @@ async function loadJobs() {
             <div><strong>Location:</strong> ${job.location}</div>
             <div><strong>Position Type:</strong> ${job.job_type}</div>
             <div><strong>Job Description:</strong></div>
-            <p>${job.description}</p>
+            <p style="white-space: pre-line; margin: 8px 0 12px 0; line-height:1.4;">${job.description}</p>
             <small>Posted on: ${new Date(job.created_at).toLocaleDateString()}</small>
         `;
 
         const applyBtn = document.createElement('button');
-        applyBtn.textContent = 'Apply';
-        applyBtn.className = 'applyBtn';
 
-        // Redirect to applicationform.html with jobId and jobTitle as query parameters
-       // Instead of opening modal
-    applyBtn.onclick = () => {
-    const url = new URL("applicationform.html", window.location.href);
-    url.searchParams.set("job_id", job.id);
-    url.searchParams.set("job_title", job.title);
-    window.location.href = url.toString();
-};
+        if (appliedJobIds.includes(job.id)) {
+            applyBtn.textContent = 'Already Applied';
+            applyBtn.disabled = true;
+            applyBtn.style.backgroundColor = '#ccc';
+            applyBtn.style.cursor = 'not-allowed';
+        } else {
+            applyBtn.textContent = 'Apply';
+            applyBtn.className = 'applyBtn';
+            applyBtn.onclick = () => {
+                const url = new URL("applicationform.html", window.location.href);
+                url.searchParams.set("job_id", job.id);
+                url.searchParams.set("job_title", job.title);
+                window.location.href = url.toString();
+            };
+        }
 
         li.appendChild(applyBtn);
         publicJobList.appendChild(li);
@@ -57,4 +78,3 @@ async function loadJobs() {
 
 // Load jobs on page load
 loadJobs();
-

@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Reply to Recruiter - Graduateinhunt</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  body { font-family: 'Inter', sans-serif; background:#f4f7fb; margin:0; padding:0; }
+  header { background: linear-gradient(90deg,#1e3a8a,#3b82f6); color:white; padding:20px; text-align:center; border-radius:0 0 20px 20px; }
+  header h1 { margin:0; font-size:1.6rem; }
+
+  .container { max-width:700px; margin:30px auto; background:white; padding:20px; border-radius:12px; box-shadow:0 6px 12px rgba(0,0,0,0.1); }
+
+  .btn-home { display:inline-block; margin-bottom:15px; padding:10px 20px; background:#1e3a8a; color:white; border:none; border-radius:8px; cursor:pointer; font-weight:600; transition:0.3s; text-decoration:none; }
+  .btn-home:hover { background:#3b82f6; }
+
+  .info { margin-bottom:15px; font-weight:500; }
+  .info span { font-weight:600; }
+
+  /* Chat Area */
+  .chat-container { border:1px solid #ccc; border-radius:12px; height:400px; display:flex; flex-direction:column; overflow:hidden; }
+  .chat-messages { flex:1; padding:15px; overflow-y:auto; display:flex; flex-direction:column; gap:10px; background:#f9faff; }
+  .message { max-width:70%; padding:10px 15px; border-radius:20px; word-wrap:break-word; }
+  .message.student { align-self:flex-end; background: linear-gradient(90deg,#1e3a8a,#3b82f6); color:white; }
+  .message.recruiter { align-self:flex-start; background:#e0e6f8; color:#000; }
+  .message a.file-link { display:block; color:#1e3a8a; text-decoration:underline; margin-top:5px; }
+
+  .chat-input { display:flex; flex-direction:column; padding:10px; gap:5px; border-top:1px solid #ddd; background:white; }
+  .chat-input textarea { flex:1; min-height:80px; max-height:150px; padding:12px; border-radius:15px; border:1px solid #ccc; font-size:14px; resize:none; overflow-y:auto; font-family:'Inter',sans-serif; }
+
+  .chat-input .actions { display:flex; gap:10px; }
+
+  /* Styled file input */
+  .chat-input input[type=file] {
+    flex:1;
+    padding:8px;
+    border-radius:8px;
+    border:none;
+    background:#1e3a8a;
+    color:white;
+    cursor:pointer;
+    font-weight:600;
+    transition:0.3s;
+  }
+  .chat-input input[type=file]:hover {
+    background:#3b82f6;
+  }
+
+  .chat-input input[type=file]::-webkit-file-upload-button {
+    background:#1e3a8a;
+    color:white;
+    border:none;
+    padding:6px 12px;
+    border-radius:8px;
+    cursor:pointer;
+    font-weight:600;
+    transition:0.3s;
+  }
+  .chat-input input[type=file]::-webkit-file-upload-button:hover {
+    background:#3b82f6;
+  }
+  .chat-input input[type=file]::-moz-file-upload-button {
+    background:#1e3a8a;
+    color:white;
+    border:none;
+    padding:6px 12px;
+    border-radius:8px;
+    cursor:pointer;
+    font-weight:600;
+    transition:0.3s;
+  }
+  .chat-input input[type=file]::-moz-file-upload-button:hover {
+    background:#3b82f6;
+  }
+
+  .chat-input button { padding:10px 20px; background:#1e3a8a; color:white; border:none; border-radius:12px; cursor:pointer; font-weight:600; transition:0.3s; }
+  .chat-input button:hover { background:#3b82f6; }
+
+  #feedback { margin-top:10px; }
+  #feedback p.success { color:green; }
+  #feedback p.error { color:red; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Reply to Recruiter</h1>
+</header>
+
+<div class="container">
+  <a href="graduate-message.html" class="btn-home">← Back to Messages</a>
+
+  <div class="info">
+    <p>Recruiter: <span id="recruiterName">Loading...</span></p>
+    <p>Job Applied For: <span id="jobTitle">Loading...</span></p>
+  </div>
+
+  <!-- Chat Box -->
+  <div class="chat-container">
+    <div class="chat-messages" id="chatMessages">
+      <!-- Messages will appear here -->
+    </div>
+    <div class="chat-input">
+      <textarea id="replyText" placeholder="Write your reply..."></textarea>
+      <div class="actions">
+        <input type="file" id="fileInput">
+        <button id="sendReplyBtn">Send</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="feedback"></div>
+</div>
+
+<script type="module" src="graduate-reply.js"></script>
+</body>
+</html>

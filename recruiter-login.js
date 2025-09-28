@@ -4,61 +4,66 @@ const SUPABASE_URL = 'https://euclknvsppptbfclwxqq.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV1Y2xrbnZzcHBwdGJmY2x3eHFxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc2Mjc2NTQsImV4cCI6MjA3MzIwMzY1NH0.HlGW3kZJ4CPnF2JuZGs_4ObkhxwVFTSedb7O8HHDEag';
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
+// Elements
 const emailInput = document.getElementById('email');
 const passwordInput = document.getElementById('password');
 const loginBtn = document.getElementById('loginBtn');
-const messageEl = document.getElementById('message');
+const message = document.getElementById('message');
+const togglePassword = document.getElementById('togglePassword');
 
+// Toggle password visibility
+togglePassword.addEventListener('click', () => {
+  if(passwordInput.type === 'password'){
+    passwordInput.type = 'text';
+    togglePassword.textContent = 'Hide';
+  } else {
+    passwordInput.type = 'password';
+    togglePassword.textContent = 'Show';
+  }
+});
+
+// Login logic
 loginBtn.addEventListener('click', async () => {
-  messageEl.textContent = '';
-  messageEl.className = 'message';
-
   const email = emailInput.value.trim();
   const password = passwordInput.value;
 
-  if (!email || !password) {
-    messageEl.textContent = 'Please enter both email and password.';
-    messageEl.classList.add('error');
+  if(!email || !password){
+    message.style.color = 'red';
+    message.textContent = "Enter email and password";
     return;
   }
 
-  const { data, error } = await supabase.auth.signInWithPassword({
-    email,
-    password
-  });
+  try {
+    const { data: authData, error: authError } = await supabase.auth.signInWithPassword({ email, password });
+    if(authError) throw authError;
 
-  if (error) {
-    // Check if the error is due to wrong credentials or non-existent account
-    if (error.message.includes('Invalid login credentials')) {
-      messageEl.textContent = 'Account does not exist or wrong credentials.';
-    } else {
-      messageEl.textContent = error.message;
+    // Optional: check if recruiter exists in your table
+    const { data: recruiter, error: recruiterError } = await supabase
+      .from('recruiters')
+      .select('verified')
+      .eq('email', email)
+      .single();
+
+    if(recruiterError || !recruiter){
+      await supabase.auth.signOut();
+      message.style.color = 'red';
+      message.textContent = "This account is not registered as a recruiter.";
+      return;
     }
-    messageEl.classList.add('error');
-    return;
+
+    if(!recruiter.verified){
+      message.style.color = 'red';
+      message.textContent = "Your account is not yet verified. Please wait for admin approval.";
+      return;
+    }
+
+    message.style.color = 'green';
+    message.textContent = "Login successful! Redirecting...";
+    setTimeout(() => window.location.href = 'recruiter-dashboard.html', 1200);
+
+  } catch(err) {
+    console.error(err);
+    message.style.color = 'red';
+    message.textContent = err.message;
   }
-
-  // Optional: check if recruiter is registered (in recruiters table)
-  const { data: recruiter, error: recruiterError } = await supabase
-    .from('recruiters')
-    .select('verified')
-    .eq('id', data.user.id)
-    .single();
-
-  if (recruiterError) {
-    // If user is not in recruiters table
-    messageEl.textContent = 'Account is not registered as a recruiter.';
-    messageEl.classList.add('error');
-    return;
-  }
-
-  if (!recruiter.verified) {
-    messageEl.textContent = 'Your account is not yet verified. Please wait for admin approval.';
-    messageEl.classList.add('error');
-    return;
-  }
-
-  // Successful login -> redirect to recruiter dashboard
-  window.location.href = 'recruiter-dashboard.html';
 });
-

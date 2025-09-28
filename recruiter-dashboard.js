@@ -4,19 +4,20 @@ const SUPABASE_URL = 'https://euclknvsppptbfclwxqq.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV1Y2xrbnZzcHBwdGJmY2x3eHFxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc2Mjc2NTQsImV4cCI6MjA3MzIwMzY1NH0.HlGW3kZJ4CPnF2JuZGs_4ObkhxwVFTSedb7O8HHDEag';
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
-// Elements
 const profilePicEl = document.getElementById('profilePic');
+const profilePicContainer = document.getElementById('profilePicContainer');
 const profileNameEl = document.getElementById('profileName');
 const profileCompanyEl = document.getElementById('profileCompany');
 const profileCreditsEl = document.getElementById('profileCredits');
 const jobForm = document.getElementById('jobForm');
 const jobListEl = document.getElementById('jobList');
 const logoutBtn = document.getElementById('logoutBtn');
+const declarationCheckbox = document.getElementById('declaration');
 
 let currentUserId = null;
-let editingJobId = null; // Track which job is being edited
+let editingJobId = null;
 
-// ---------------- AUTH CHECK ----------------
+// Auth check
 async function checkUser() {
     const { data: { session } } = await supabase.auth.getSession();
     if (!session?.user) {
@@ -30,64 +31,30 @@ async function checkUser() {
 }
 checkUser();
 
-// ---------------- LOAD PROFILE ----------------
-// Add this at the top
-const profilePicContainer = document.getElementById('profilePicContainer');
-
-// ---------------- LOAD PROFILE ----------------
+// Load profile
 async function loadProfile() {
     const { data, error } = await supabase
         .from('recruiters')
         .select('*')
         .eq('id', currentUserId)
         .single();
-
-    if (error) return console.error("Failed to load profile:", error);
+    if (error) return console.error(error);
 
     profileNameEl.textContent = `${data.first_name} ${data.last_name}`;
     profileCompanyEl.textContent = data.company_name || 'Your Company/Agency';
     profileCreditsEl.textContent = `Credits: ${data.credits || 0}`;
 
     if (data.profile_url) {
-        try {
-            const { data: urlData, error: urlError } = supabase
-                .storage
-                .from('recruiter-profile-pics')
-                .getPublicUrl(data.profile_url);
-
-            if (urlError || !urlData?.publicUrl) {
-                console.error("Failed to get profile pic URL", urlError);
-                profilePicEl.style.display = 'none';
-                profilePicContainer.style.display = 'flex'; // show placeholder
-            } else {
-                profilePicEl.src = urlData.publicUrl;
-                profilePicEl.style.display = 'block';
-                profilePicContainer.style.display = 'none';
-            }
-        } catch (err) {
-            console.error("Unexpected error loading profile pic:", err);
-            profilePicEl.style.display = 'none';
-            profilePicContainer.style.display = 'flex';
+        const { data: urlData } = supabase.storage.from('recruiter-profile-pics').getPublicUrl(data.profile_url);
+        if (urlData?.publicUrl) {
+            profilePicEl.src = urlData.publicUrl;
+            profilePicEl.style.display = 'block';
+            profilePicContainer.style.display = 'none';
         }
-    } else {
-        // No profile picture uploaded
-        profilePicEl.style.display = 'none';
-        profilePicContainer.style.display = 'flex';
     }
 }
 
-
-
-
-
-
-
-
-
-
-
-
-// ---------------- LOAD JOBS ----------------
+// Load jobs
 async function loadJobs() {
     jobListEl.innerHTML = '';
     const { data, error } = await supabase
@@ -95,8 +62,7 @@ async function loadJobs() {
         .select('*')
         .eq('recruiter_id', currentUserId)
         .order('created_at', { ascending: false });
-
-    if (error) return console.error("Failed to load jobs:", error);
+    if (error) return console.error(error);
 
     if (!data.length) {
         jobListEl.innerHTML = '<p>No jobs posted yet.</p>';
@@ -104,56 +70,52 @@ async function loadJobs() {
     }
 
     data.forEach(job => {
-        const li = document.createElement('div');
-        li.classList.add('job-item');
-        li.innerHTML = `
+        const div = document.createElement('div');
+        div.classList.add('job-item');
+        div.innerHTML = `
             <div>
-                <strong>${job.title}</strong> (${job.job_type})<br>
-                <small>${job.location}</small><br>
-                <small>Company: ${job.company_name}</small>
+              <strong>${job.title}</strong> (${job.job_type})<br>
+              <small>${job.location}</small><br>
+              <small>Company: ${job.company_name}</small><br>
+              <p style="white-space: pre-line; color:#555; margin-top:8px;">${job.description}</p>
             </div>
-            <div class="job-actions">
-                <button class="editBtn" data-id="${job.id}">Edit</button>
-                <button class="deleteBtn" data-id="${job.id}">Delete</button>
+            <div>
+              <button class="editBtn" data-id="${job.id}">Edit</button>
+              <button class="deleteBtn" data-id="${job.id}">Delete</button>
             </div>
         `;
-        jobListEl.appendChild(li);
+        jobListEl.appendChild(div);
     });
 }
 
-// ---------------- POST / UPDATE JOB ----------------
+// Post/update job
 jobForm.addEventListener('submit', async (e) => {
     e.preventDefault();
+
+    if (!declarationCheckbox.checked) {
+        alert("You must agree to the declaration before posting a job.");
+        return;
+    }
+
     const title = document.getElementById('jobTitle').value.trim();
     const location = document.getElementById('location').value.trim();
     const jobType = document.getElementById('jobType').value;
     const description = document.getElementById('description').value.trim();
-    const companyName = document.getElementById('jobCompany').value.trim(); // Fixed id
+    const companyName = document.getElementById('jobCompany').value.trim();
 
     if (!title || !location || !jobType || !description || !companyName) {
-        alert("Please fill all fields, including company name.");
+        alert("Please fill all fields.");
         return;
     }
 
     if (editingJobId) {
-        // UPDATE existing job
-        const { error } = await supabase
-            .from('jobs')
-            .update({ title, location, job_type: jobType, description, company_name: companyName })
-            .eq('id', editingJobId);
-
-        if (error) return alert("Failed to update job: " + error.message);
-
+        const { error } = await supabase.from('jobs').update({ title, location, job_type: jobType, description, company_name: companyName }).eq('id', editingJobId);
+        if (error) return alert(error.message);
         editingJobId = null;
         alert("Job updated successfully!");
     } else {
-        // INSERT new job
-        const { error } = await supabase
-            .from('jobs')
-            .insert([{ recruiter_id: currentUserId, title, location, job_type: jobType, description, company_name: companyName }]);
-
-        if (error) return alert("Failed to post job: " + error.message);
-
+        const { error } = await supabase.from('jobs').insert([{ recruiter_id: currentUserId, title, location, job_type: jobType, description, company_name: companyName }]);
+        if (error) return alert(error.message);
         alert("Job posted successfully!");
     }
 
@@ -161,53 +123,34 @@ jobForm.addEventListener('submit', async (e) => {
     await loadJobs();
 });
 
-// ---------------- DELETE / EDIT JOB ----------------
+// Edit/Delete jobs
 jobListEl.addEventListener('click', async (e) => {
     const jobId = e.target.dataset.id;
     if (!jobId) return;
 
     if (e.target.classList.contains('deleteBtn')) {
-        const confirmed = confirm("Are you sure you want to delete this job?");
-        if (!confirmed) return;
-
-        const { error } = await supabase
-            .from('jobs')
-            .delete()
-            .eq('id', jobId);
-
-        if (error) return alert("Failed to delete job: " + error.message);
-
+        if (!confirm("Are you sure?")) return;
+        const { error } = await supabase.from('jobs').delete().eq('id', jobId);
+        if (error) return alert(error.message);
         await loadJobs();
     }
 
     if (e.target.classList.contains('editBtn')) {
-        const { data: job, error } = await supabase
-            .from('jobs')
-            .select('*')
-            .eq('id', jobId)
-            .single();
+        const { data: job, error } = await supabase.from('jobs').select('*').eq('id', jobId).single();
+        if (error) return alert(error.message);
 
-        if (error) return alert("Failed to fetch job: " + error.message);
-
-        // Prefill the form
         document.getElementById('jobTitle').value = job.title;
         document.getElementById('location').value = job.location;
         document.getElementById('jobType').value = job.job_type;
         document.getElementById('description').value = job.description;
-        document.getElementById('jobCompany').value = job.company_name; // Prefill company
+        document.getElementById('jobCompany').value = job.company_name;
 
         editingJobId = jobId;
         window.scrollTo({ top: jobForm.offsetTop, behavior: 'smooth' });
     }
 });
-const viewApplicationsBtn = document.getElementById('viewApplicationsBtn');
 
-viewApplicationsBtn.addEventListener('click', () => {
-    window.location.href = 'recruiter-applications.html';
-});
-
-
-// ---------------- LOGOUT ----------------
+// Logout
 logoutBtn.addEventListener('click', async () => {
     await supabase.auth.signOut();
     window.location.href = 'homepage.html';

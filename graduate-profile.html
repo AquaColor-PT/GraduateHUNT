@@ -4,99 +4,143 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Graduate Profile</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
 <style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
   body { 
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+    font-family: 'Inter', sans-serif; 
     background: #f4f6f9; 
-    margin: 0; padding: 0; color: #333;
+    color: #333;
   }
 
-  /* Navigation */
+  /* Navbar */
   .navbar {
     display: flex;
     justify-content: flex-end;
+    gap: 12px;
     padding: 15px 30px;
-    background: #0066cc;
+    background: #1e3a8a;
+    flex-wrap: wrap;
   }
   .navbar button {
-    padding: 8px 16px;
-    margin-left: 10px;
+    padding: 8px 18px;
     background: white;
-    color: #0066cc;
-    border: 1px solid #0066cc;
+    color: #1e3a8a;
+    border: 1px solid #1e3a8a;
     border-radius: 20px;
-    font-weight: 500;
+    font-weight: 600;
     cursor: pointer;
     transition: 0.3s;
   }
   .navbar button:hover {
-    background: #0052a3;
+    background: #16275f;
     color: white;
-    border-color: #0052a3;
+    border-color: #16275f;
   }
 
-  /* Profile container */
+  /* Container */
   .container { 
     max-width: 700px; 
     margin: 40px auto; 
     background: white; 
-    padding: 40px; 
-    border-radius: 15px; 
-    box-shadow: 0 6px 18px rgba(0,0,0,0.1); 
+    padding: 40px 30px; 
+    border-radius: 16px; 
+    box-shadow: 0 8px 20px rgba(0,0,0,0.08); 
   }
+
   h2 { 
-    color: #0066cc; 
+    color: #1e3a8a; 
     text-align: center; 
-    margin-bottom: 20px;
+    margin-bottom: 30px; 
+    font-weight: 600;
     font-size: 28px;
   }
 
-  /* Profile info */
-  .profile-info { 
-    margin-top: 20px; 
-    padding: 20px; 
-    background: #f9fbfd; 
-    border-radius: 12px; 
-    border: 1px solid #e1e8f0;
+  /* Profile Info */
+  .profile-info {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
   }
+
   .profile-info label {
-    display: block;
-    margin: 10px 0 5px;
     font-weight: 500;
+    margin-bottom: 6px;
   }
-  .profile-info input {
+
+  .profile-info input, 
+  .profile-info select, 
+  .profile-info datalist {
     width: 100%;
-    padding: 8px;
-    border-radius: 6px;
+    padding: 12px 14px;
+    border-radius: 10px;
     border: 1px solid #ccc;
+    font-size: 1rem;
+    transition: 0.3s;
   }
+
+  .profile-info input:focus,
+  .profile-info select:focus {
+    border-color: #1e3a8a;
+    box-shadow: 0 0 6px rgba(30, 58, 138, 0.15);
+    outline: none;
+  }
+
   .profile-info a {
-    color: #0066cc;
+    color: #1e3a8a;
     font-weight: 500;
     text-decoration: none;
   }
+
   .profile-info a:hover {
     text-decoration: underline;
-  }
-  .profile-info button {
-    margin-top: 20px;
-    padding: 12px 20px;
-    background: #0066cc;
-    color: white;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 16px;
-  }
-  .profile-info button:hover {
-    background: #0052a3;
   }
 
   #profilePicPreview {
     display: none;
     max-width: 120px;
     margin-top: 10px;
-    border-radius: 8px;
+    border-radius: 12px;
+    border: 1px solid #ccc;
+  }
+
+  .cv-filename {
+    font-size: 0.95rem;
+    margin-top: 4px;
+    color: #555;
+  }
+
+  .profile-info button {
+    padding: 12px 18px;
+    background: #1e3a8a;
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: 0.3s;
+    margin-top: 10px;
+  }
+
+  .profile-info button:hover {
+    background: #16275f;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+  }
+
+  /* Responsive */
+  @media (max-width: 600px) {
+    .container {
+      margin: 20px;
+      padding: 30px 20px;
+    }
+    .navbar {
+      justify-content: center;
+      gap: 8px;
+    }
+    .navbar button { padding: 8px 12px; font-size: 0.95rem; }
   }
 </style>
 </head>
@@ -114,19 +158,38 @@
   <h2>Your Profile</h2>
   <div class="profile-info">
     <label for="name">Full Name</label>
-    <input type="text" id="name">
+    <input type="text" id="name" placeholder="Enter your full name">
 
     <label>Email</label>
-    <p id="email"></p>
+    <p id="email" style="padding:10px; background:#f0f4ff; border-radius:8px;">user@example.com</p>
 
     <label for="phone">Phone</label>
-    <input type="text" id="phone">
+    <input type="text" id="phone" placeholder="Enter your phone number">
 
     <label for="qualification">Qualification</label>
-    <input type="text" id="qualification">
+    <input list="qualificationOptions" id="qualification" placeholder="Select or search qualification">
+    <datalist id="qualificationOptions">
+      <option value="B.Eng Electrical Engineering">
+      <option value="B.Eng Mechanical Engineering">
+      <option value="B.Eng Civil Engineering">
+      <option value="B.Eng Computer Engineering">
+      <option value="B.Eng Chemical Engineering">
+      <option value="B.Eng Industrial Engineering">
+      <option value="B.Eng Mining Engineering">
+      <option value="B.Eng Biomedical Engineering">
+      <option value="B.Eng Mechatronics Engineering">
+      <option value="B.Sc Computer Science">
+      <option value="B.Sc Information Technology">
+      <option value="Diploma in Electrical Engineering">
+      <option value="Diploma in Mechanical Engineering">
+      <option value="Diploma in Civil Engineering">
+      <option value="Diploma in Chemical Engineering">
+      <option value="Higher Certificate in Engineering Fundamentals">
+      <option value="Other">
+    </datalist>
 
     <label for="skills">Skills (comma-separated)</label>
-    <input type="text" id="skills">
+    <input type="text" id="skills" placeholder="e.g., Python, MATLAB, C++">
 
     <label for="profilePic">Upload Profile Picture (PNG/JPG)</label>
     <input type="file" id="profilePic" accept="image/png, image/jpeg">
@@ -134,6 +197,7 @@
 
     <label for="cvFile">Upload CV (PDF)</label>
     <input type="file" id="cvFile" accept="application/pdf">
+    <p class="cv-filename" id="cvFileName">No file selected</p>
     <p><strong>Current CV:</strong> <a id="cvLink" href="#" target="_blank">View CV</a></p>
 
     <button id="saveBtn">Save Changes</button>
@@ -149,6 +213,31 @@
   document.getElementById("browseJobsBtn").addEventListener("click", () => {
     window.location.href = "browse-jobs.html";
   });
+
+  // Profile picture live preview
+  const profilePicInput = document.getElementById('profilePic');
+  const profilePicPreview = document.getElementById('profilePicPreview');
+
+  profilePicInput.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if(file) {
+      profilePicPreview.src = URL.createObjectURL(file);
+      profilePicPreview.style.display = 'block';
+    } else {
+      profilePicPreview.style.display = 'none';
+      profilePicPreview.src = '#';
+    }
+  });
+
+  // CV file name display
+  const cvFileInput = document.getElementById('cvFile');
+  const cvFileName = document.getElementById('cvFileName');
+
+  cvFileInput.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    cvFileName.textContent = file ? file.name : 'No file selected';
+  });
 </script>
+
 </body>
 </html>

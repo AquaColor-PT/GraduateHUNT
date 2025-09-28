@@ -4,122 +4,175 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Recruiter Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
 <style>
-body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: #f4f6f9;
-    margin: 0; padding: 0; color: #333;
-}
-/* Header */
-header {
+  body {
+    font-family: 'Inter', sans-serif;
+    background: #f4f7fb;
+    margin: 0;
+    padding: 0;
+    color: #333;
+  }
+
+  /* Header */
+  header {
     display:flex;
     justify-content:space-between;
     align-items:center;
-    background:#0066cc;
+    background: linear-gradient(90deg, #1e3a8a, #3b82f6);
     color:white;
-    padding:15px 30px;
-}
-header h1 { margin:0;font-size:22px; }
-header nav a {
+    padding:20px 30px;
+    border-radius:0 0 20px 20px;
+    box-shadow:0 4px 12px rgba(0,0,0,0.15);
+  }
+
+  header h1 { margin:0; font-weight:600; font-size:1.5rem;}
+
+  header nav a {
     color:white;
     text-decoration:none;
     margin-left:20px;
     font-weight:500;
-}
-header nav a:hover { text-decoration:underline; }
+    transition:0.2s;
+  }
 
-/* Layout */
-.main {
+  header nav a:hover { color:#ffd700; }
+
+  /* Layout */
+  .main {
     display:flex;
     max-width:1200px;
-    margin:20px auto;
+    margin:30px auto;
     gap:20px;
-}
-/* Left Panel */
-.left-panel {
+    flex-wrap:wrap;
+  }
+
+  /* Left Panel */
+  .left-panel {
     flex:1;
+    min-width:280px;
     background:white;
     border-radius:12px;
     padding:20px;
-    box-shadow:0 6px 18px rgba(0,0,0,0.1);
+    box-shadow:0 6px 18px rgba(0,0,0,0.08);
     text-align:center;
-}
-.left-panel img, #profilePicContainer {
-    display: block;
-    margin: 0 auto 10px; /* center horizontally */
-    width: 120px;
-    height: 120px;
-    border-radius: 50%;
-    object-fit: cover;
-    text-align: center;
-}
+  }
 
+  .left-panel img, #profilePicContainer 
+  {
+    width:120px;
+    height:120px;
+    border-radius:50%;
+    object-fit:cover;
+    display:block;
+    margin:0 auto 10px;
+  }
 
-/* Right Panel */
-.right-panel {
-    flex:2;
+  #profilePicContainer
+   {
     display:flex;
-    flex-direction:column;
-    gap:20px;
-}
+    align-items:center;
+    justify-content:center;
+    font-weight:bold;
+    font-size:14px;
+    color:white;
+    background: linear-gradient(135deg, #1e3a8a, #3b82f6);
+  }
 
-/* Job Form */
-#jobForm {
+  .left-panel h2 { margin:10px 0 5px; color:#1e3a8a; font-weight:600; }
+  .left-panel p { margin:5px 0; font-weight:500; color:#555; }
+
+  /* Right Panel */
+  .right-panel { flex:2; display:flex; flex-direction:column; gap:20px; min-width:300px; }
+
+  /* Job Form */
+  #jobForm {
     background:white;
-    padding:20px;
+    padding:25px;
     border-radius:12px;
-    box-shadow:0 6px 18px rgba(0,0,0,0.1);
-}
-#jobForm input, #jobForm select, #jobForm textarea {
-    width:100%;
-    padding:10px;
-    margin:10px 0;
-    border-radius:6px;
-    border:1px solid #ccc;
-}
-#jobForm button {
+    box-shadow:0 6px 18px rgba(0,0,0,0.08);
+  }
+
+  #jobForm input, #jobForm select, #jobForm textarea {
     width:100%;
     padding:12px;
-    background:#0066cc;
+    margin:10px 0;
+    border-radius:8px;
+    border:1px solid #ccc;
+    font-size:1rem;
+  }
+
+  #jobForm button {
+    width:100%;
+    padding:14px;
+    background: linear-gradient(90deg, #1e3a8a, #3b82f6);
     color:white;
     border:none;
-    border-radius:6px;
-    font-size:16px;
+    border-radius:8px;
+    font-size:1rem;
+    font-weight:600;
     cursor:pointer;
-}
+    transition:0.3s;
+    box-shadow:0 4px 10px rgba(0,0,0,0.15);
+  }
 
-/* Job List */
-#jobList {
+  #jobForm button:hover {
+    background: linear-gradient(90deg, #16275f, #2563eb);
+  }
+
+  /* Declaration Section */
+  .declaration-section {
+    margin:15px 0;
+    font-size:0.95rem;
+  }
+
+  .declaration-section input[type="checkbox"] { margin-bottom:10px; }
+
+  .declaration-section span { display:block; margin-left:25px; }
+
+  .declaration-section ul { margin:5px 0 0 20px; padding:0; list-style:disc; }
+
+  /* Jobs Posted */
+  #jobList {
     background:white;
     border-radius:12px;
     padding:20px;
-    box-shadow:0 6px 18px rgba(0,0,0,0.1);
-}
-.job-item {
-    padding:12px;
+    box-shadow:0 6px 18px rgba(0,0,0,0.08);
+  }
+
+  .job-item {
+    padding:15px;
     border-bottom:1px solid #eee;
     display:flex;
     justify-content:space-between;
     align-items:center;
-}
-.job-item:last-child { border-bottom:none; }
-.job-item button {
+    flex-wrap:wrap;
+  }
+
+  .job-item:last-child { border-bottom:none; }
+
+  .job-item button {
     margin-left:10px;
-    padding:6px 12px;
+    padding:8px 14px;
     border:none;
     border-radius:6px;
     cursor:pointer;
-}
-.editBtn { background:#28a745;color:white; }
-.deleteBtn { background:#dc3545;color:white; }
+    font-weight:500;
+    transition:0.2s;
+    color:white;
+  }
 
-.profile-info img {
-    display: block;
-    margin: 10px auto 0; /* top 10px, auto left/right, no bottom margin */
-    max-width: 120px;
-    border-radius: 50%;
-}
+  .editBtn {
+    background: linear-gradient(90deg, #1e3a8a, #3b82f6);
+  }
+  .editBtn:hover {
+    background: linear-gradient(90deg, #16275f, #2563eb);
+  }
 
+  .deleteBtn { background:#dc3545; }
+  .deleteBtn:hover { background:#a71d2a; }
+
+  @media (max-width:800px) { .main { flex-direction:column; } }
 </style>
 </head>
 <body>
@@ -129,78 +182,66 @@ header nav a:hover { text-decoration:underline; }
   <nav>
     <a href="recruiter-profile.html">Update Profile</a>
     <a href="homepage-for-recruiters.html">View Graduates</a>
-    <a href="recruiter-applications.html">View Applications</a> <!-- New link -->
+    <a href="recruiter-applications.html">View Applications</a>
     <a href="homepage.html" id="logoutBtn">Logout</a>
   </nav>
 </header>
 
-
-<!-- Left Panel -->
-
-<!-- Left Panel -->
-<div class="left-panel">
-    <!-- Colorful placeholder if no profile pic -->
-    <div id="profilePicContainer" style="
-        width:120px; 
-        height:120px; 
-        border-radius:50%; 
-        margin:0 auto 10px; 
-        display:flex; 
-        align-items:center; 
-        justify-content:center; 
-        font-weight:bold; 
-        font-size:14px; 
-        color:white; 
-        background: linear-gradient(135deg, #6a11cb, #2575fc);
-    ">
-        No Profile Pic
-    </div>
-
-    <!-- Actual profile picture -->
-    <img id="profilePic" src="" alt="Profile Picture" style="
-        display:none; 
-        width:120px; 
-        height:120px; 
-        border-radius:50%; 
-        object-fit:cover; 
-        margin-bottom:10px;
-    ">
-
+<div class="main">
+  <!-- Left Panel -->
+  <div class="left-panel">
+    <div id="profilePicContainer">No Profile Pic</div>
+    <img id="profilePic" src="" alt="Profile Picture" style="display:none;">
     <h2 id="profileName">Recruiter Name</h2>
     <p id="profileCompany">Company/Agency</p>
     <p id="profileCredits">Credits: 0</p>
-</div>
+  </div>
 
-
-
-    <!-- Right Panel -->
-<!-- Right Panel -->
-<div class="right-panel">
+  <!-- Right Panel -->
+  <div class="right-panel">
     <!-- Job Form -->
     <form id="jobForm" novalidate>
-        <input type="text" id="jobTitle" placeholder="Job Title" required>
-        <input type="text" id="location" placeholder="Location" required>
-        <input type="text" id="jobCompany" placeholder="Company / Agency Name" required>
-        <select id="jobType" required>
-            <option value="">-- Select Type --</option>
-            <option value="Internship">Internship</option>
-            <option value="Learnership">Learnership</option>
-            <option value="Training Program">Training Program</option>
-            <option value="Permanent (No Experience)">Permanent (No Experience)</option>
-        </select>
-        <textarea id="description" placeholder="Job Description" rows="4" required></textarea>
-        <button type="submit" id="postJobBtn">Post Job</button>
-    </form>
+      <input type="text" id="jobTitle" placeholder="Job Title" required>
+      <input type="text" id="location" placeholder="Location" required>
+      <input type="text" id="jobCompany" placeholder="Company / Agency Name" required>
+      <select id="jobType" required>
+        <option value="">-- Select Type --</option>
+        <option value="Internship">Internship</option>
+        <option value="Learnership">Learnership</option>
+        <option value="Training Program">Training Program</option>
+        <option value="Permanent (No Experience)">Permanent (No Experience)</option>
+      </select>
+      <textarea id="description" placeholder="Job Description" rows="4" required></textarea>
 
-    <!-- View Applications Button -->
-    
+      <!-- Declaration Section -->
+      <div class="declaration-section">
+        <label>
+          <input type="checkbox" id="declaration" required>
+          <span>
+            I hereby declare that:
+            <ul>
+              <li>The job position is currently available and genuine</li>
+              <li>Interviews will be conducted for all applicants</li>
+              <li>This job does not require any prior work experience</li>
+              <li>All job details provided are accurate and truthful</li>
+              <li>The job adheres to labor laws and regulations</li>
+              <li>The job does not involve any hidden fees or unfair practices</li>
+              <li>The recruiter/company agrees to provide a safe working environment</li>
+              <li>All communication with applicants will be professional and transparent</li>
+            </ul>
+          </span>
+        </label>
+      </div>
+
+      <button type="submit" id="postJobBtn">Post Job</button>
+    </form>
 
     <!-- Jobs Posted -->
     <div id="jobList">
-        <!-- Dynamically filled with posted jobs -->
+      <!-- Dynamically filled with posted jobs -->
     </div>
+  </div>
 </div>
-
 
 <script type="module" src="recruiter-dashboard.js"></script>
 </body>

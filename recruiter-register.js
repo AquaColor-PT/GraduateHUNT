@@ -33,47 +33,57 @@ registerBtn.addEventListener('click', async () => {
     return;
   }
 
-  // 1. Sign up user in Supabase Auth
-  const { data: authData, error: authError } = await supabase.auth.signUp({
-    email,
-    password
-  });
+  try {
+    // 1. Sign up user in Supabase Auth with email verification
+    const { data: authData, error: authError } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        emailRedirectTo: window.location.origin + '/recruiter-login.html' // redirect after verification
+      }
+    });
 
-  if (authError) {
-    messageEl.textContent = authError.message;
+    if (authError) {
+      messageEl.textContent = authError.message;
+      messageEl.classList.add('error');
+      return;
+    }
+
+    const userId = authData.user.id;
+
+    // 2. Insert recruiter profile into table
+    const { data, error } = await supabase.from('recruiters').insert([{
+      id: userId,
+      first_name,
+      last_name,
+      email,
+      company_name,
+      registration_number,
+      contact,
+      verified: false
+    }]);
+
+    if (error) {
+      messageEl.textContent = error.message;
+      messageEl.classList.add('error');
+      return;
+    }
+
+    // Success message
+    messageEl.textContent = 'Registration successful! Please check your email to verify your account. Await admin verification afterward.';
+    messageEl.classList.add('success');
+
+    // Clear form
+    firstNameInput.value = '';
+    lastNameInput.value = '';
+    emailInput.value = '';
+    passwordInput.value = '';
+    companyInput.value = '';
+    registrationNumberInput.value = '';
+    contactInput.value = '';
+
+  } catch (err) {
+    messageEl.textContent = 'Unexpected error: ' + err.message;
     messageEl.classList.add('error');
-    return;
   }
-
-  const userId = authData.user.id;
-
-  // 2. Insert recruiter profile into table
-  const { data, error } = await supabase.from('recruiters').insert([{
-    id: userId,
-    first_name,
-    last_name,
-    email,
-    company_name,
-    registration_number,
-    contact,
-    verified: false
-  }]);
-
-  if (error) {
-    messageEl.textContent = error.message;
-    messageEl.classList.add('error');
-    return;
-  }
-
-  messageEl.textContent = 'Registration successful! Await verification.';
-  messageEl.classList.add('success');
-
-  // Optionally: clear the form
-  firstNameInput.value = '';
-  lastNameInput.value = '';
-  emailInput.value = '';
-  passwordInput.value = '';
-  companyInput.value = '';
-  registrationNumberInput.value = '';
-  contactInput.value = '';
 });
