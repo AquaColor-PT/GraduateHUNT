@@ -3,339 +3,100 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Graduate Job Portal</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<title>GraduateHUNT - Coming Soon</title>
 <style>
-body{
-  font-family: 'Inter', sans-serif;
-  margin: 0;
-  padding: 0;
-  background: #f5f7fa;
-  color: #333;
-  overflow-x: hidden;
-}
+  /* Page background */
+  body {
+    margin: 0;
+    font-family: 'Arial', sans-serif;
+    background: #1a5d3e; /* Dark green theme */
+    color: #fff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    text-align: center;
+  }
 
-/* Header */
-header {
-  background: linear-gradient(90deg,#1e3a8a,#3b82f6);
-  color: white;
-  padding: 15px 20px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-}
-header h1 {
-  margin: 0;
-  font-weight: 700;
-  font-size: 1.6rem;
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
-}
-.hamburger {
-  font-size: 1.6rem;
-  cursor: pointer;
-  background: none;
-  border: none;
-  color: white;
-  position: absolute;
-  left: 20px;
-}
+  /* Container box */
+  #loginBox {
+    background: #ffffff22; /* semi-transparent white */
+    padding: 40px;
+    border-radius: 15px;
+    box-shadow: 0 0 20px rgba(0,0,0,0.3);
+    max-width: 400px;
+    width: 90%;
+  }
 
-/* Sidebar */
-.sidebar {
-  position: fixed;
-  top: 0;
-  left: -280px;
-  width: 260px;
-  height: 100%;
-  background: #1e3a8a;
-  color: white;
-  padding: 20px;
-  transition: left 0.3s ease;
-  z-index: 2000;
-  overflow-y: auto;
-}
-.sidebar.active {
-  left: 0;
-}
-.sidebar h2 {
-  font-size: 1.4rem;
-  margin-bottom: 15px;
-  color: #ffd700;
-}
-.sidebar p {
-  line-height: 1.6;
-  font-size: 0.95rem;
-}
-.close-btn {
-  background: none;
-  border: none;
-  color: white;
-  font-size: 1.4rem;
-  cursor: pointer;
-  position: absolute;
-  top: 15px;
-  right: 15px;
-}
+  h1 {
+    font-size: 2em;
+    margin-bottom: 10px;
+    color: #ffffff;
+  }
 
-/* Hero Section with Background Image */
-.hero {
-  position: relative;
-  background: url('3.jpg') no-repeat center center/cover; /* <-- your image */
-  padding: 100px 20px;
-  text-align: center;
-  border-radius: 0 0 40px 40px;
-  margin-bottom: 40px;
-  box-shadow: 0 6px 20px rgba(0,0,0,0.05);
-  color: white;
-  overflow: hidden;
-}
+  p {
+    font-size: 1.2em;
+    margin-bottom: 30px;
+    color: #d0ffd0; /* lighter green */
+  }
 
-.hero-overlay {
-  position: absolute;
-  top:0; left:0;
-  width:100%; height:100%;
-  background: rgba(30,58,138,0.6);
-  z-index: 0;
-}
+  input[type="password"] {
+    padding: 12px;
+    width: 80%;
+    margin-bottom: 15px;
+    border-radius: 8px;
+    border: none;
+  }
 
-.hero h2,
-.hero p,
-.hero .auth-buttons {
-  position: relative;
-  z-index: 1;
-}
+  input[type="submit"] {
+    padding: 12px 25px;
+    background-color: #4CAF50;
+    border: none;
+    border-radius: 8px;
+    color: white;
+    font-size: 1em;
+    cursor: pointer;
+  }
 
-.hero h2 {
-  font-size: 2.5rem;
-  margin-bottom: 20px;
-  font-weight: 700;
-}
-.hero p {
-  font-size: 1.2rem;
-  margin-bottom: 30px;
-}
-.hero .auth-buttons {
-  display: flex;
-  justify-content: center;
-  gap: 20px;
-  flex-wrap: wrap;
-}
-.hero .auth-buttons a,
-.hero .auth-buttons button {
-  padding: 14px 30px;
-  border-radius: 12px;
-  font-weight: 600;
-  font-size: 1rem;
-  border: none;
-  cursor: pointer;
-  transition: 0.3s;
-}
-.hero .auth-buttons a {
-  background: #1e3a8a;
-  color: white;
-  text-decoration: none;
-}
-.hero .auth-buttons a:hover {
-  background: #16275f;
-}
-.hero .auth-buttons button {
-  background: #28a745;
-  color: white;
-}
-.hero .auth-buttons button:hover {
-  background: #1e7e34;
-}
+  input[type="submit"]:hover {
+    background-color: #45a049;
+  }
 
-/* How it works */
-.how-it-works {
-  padding: 60px 20px;
-  text-align: center;
-}
-.how-it-works h3 {
-  font-size: 2rem;
-  margin-bottom: 40px;
-  color: #1e3a8a;
-}
-.steps {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 20px;
-  justify-content: center;
-}
-.step {
-  background: white;
-  border-radius: 16px;
-  padding: 30px 20px;
-  flex: 1 1 250px;
-  max-width: 300px;
-  box-shadow: 0 8px 20px rgba(0,0,0,0.08);
-  transition: transform 0.3s;
-}
-.step:hover {
-  transform: translateY(-5px);
-}
-.step h4 {
-  font-size: 1.3rem;
-  margin-bottom: 15px;
-  color: #1e3a8a;
-}
-.step p {
-  font-size: 1rem;
-  color: #555;
-}
-
-/* Modal */
-#roleModal {
-  display: none;
-  position: fixed;
-  top:0; left:0;
-  width:100%;
-  height:100%;
-  background: rgba(0,0,0,0.5);
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
-}
-.modal-content {
-  background: white;
-  padding: 30px;
-  border-radius: 16px;
-  text-align: center;
-  width: 300px;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-}
-.modal-content h3 {
-  margin-bottom: 20px;
-  color: #1e3a8a;
-}
-.modal-content button {
-  width: 100%;
-  margin: 10px 0;
-  padding: 12px;
-  border-radius: 12px;
-  font-weight: 600;
-  border: none;
-  cursor: pointer;
-  transition: 0.3s;
-}
-#graduateLogin { background: #1e3a8a; color:white; }
-#graduateLogin:hover { background:#16275f; }
-#recruiterLogin { background: #28a745; color:white; }
-#recruiterLogin:hover { background:#1e7e34; }
-#closeModal { background:#dc3545; color:white; }
-#closeModal:hover { background:#a71d2a; }
-
-/* Footer */
-footer {
-  background: #1e3a8a;
-  color: white;
-  text-align: center;
-  padding: 20px 0;
-  margin-top: 40px;
-}
-footer p {
-  margin: 0;
-}
-
-/* Responsive */
-@media (max-width:600px){
-  .hero h2 { font-size: 2rem; }
-  .hero p { font-size: 1rem; }
-  .step { max-width: 100%; }
-}
+  #error {
+    color: #ff8080;
+    margin-top: 15px;
+    font-weight: bold;
+  }
 </style>
 </head>
 <body>
 
-<header>
-  <button class="hamburger" id="hamburger">☰</button>
-  <h1>GraduateInHunt</h1>
-</header>
-
-<!-- Sidebar -->
-<div class="sidebar" id="sidebar">
-  <button class="close-btn" id="closeSidebar">&times;</button>
-  <h2>My Story</h2>
-  <p>Hi, my name is <strong>Tokollo Simbini</strong>, an unemployed Electrical Engineering graduate.  
-  After finishing my degree, I realized how tough it is for graduates with no experience to find real opportunities.  
-  I created GraduateInHunt to connect graduates like myself with recruiters willing to give us a chance through internships, learnerships, and entry-level positions.  
-  This platform is built to inspire hope and create a bridge between education and employment.</p>
+<div id="loginBox">
+  <h1>GraduateHUNT</h1>
+  <p>Coming Soon</p>
+  <input type="password" id="password" placeholder="Enter Password"><br>
+  <input type="submit" value="Unlock" onclick="checkPassword()">
+  <div id="error"></div>
 </div>
-
-<!-- Hero Section -->
-<section class="hero">
-  <div class="hero-overlay"></div>
-  <h2>No Experience? No Problem.</h2>
-  <p>Find internships, learnerships, training programs, and entry-level jobs tailored just for graduates.</p>
-  <div class="auth-buttons">
-    <a href="select-role.html">Register</a>
-    <button id="loginBtn">Login</button>
-  </div>
-</section>
-
-<!-- How it works -->
-<section class="how-it-works">
-  <h3>How It Works</h3>
-  <div class="steps">
-    <div class="step">
-      <h4>🎓 Graduates</h4>
-      <p>Register and start applying to jobs with no experience required.</p>
-    </div>
-    <div class="step">
-      <h4>🏢 Recruiters</h4>
-      <p>Post job opportunities to help young talent get started.</p>
-    </div>
-  </div>
-</section>
-
-<!-- Role selection modal -->
-<div id="roleModal">
-  <div class="modal-content">
-    <h3>Select Login Type</h3>
-    <button id="graduateLogin">Graduate Login</button>
-    <button id="recruiterLogin">Recruiter Login</button>
-    <button id="closeModal">Cancel</button>
-  </div>
-</div>
-
-<footer>
-  <p>&copy; 2025 Graduate Job Portal. All rights reserved.</p>
-</footer>
 
 <script>
-const loginBtn = document.getElementById('loginBtn');
-const roleModal = document.getElementById('roleModal');
-const graduateLogin = document.getElementById('graduateLogin');
-const recruiterLogin = document.getElementById('recruiterLogin');
-const closeModal = document.getElementById('closeModal');
+  function checkPassword() {
+    const input = document.getElementById('password').value;
+    const correctPassword = "Tokollo1234@";
 
-// Login modal
-loginBtn.addEventListener('click', () => {
-  roleModal.style.display = 'flex';
-});
-graduateLogin.addEventListener('click', () => {
-  window.location.href = 'graduate-login.html';
-});
-recruiterLogin.addEventListener('click', () => {
-  window.location.href = 'recruiter-login.html';
-});
-closeModal.addEventListener('click', () => {
-  roleModal.style.display = 'none';
-});
-window.addEventListener('click', (e) => {
-  if(e.target == roleModal) roleModal.style.display = 'none';
-});
+    if(input === correctPassword) {
+      window.location.href = "homepage.html"; // redirect after unlock
+    } else {
+      document.getElementById('error').innerText = "Incorrect password. Try again!";
+    }
+  }
 
-// Sidebar toggle
-const hamburger = document.getElementById('hamburger');
-const sidebar = document.getElementById('sidebar');
-const closeSidebar = document.getElementById('closeSidebar');
-hamburger.addEventListener('click', () => sidebar.classList.add('active'));
-closeSidebar.addEventListener('click', () => sidebar.classList.remove('active'));
+  // Allow Enter key to submit
+  document.getElementById("password").addEventListener("keypress", function(e) {
+    if (e.key === "Enter") {
+      checkPassword();
+    }
+  });
 </script>
 
 </body>
