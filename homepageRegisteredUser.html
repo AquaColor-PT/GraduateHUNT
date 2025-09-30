@@ -7,25 +7,96 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
 <style>
   body { font-family: 'Inter', sans-serif; margin: 0; background: #f4f7fb; }
-  header { background: #1e3a8a; color: white; padding: 20px 25px; display: flex; align-items: center; justify-content: space-between; border-radius: 0 0 20px 20px; }
-  header h1 { margin: 0; font-weight: 600; font-size: 1.5rem; }
-  .hamburger { cursor: pointer; display: inline-block; }
-  .hamburger div { width: 25px; height: 3px; background: white; margin: 5px 0; transition: 0.3s; }
-  #sidebar { height: 100%; width: 0; position: fixed; z-index: 10; top: 0; left: 0; background-color: #1e3a8a; overflow-x: hidden; transition: 0.4s; padding-top: 60px; color: white; box-shadow: 2px 0 12px rgba(0,0,0,0.3); }
+
+  /* Header with shiny gradient */
+  header {
+    background: linear-gradient(90deg,#1e3a8a,#3b82f6);
+    color: white;
+    padding: 20px 25px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    border-radius: 0 0 20px 20px;
+  }
+
+  header h1 {
+    margin: 0;
+    font-weight: 600;
+    font-size: 1.5rem;
+  }
+
+  .hamburger {
+    cursor: pointer;
+    position: absolute;
+    left: 25px;
+    display: inline-block;
+  }
+
+  .hamburger div {
+    width: 25px;
+    height: 3px;
+    background: white;
+    margin: 5px 0;
+    transition: 0.3s;
+  }
+
+  /* Logout button with gradient */
+  #logoutBtn {
+    position: absolute;
+    right: 25px;
+    padding: 8px 20px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    background: linear-gradient(145deg, #1e3a8a, #3b82f6);
+    color: white;
+    transition: 0.3s;
+  }
+  #logoutBtn:hover {
+    background: linear-gradient(145deg, #16275f, #2563eb);
+  }
+
+  /* Sidebar */
+  #sidebar {
+    height: 100%;
+    width: 0;
+    position: fixed;
+    z-index: 10;
+    top: 0;
+    left: 0;
+    background-color: #1e3a8a;
+    overflow-x: hidden;
+    transition: 0.4s;
+    padding-top: 60px;
+    color: white;
+    box-shadow: 2px 0 12px rgba(0,0,0,0.3);
+  }
   #sidebar .closebtn { position: absolute; top: 20px; right: 25px; font-size: 36px; cursor: pointer; }
   #sidebar img { border-radius: 50%; width: 120px; height: 120px; object-fit: cover; display: block; margin: 0 auto 15px; border: 3px solid white; box-shadow: 0 4px 12px rgba(0,0,0,0.4); }
   #sidebar p { text-align: center; margin: 8px 0; color: white; font-weight: 500; }
   .skills-tags { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; margin-top: 10px; }
   .skill-tag { background: #28a745; padding: 5px 10px; border-radius: 12px; font-size: 0.85em; color: white; }
+
   .container { padding: 40px 20px 20px 20px; max-width: 900px; margin: auto; }
+
+  /* Hero section styled with shiny blue buttons */
   .hero { background: white; padding: 50px 20px; text-align: center; border-radius: 12px; box-shadow: 0 6px 18px rgba(0,0,0,0.08); }
   .hero h2 { font-size: 2em; margin-bottom: 15px; color: #1e3a8a; }
   .hero p { font-size: 1.1em; margin-bottom: 25px; color: #333; }
   .job-buttons { display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; }
-  .job-buttons a { padding: 12px 25px; background: #28a745; color: white; text-decoration: none; border-radius: 8px; font-weight: 600; transition: 0.3s; position: relative; }
-  .job-buttons a:hover { background: #218838; }
-  #logoutBtn { margin-top: 25px; padding: 12px 25px; background: #c82333; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; transition: 0.3s; }
-  #logoutBtn:hover { background: #a71d2a; }
+  .job-buttons a {
+    padding: 12px 25px;
+    border-radius: 8px;
+    font-weight: 600;
+    color: white;
+    text-decoration: none;
+    background: linear-gradient(145deg, #1e3a8a, #3b82f6);
+    transition: 0.3s;
+  }
+  .job-buttons a:hover { background: linear-gradient(145deg, #16275f, #2563eb); }
+
   @media (max-width: 500px) { .job-buttons { flex-direction: column; } }
 </style>
 </head>
@@ -36,6 +107,7 @@
     <div></div><div></div><div></div>
   </div>
   <h1>Graduate Portal</h1>
+  <button id="logoutBtn">Logout</button>
 </header>
 
 <!-- Sidebar -->
@@ -61,111 +133,12 @@
         📩 Messages 
         <span id="messageBadge" style="display:none;background:red;color:white;font-size:0.75rem;padding:2px 6px;border-radius:50%;margin-left:5px;">!</span>
       </a>
+      <a href="graduate-applications.html">My Applications</a>
     </div>
-    <button id="logoutBtn">Logout</button>
   </section>
 </div>
 
-<script type="module">
-import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
-
-const SUPABASE_URL = 'https://euclknvsppptbfclwxqq.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV1Y2xrbnZzcHBwdGJmY2x3eHFxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc2Mjc2NTQsImV4cCI6MjA3MzIwMzY1NH0.HlGW3kZJ4CPnF2JuZGs_4ObkhxwVFTSedb7O8HHDEag';
-const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
-
-const logoutBtn = document.getElementById('logoutBtn');
-const profilePic = document.getElementById('profilePic');
-const profileName = document.getElementById('profileName');
-const profileEmail = document.getElementById('profileEmail');
-const profilePhone = document.getElementById('profilePhone');
-const profileSkills = document.getElementById('profileSkills');
-const cvLink = document.getElementById('cvLink');
-const messageBadge = document.getElementById('messageBadge');
-
-async function loadProfile() {
-  const { data: { session } } = await supabase.auth.getSession();
-  if (!session) return window.location.href = 'homepage.html';
-  const userId = session.user.id;
-
-  const { data, error } = await supabase.from('graduates')
-    .select('*')
-    .eq('id', userId)
-    .single();
-
-  if (error) { console.error("Error fetching profile:", error); return; }
-
-  profilePic.src = data.profile_pic_url || 'https://via.placeholder.com/120';
-  profileName.textContent = data.full_name || '';
-  profileEmail.textContent = data.email || '';
-  profilePhone.textContent = data.phone || '';
-
-  profileSkills.innerHTML = '';
-  if (data.skills) {
-    data.skills.split(',').forEach(skill => {
-      const tag = document.createElement('div');
-      tag.className = 'skill-tag';
-      tag.textContent = skill.trim();
-      profileSkills.appendChild(tag);
-    });
-  } else {
-    profileSkills.textContent = 'No skills added';
-  }
-
-  if (data.cv_url) {
-    try {
-      const { data: signedData, error: signedError } = await supabase
-        .storage
-        .from('cv_bucket')
-        .createSignedUrl(`graduates/${userId}/${data.cv_url}`, 60);
-      if (signedError) throw signedError;
-      cvLink.href = signedData.signedUrl;
-      cvLink.target = "_blank";
-      cvLink.textContent = "View CV";
-    } catch (err) {
-      console.error("Failed to get CV signed URL:", err);
-      cvLink.href = "#";
-      cvLink.textContent = "CV not available";
-    }
-  } else {
-    cvLink.href = "#";
-    cvLink.textContent = "No CV uploaded";
-  }
-
-  checkNewMessages(userId);
-  subscribeNewMessages(userId);
-}
-
-logoutBtn.addEventListener('click', async () => {
-  await supabase.auth.signOut();
-  window.location.href = 'homepage.html';
-});
-
-async function checkNewMessages(userId) {
-  try {
-    const { data: messages, error } = await supabase
-      .from('messages')
-      .select('id')
-      .eq('student_id', userId)
-      .eq('status', 'unread');
-
-    if (error) throw error;
-
-    messageBadge.style.display = (messages && messages.length > 0) ? 'inline-block' : 'none';
-  } catch (err) { console.error("Failed to check new messages:", err); }
-}
-
-function subscribeNewMessages(userId) {
-  supabase
-    .channel('graduate-messages')
-    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages', filter: `student_id=eq.${userId}` }, payload => {
-      messageBadge.style.display = 'inline-block';
-    })
-    .subscribe();
-}
-
-loadProfile();
-</script>
-
+<script type="module" src="homepageRegisteredUser.js"></script>
 <script>
 function openSidebar() { document.getElementById("sidebar").style.width = "280px"; }
 function closeSidebar() { document.getElementById("sidebar").style.width = "0"; }

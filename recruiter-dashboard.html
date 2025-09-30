@@ -6,39 +6,41 @@
 <title>Recruiter Dashboard</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
 <style>
-  body {
-    font-family: 'Inter', sans-serif;
-    background: #f4f7fb;
-    margin: 0;
-    padding: 0;
-    color: #333;
+  body { 
+    font-family: 'Inter', sans-serif; 
+    background: #f4f7fb; 
+    margin: 0; 
+    padding: 0; 
+    color: #333; 
   }
 
-  /* Header */
+  /* Header with shiny gradient */
   header {
     display:flex;
     justify-content:space-between;
     align-items:center;
-    background: linear-gradient(90deg, #1e3a8a, #3b82f6);
+    background: linear-gradient(90deg,#1e3a8a,#3b82f6);
     color:white;
     padding:20px 30px;
     border-radius:0 0 20px 20px;
     box-shadow:0 4px 12px rgba(0,0,0,0.15);
+    flex-wrap: wrap;
   }
-
-  header h1 { margin:0; font-weight:600; font-size:1.5rem;}
-
+  header h1 { margin:0; font-weight:600; font-size:1.5rem; }
   header nav a {
     color:white;
     text-decoration:none;
     margin-left:20px;
     font-weight:500;
+    padding:8px 12px;
+    border-radius:8px;
     transition:0.2s;
   }
+  header nav a:hover {
+    background: rgba(255,255,255,0.2);
+    color:white;
+  }
 
-  header nav a:hover { color:#ffd700; }
-
-  /* Layout */
   .main {
     display:flex;
     max-width:1200px;
@@ -47,7 +49,6 @@
     flex-wrap:wrap;
   }
 
-  /* Left Panel */
   .left-panel {
     flex:1;
     min-width:280px;
@@ -58,8 +59,7 @@
     text-align:center;
   }
 
-  .left-panel img, #profilePicContainer 
-  {
+  .left-panel img, #profilePicContainer {
     width:120px;
     height:120px;
     border-radius:50%;
@@ -67,25 +67,21 @@
     display:block;
     margin:0 auto 10px;
   }
-
-  #profilePicContainer
-   {
+  #profilePicContainer {
     display:flex;
     align-items:center;
     justify-content:center;
     font-weight:bold;
     font-size:14px;
     color:white;
-    background: linear-gradient(135deg, #1e3a8a, #3b82f6);
+    background: linear-gradient(135deg,#1e3a8a,#3b82f6);
   }
 
   .left-panel h2 { margin:10px 0 5px; color:#1e3a8a; font-weight:600; }
   .left-panel p { margin:5px 0; font-weight:500; color:#555; }
 
-  /* Right Panel */
   .right-panel { flex:2; display:flex; flex-direction:column; gap:20px; min-width:300px; }
 
-  /* Job Form */
   #jobForm {
     background:white;
     padding:25px;
@@ -105,7 +101,7 @@
   #jobForm button {
     width:100%;
     padding:14px;
-    background: linear-gradient(90deg, #1e3a8a, #3b82f6);
+    background: linear-gradient(90deg,#1e3a8a,#3b82f6);
     color:white;
     border:none;
     border-radius:8px;
@@ -115,24 +111,18 @@
     transition:0.3s;
     box-shadow:0 4px 10px rgba(0,0,0,0.15);
   }
-
   #jobForm button:hover {
-    background: linear-gradient(90deg, #16275f, #2563eb);
+    background: linear-gradient(90deg,#16275f,#2563eb);
   }
 
-  /* Declaration Section */
   .declaration-section {
     margin:15px 0;
     font-size:0.95rem;
   }
-
   .declaration-section input[type="checkbox"] { margin-bottom:10px; }
-
   .declaration-section span { display:block; margin-left:25px; }
-
   .declaration-section ul { margin:5px 0 0 20px; padding:0; list-style:disc; }
 
-  /* Jobs Posted */
   #jobList {
     background:white;
     border-radius:12px;
@@ -145,14 +135,14 @@
     border-bottom:1px solid #eee;
     display:flex;
     justify-content:space-between;
-    align-items:center;
+    align-items:flex-start;
     flex-wrap:wrap;
   }
-
   .job-item:last-child { border-bottom:none; }
 
   .job-item button {
     margin-left:10px;
+    margin-top:5px;
     padding:8px 14px;
     border:none;
     border-radius:6px;
@@ -161,16 +151,21 @@
     transition:0.2s;
     color:white;
   }
-
-  .editBtn {
-    background: linear-gradient(90deg, #1e3a8a, #3b82f6);
-  }
-  .editBtn:hover {
-    background: linear-gradient(90deg, #16275f, #2563eb);
-  }
-
+  .editBtn { background: linear-gradient(90deg,#1e3a8a,#3b82f6); }
+  .editBtn:hover { background: linear-gradient(90deg,#16275f,#2563eb); }
   .deleteBtn { background:#dc3545; }
   .deleteBtn:hover { background:#a71d2a; }
+
+  .toggleDesc {
+    display:inline-block;
+    margin-top:5px;
+    cursor:pointer;
+    color:#3b82f6;
+    font-weight:600;
+    text-decoration:underline;
+    transition:color 0.2s;
+  }
+  .toggleDesc:hover { color:#1e3a8a; }
 
   @media (max-width:800px) { .main { flex-direction:column; } }
 </style>
@@ -183,12 +178,12 @@
     <a href="recruiter-profile.html">Update Profile</a>
     <a href="homepage-for-recruiters.html">View Graduates</a>
     <a href="recruiter-applications.html">View Applications</a>
+    <a href="messages.html">Messages</a>
     <a href="homepage.html" id="logoutBtn">Logout</a>
   </nav>
 </header>
 
 <div class="main">
-  <!-- Left Panel -->
   <div class="left-panel">
     <div id="profilePicContainer">No Profile Pic</div>
     <img id="profilePic" src="" alt="Profile Picture" style="display:none;">
@@ -197,9 +192,7 @@
     <p id="profileCredits">Credits: 0</p>
   </div>
 
-  <!-- Right Panel -->
   <div class="right-panel">
-    <!-- Job Form -->
     <form id="jobForm" novalidate>
       <input type="text" id="jobTitle" placeholder="Job Title" required>
       <input type="text" id="location" placeholder="Location" required>
@@ -209,11 +202,12 @@
         <option value="Internship">Internship</option>
         <option value="Learnership">Learnership</option>
         <option value="Training Program">Training Program</option>
-        <option value="Permanent (No Experience)">Permanent (No Experience)</option>
+        <option value="Part-time">Part-time</option>
+        <option value="Permanent">Permanent</option>
+        <option value="Contract">Contract</option>
       </select>
       <textarea id="description" placeholder="Job Description" rows="4" required></textarea>
 
-      <!-- Declaration Section -->
       <div class="declaration-section">
         <label>
           <input type="checkbox" id="declaration" required>
@@ -236,10 +230,7 @@
       <button type="submit" id="postJobBtn">Post Job</button>
     </form>
 
-    <!-- Jobs Posted -->
-    <div id="jobList">
-      <!-- Dynamically filled with posted jobs -->
-    </div>
+    <div id="jobList"></div>
   </div>
 </div>
 

@@ -84,7 +84,7 @@ header h1 {
 /* Hero Section with Background Image */
 .hero {
   position: relative;
-  background: url('3.jpg') no-repeat center center/cover; /* <-- Your picture here */
+  background: url('3.jpg') no-repeat center center/cover; /* <-- your image */
   padding: 100px 20px;
   text-align: center;
   border-radius: 0 0 40px 40px;
@@ -93,19 +93,22 @@ header h1 {
   color: white;
   overflow: hidden;
 }
+
 .hero-overlay {
   position: absolute;
   top:0; left:0;
   width:100%; height:100%;
-  background: rgba(30,58,138,0.6); /* overlay for contrast */
+  background: rgba(30,58,138,0.6);
   z-index: 0;
 }
+
 .hero h2,
 .hero p,
 .hero .auth-buttons {
   position: relative;
   z-index: 1;
 }
+
 .hero h2 {
   font-size: 2.5rem;
   margin-bottom: 20px;
@@ -269,7 +272,7 @@ footer p {
   <h2>No Experience? No Problem.</h2>
   <p>Find internships, learnerships, training programs, and entry-level jobs tailored just for graduates.</p>
   <div class="auth-buttons">
-    <button id="registerBtn">Register</button>
+    <a href="select-role.html">Register</a>
     <button id="loginBtn">Login</button>
   </div>
 </section>
@@ -303,30 +306,29 @@ footer p {
   <p>&copy; 2025 Graduate Job Portal. All rights reserved.</p>
 </footer>
 
-<!-- Scripts -->
-<script type="module">
-// Supabase registration JS
-import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
-const SUPABASE_URL = 'https://euclknvsppptbfclwxqq.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV1Y2xrbnZzcHBwdGJmY2x3eHFxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc2Mjc2NTQsImV4cCI6MjA3MzIwMzY1NH0.HlGW3kZJ4CPnF2JuZGs_4ObkhxwVFTSedb7O8HHDEag';
-const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
-
-// Buttons & modal
+<script>
 const loginBtn = document.getElementById('loginBtn');
 const roleModal = document.getElementById('roleModal');
 const graduateLogin = document.getElementById('graduateLogin');
 const recruiterLogin = document.getElementById('recruiterLogin');
 const closeModal = document.getElementById('closeModal');
-const registerBtn = document.getElementById('registerBtn');
 
-// Open login modal
-loginBtn.addEventListener('click', () => roleModal.style.display = 'flex');
-
-// Redirects
-graduateLogin.addEventListener('click', () => window.location.href='graduate-login.html');
-recruiterLogin.addEventListener('click', () => window.location.href='recruiter-login.html');
-closeModal.addEventListener('click', () => roleModal.style.display='none');
-window.addEventListener('click', (e)=> {if(e.target==roleModal) roleModal.style.display='none';});
+// Login modal
+loginBtn.addEventListener('click', () => {
+  roleModal.style.display = 'flex';
+});
+graduateLogin.addEventListener('click', () => {
+  window.location.href = 'graduate-login.html';
+});
+recruiterLogin.addEventListener('click', () => {
+  window.location.href = 'recruiter-login.html';
+});
+closeModal.addEventListener('click', () => {
+  roleModal.style.display = 'none';
+});
+window.addEventListener('click', (e) => {
+  if(e.target == roleModal) roleModal.style.display = 'none';
+});
 
 // Sidebar toggle
 const hamburger = document.getElementById('hamburger');
@@ -334,11 +336,6 @@ const sidebar = document.getElementById('sidebar');
 const closeSidebar = document.getElementById('closeSidebar');
 hamburger.addEventListener('click', () => sidebar.classList.add('active'));
 closeSidebar.addEventListener('click', () => sidebar.classList.remove('active'));
-
-// Example register redirect (replace with full recruiter-register.js logic)
-registerBtn.addEventListener('click', () => {
-    window.location.href='recruiter-register.html'; // or open a registration form modal
-});
 </script>
 
 </body>

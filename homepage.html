@@ -267,15 +267,17 @@ footer p {
 </div>
 
 <!-- Hero Section -->
+<!-- Hero Section -->
 <section class="hero">
   <div class="hero-overlay"></div>
   <h2>No Experience? No Problem.</h2>
   <p>Find internships, learnerships, training programs, and entry-level jobs tailored just for graduates.</p>
   <div class="auth-buttons">
     <a href="select-role.html">Register</a>
-    <button id="loginBtn">Login</button>
+    <a href="login-type.html" id="loginBtn">Login</a> <!-- Changed from button to link -->
   </div>
 </section>
+
 
 <!-- How it works -->
 <section class="how-it-works">
@@ -292,15 +294,7 @@ footer p {
   </div>
 </section>
 
-<!-- Role selection modal -->
-<div id="roleModal">
-  <div class="modal-content">
-    <h3>Select Login Type</h3>
-    <button id="graduateLogin">Graduate Login</button>
-    <button id="recruiterLogin">Recruiter Login</button>
-    <button id="closeModal">Cancel</button>
-  </div>
-</div>
+
 
 <footer>
   <p>&copy; 2025 Graduate Job Portal. All rights reserved.</p>
@@ -313,22 +307,7 @@ const graduateLogin = document.getElementById('graduateLogin');
 const recruiterLogin = document.getElementById('recruiterLogin');
 const closeModal = document.getElementById('closeModal');
 
-// Login modal
-loginBtn.addEventListener('click', () => {
-  roleModal.style.display = 'flex';
-});
-graduateLogin.addEventListener('click', () => {
-  window.location.href = 'graduate-login.html';
-});
-recruiterLogin.addEventListener('click', () => {
-  window.location.href = 'recruiter-login.html';
-});
-closeModal.addEventListener('click', () => {
-  roleModal.style.display = 'none';
-});
-window.addEventListener('click', (e) => {
-  if(e.target == roleModal) roleModal.style.display = 'none';
-});
+
 
 // Sidebar toggle
 const hamburger = document.getElementById('hamburger');

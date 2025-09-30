@@ -14,13 +14,7 @@ const registerBtn = document.getElementById('registerBtn');
 const messageEl = document.getElementById('message');
 
 // Optional: toggle password visibility
-const togglePassword = document.getElementById('togglePassword');
-if (togglePassword) {
-  togglePassword.addEventListener('click', () => {
-    passwordInput.type = passwordInput.type === 'password' ? 'text' : 'password';
-    togglePassword.textContent = passwordInput.type === 'password' ? 'Show' : 'Hide';
-  });
-}
+
 
 registerBtn.addEventListener('click', async () => {
   messageEl.textContent = '';
@@ -39,48 +33,38 @@ registerBtn.addEventListener('click', async () => {
   }
 
   try {
-    // Check if email already exists in graduates
-    const { data: existingGrad } = await supabase
+    // Check if email already exists in graduates table
+    const { data: existingUser, error: userError } = await supabase
       .from('graduates')
       .select('id')
       .eq('email', email)
-      .maybeSingle(); // use maybeSingle() to avoid error if no rows
+      .maybeSingle();
 
-    if (existingGrad) {
-      messageEl.textContent = 'This email is already registered as a graduate.';
+    if (existingUser) {
+      messageEl.textContent = 'This email is already registered.';
       messageEl.classList.add('error');
       return;
     }
 
-    // 1. Sign up user in Supabase Auth
-    const { data: authData, error: authError } = await supabase.auth.signUp({
+    // Sign up with Supabase Auth (email verification required)
+    const { data: authData, error } = await supabase.auth.signUp({
       email,
-      password
+      password,
+      options: {
+        emailRedirectTo: window.location.origin + "/verify.html",
+        data: { full_name, phone, qualification }
+      }
     });
-    if (authError) throw authError;
 
-    const userId = authData.user.id; // Use Auth user ID as graduate ID
+    if (error) throw error;
 
-    // 2. Insert graduate info into table with id = Auth user ID
-    const { data, error } = await supabase.from('graduates').insert([{
-      id: userId,
-      full_name,
-      email,
-      phone,
-      qualification,
-      created_at: new Date().toISOString()
-    }]);
+    // ✅ Do not insert into graduates table yet.
+    // Wait until user verifies their email, then handle insert on verify.html page.
 
-    if (error) {
-      messageEl.textContent = error.message;
-      messageEl.classList.add('error');
-      return;
-    }
-
-    messageEl.textContent = 'Graduate registration successful! Check your email to confirm.';
+    messageEl.textContent = 'Registration successful! Please check your email to verify your account before logging in.';
     messageEl.classList.add('success');
 
-    // Clear the form
+    // Clear form
     fullNameInput.value = '';
     emailInput.value = '';
     phoneInput.value = '';

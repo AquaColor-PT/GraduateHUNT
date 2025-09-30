@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Applications</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  /* Body and fonts */
+  body {
+    font-family: 'Inter', sans-serif;
+    margin: 0;
+    background: #f5f7fa; /* light neutral background matching portal */
+    color: #1e3a8a;
+  }
+
+  /* Header */
+  header {
+    background: linear-gradient(135deg, #1e3a8a, #3b82f6);
+    color: white;
+    padding: 25px 20px;
+    text-align: center;
+    font-weight: 700;
+    font-size: 1.8rem;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  }
+
+  /* Container */
+  .container {
+    max-width: 1000px;
+    margin: 30px auto;
+    padding: 0 20px;
+  }
+
+  h2 {
+    color: #1e3a8a;
+    margin-bottom: 20px;
+    font-weight: 600;
+  }
+
+  /* Table styling */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+  }
+
+  th, td {
+    padding: 15px 20px;
+    text-align: left;
+  }
+
+  th {
+    background: linear-gradient(135deg, #1e3a8a, #3b82f6);
+    color: white;
+    font-weight: 600;
+  }
+
+  tr:nth-child(even) {
+    background: #e0efff; /* light blue alternate rows */
+  }
+
+  tr:hover {
+    background: #dbeafe;
+    transition: 0.3s;
+  }
+
+  /* Status badges */
+  .status {
+    font-weight: 600;
+    padding: 5px 10px;
+    border-radius: 12px;
+    color: white;
+    font-size: 0.9rem;
+  }
+  .pending { background: #f59e0b; }
+  .accepted { background: #10b981; }
+  .rejected { background: #ef4444; }
+
+  /* No applications message */
+  .no-apps {
+    text-align: center;
+    padding: 50px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+    color: #334155;
+    font-size: 1.2rem;
+    font-weight: 500;
+  }
+
+  /* Buttons */
+  #goBackBtn {
+    display: inline-block;
+    margin-top: 25px;
+    padding: 12px 30px;
+    background: #1e3a8a; /* portal blue */
+    color: white;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 1rem;
+    box-shadow: 0 4px 12px rgba(30,58,138,0.3);
+    transition: all 0.3s ease;
+  }
+  #goBackBtn:hover {
+    background: #16275f;
+    box-shadow: 0 6px 16px rgba(22,39,95,0.4);
+  }
+
+  /* CV link */
+  a.cv-link {
+    color: #1e3a8a;
+    text-decoration: underline;
+    font-weight: 500;
+    transition: 0.2s;
+  }
+  a.cv-link:hover {
+    color: #3b82f6;
+  }
+
+  /* Loading text */
+  .loading {
+    text-align: center;
+    font-size: 1.1rem;
+    color: #334155;
+    padding: 40px 0;
+  }
+</style>
+</head>
+<body>
+
+<header>My Job Applications</header>
+
+<div class="container">
+  <h2>Applications</h2>
+  <div id="applicationsContainer"></div>
+  <button id="goBackBtn" onclick="window.location.href='homepageRegisteredUser.html'">Go Back</button>
+</div>
+
+
+<script type="module" src="graduate-applications.js"></script>
+</body>
+</html>

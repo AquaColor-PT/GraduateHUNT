@@ -12,15 +12,7 @@ const message = document.getElementById('message');
 const togglePassword = document.getElementById('togglePassword');
 
 // Toggle password visibility
-togglePassword.addEventListener('click', () => {
-  if(passwordInput.type === 'password'){
-    passwordInput.type = 'text';
-    togglePassword.textContent = 'Hide';
-  } else {
-    passwordInput.type = 'password';
-    togglePassword.textContent = 'Show';
-  }
-});
+
 
 // Login logic
 loginBtn.addEventListener('click', async () => {
@@ -38,24 +30,26 @@ loginBtn.addEventListener('click', async () => {
     if(authError) throw authError;
 
     // Optional: check if recruiter exists in your table
-    const { data: recruiter, error: recruiterError } = await supabase
-      .from('recruiters')
-      .select('verified')
-      .eq('email', email)
-      .single();
+    // Optional: check if recruiter exists in your table
+const { data: recruiter, error: recruiterError } = await supabase
+  .from('recruiters')
+  .select('verified')
+  .eq('email', email)
+  .single();
 
-    if(recruiterError || !recruiter){
-      await supabase.auth.signOut();
-      message.style.color = 'red';
-      message.textContent = "This account is not registered as a recruiter.";
-      return;
-    }
+if(recruiterError || !recruiter){
+  await supabase.auth.signOut();
+  message.style.color = 'red';
+  message.textContent = "This account is not registered as a recruiter.";
+  return;
+}
 
-    if(!recruiter.verified){
-      message.style.color = 'red';
-      message.textContent = "Your account is not yet verified. Please wait for admin approval.";
-      return;
-    }
+if(!recruiter.verified){
+  message.style.color = 'red';
+  message.textContent = "Your email is verified, but your account is pending approval. Please wait for the GraduateinHunt team to verify you.";
+  return;
+}
+
 
     message.style.color = 'green';
     message.textContent = "Login successful! Redirecting...";

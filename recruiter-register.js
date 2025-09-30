@@ -39,41 +39,17 @@ registerBtn.addEventListener('click', async () => {
       email,
       password,
       options: {
-        emailRedirectTo: window.location.origin + '/recruiter-login.html' // redirect after verification
+        emailRedirectTo: window.location.origin + "/verify-recruiter.html",
+        data: { first_name, last_name, company_name, registration_number, contact }
       }
     });
 
-    if (authError) {
-      messageEl.textContent = authError.message;
-      messageEl.classList.add('error');
-      return;
-    }
+    if (authError) throw authError;
 
-    const userId = authData.user.id;
-
-    // 2. Insert recruiter profile into table
-    const { data, error } = await supabase.from('recruiters').insert([{
-      id: userId,
-      first_name,
-      last_name,
-      email,
-      company_name,
-      registration_number,
-      contact,
-      verified: false
-    }]);
-
-    if (error) {
-      messageEl.textContent = error.message;
-      messageEl.classList.add('error');
-      return;
-    }
-
-    // Success message
-    messageEl.textContent = 'Registration successful! Please check your email to verify your account. Await admin verification afterward.';
+    messageEl.textContent = 'Registration successful! Please check your email to verify your account.';
     messageEl.classList.add('success');
 
-    // Clear form
+    // Clear the form
     firstNameInput.value = '';
     lastNameInput.value = '';
     emailInput.value = '';
@@ -83,7 +59,8 @@ registerBtn.addEventListener('click', async () => {
     contactInput.value = '';
 
   } catch (err) {
-    messageEl.textContent = 'Unexpected error: ' + err.message;
+    console.error('Sign-up error:', err);
+    messageEl.textContent = 'Error: ' + err.message;
     messageEl.classList.add('error');
   }
 });

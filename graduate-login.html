@@ -1,153 +1,168 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Graduate Login</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
-<style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Graduate Login</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
 
-  body { 
-    font-family: 'Inter', sans-serif; 
-    background: #f4f6f9; 
-    display: flex; 
-    justify-content: center; 
-    align-items: center; 
-    height: 100vh; 
-  }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #f4f6f9;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
 
-  .login-container { 
-    background: white; 
-    padding: 40px 30px; 
-    border-radius: 16px; 
-    box-shadow: 0 6px 20px rgba(0,0,0,0.1); 
-    width: 100%; 
-    max-width: 400px; 
-  }
+    .login-container {
+      background: white;
+      padding: 40px 30px;
+      border-radius: 16px;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+      width: 100%;
+      max-width: 400px;
+    }
 
-  h2 { 
-    text-align: center; 
-    color: #1e3a8a; 
-    margin-bottom: 30px; 
-    font-weight: 600; 
-  }
+    h2 {
+      text-align: center;
+      color: #1e3a8a;
+      margin-bottom: 30px;
+      font-weight: 600;
+    }
 
-  label { 
-    display: block; 
-    margin-top: 15px; 
-    font-weight: 600; 
-    font-size: 0.95rem; 
-  }
+    label {
+      display: block;
+      margin-top: 15px;
+      font-weight: 600;
+      font-size: 0.95rem;
+    }
 
-  .input-wrapper {
-    position: relative;
-    margin-top: 5px;
-  }
+    .input-wrapper {
+      position: relative;
+      margin-top: 5px;
+    }
 
-  input { 
-    width: 100%; 
-    padding: 12px 14px; 
-    padding-right: 50px; /* space for toggle */
-    border-radius: 10px; 
-    border: 1px solid #ccc; 
-    font-size: 1rem; 
-    transition: border 0.3s, box-shadow 0.3s; 
-  }
+    input {
+      width: 100%;
+      padding: 12px 14px;
+      padding-right: 50px; /* space for toggle */
+      border-radius: 10px;
+      border: 1px solid #ccc;
+      font-size: 1rem;
+      transition: border 0.3s, box-shadow 0.3s;
+    }
 
-  input:focus { 
-    border-color: #1e3a8a; 
-    box-shadow: 0 0 6px rgba(30, 58, 138, 0.2); 
-    outline: none; 
-  }
+    input:focus {
+      border-color: #1e3a8a;
+      box-shadow: 0 0 6px rgba(30, 58, 138, 0.2);
+      outline: none;
+    }
 
-  .toggle-password {
-    position: absolute;
-    top: 50%;
-    right: 14px;
-    transform: translateY(-50%);
-    cursor: pointer;
-    font-size: 0.9rem;
-    color: #555;
-    user-select: none;
-  }
+    .toggle-password {
+      position: absolute;
+      top: 50%;
+      right: 14px;
+      transform: translateY(-50%);
+      cursor: pointer;
+      font-size: 0.9rem;
+      color: #555;
+      user-select: none;
+    }
 
-  button { 
-    margin-top: 25px; 
-    width: 100%; 
-    padding: 12px; 
-    background: #1e3a8a; 
-    color: white; 
-    border: none; 
-    border-radius: 10px; 
-    cursor: pointer; 
-    font-size: 1rem; 
-    font-weight: 600; 
-    transition: background 0.3s, transform 0.2s; 
-  }
+    .forgot-password {
+      display: block;
+      margin-top: 8px;
+      font-size: 0.9rem;
+      color: #1e3a8a;
+      text-decoration: none;
+      font-weight: 500;
+      text-align: right;
+    }
 
-  button:hover { 
-    background: #16275f; 
-    transform: translateY(-2px); 
-  }
+    .forgot-password:hover {
+      text-decoration: underline;
+    }
 
-  #goBackBtn { 
-    margin-top: 10px; 
-    background: #6b7280; 
-  }
+    button {
+      margin-top: 25px;
+      width: 100%;
+      padding: 12px;
+      background: #1e3a8a;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 1rem;
+      font-weight: 600;
+      transition: background 0.3s, transform 0.2s;
+    }
 
-  #goBackBtn:hover {
-    background: #4b5563;
-  }
+    button:hover {
+      background: #16275f;
+      transform: translateY(-2px);
+    }
 
-  #message { 
-    text-align: center; 
-    margin-top: 15px; 
-    font-weight: 500;
-  }
+    #goBackBtn {
+      margin-top: 10px;
+      background: #6b7280;
+    }
 
-</style>
+    #goBackBtn:hover {
+      background: #4b5563;
+    }
+
+    #message {
+      text-align: center;
+      margin-top: 15px;
+      font-weight: 500;
+    }
+  </style>
 </head>
 <body>
+  <div class="login-container">
+    <h2>Graduate Login</h2>
 
-<div class="login-container">
-  <h2>Graduate Login</h2>
+    <label for="email">Email</label>
+    <div class="input-wrapper">
+      <input type="email" id="email" placeholder="Enter your email" required>
+    </div>
 
-  <label for="email">Email</label>
-  <div class="input-wrapper">
-    <input type="email" id="email" placeholder="Enter your email" required>
+    <label for="password">Password</label>
+    <div class="input-wrapper">
+      <input type="password" id="password" placeholder="Enter your password" required>
+      <span class="toggle-password" id="togglePassword">Show</span>
+    </div>
+
+    <!-- Forgot password link -->
+    <a href="forgot-password.html" class="forgot-password">Forgot Password?</a>
+
+    <button id="loginBtn">Login</button>
+    <button id="goBackBtn" type="button">Go Back</button>
+    <p id="message"></p>
   </div>
 
-  <label for="password">Password</label>
-  <div class="input-wrapper">
-    <input type="password" id="password" placeholder="Enter your password" required>
-    <span class="toggle-password" id="togglePassword">Show</span>
-  </div>
+  <script type="module" src="graduate-login.js"></script>
+  <script>
+    const goBackBtn = document.getElementById('goBackBtn');
+    goBackBtn.addEventListener('click', () => {
+      history.back();
+    });
 
-  <button id="loginBtn">Login</button>
-  <button id="goBackBtn" type="button">Go Back</button>
-  <p id="message"></p>
-</div>
-
-<script type="module" src="graduate-login.js"></script>
-<script>
-  const goBackBtn = document.getElementById('goBackBtn');
-  goBackBtn.addEventListener('click', () => {
-    history.back();
-  });
-
-  // Optional: Toggle password visibility
-  const togglePassword = document.getElementById('togglePassword');
-  const passwordInput = document.getElementById('password');
-  togglePassword.addEventListener('click', () => {
-    if (passwordInput.type === "password") {
-      passwordInput.type = "text";
-      togglePassword.textContent = "Hide";
-    } else {
-      passwordInput.type = "password";
-      togglePassword.textContent = "Show";
-    }
-  });
-</script>
+    // Optional: Toggle password visibility
+    const togglePassword = document.getElementById('togglePassword');
+    const passwordInput = document.getElementById('password');
+    togglePassword.addEventListener('click', () => {
+      if (passwordInput.type === "password") {
+        passwordInput.type = "text";
+        togglePassword.textContent = "Hide";
+      } else {
+        passwordInput.type = "password";
+        togglePassword.textContent = "Show";
+      }
+    });
+  </script>
 </body>
 </html>

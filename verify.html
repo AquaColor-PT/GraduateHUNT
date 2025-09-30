@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Email Verification</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  body {
+    font-family: 'Inter', sans-serif;
+    background: #f4f6f9;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+  }
+  .verify-container {
+    background: white;
+    padding: 40px 30px;
+    border-radius: 16px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+    text-align: center;
+    max-width: 450px;
+    width: 100%;
+  }
+  h2 {
+    color: #1e3a8a;
+    font-weight: 600;
+    margin-bottom: 20px;
+  }
+  p {
+    margin-bottom: 25px;
+    font-size: 1rem;
+    color: #555;
+  }
+  a.button {
+    display: inline-block;
+    padding: 12px 25px;
+    background: #1e3a8a;
+    color: white;
+    text-decoration: none;
+    border-radius: 10px;
+    font-weight: 600;
+    transition: background 0.3s, transform 0.2s;
+  }
+  a.button:hover {
+    background: #16275f;
+    transform: translateY(-2px);
+  }
+  .success { color: green; }
+  .error { color: red; }
+</style>
+</head>
+<body>
+
+<div class="verify-container">
+  <h2 id="status">Verifying...</h2>
+  <p id="message">Please wait while we verify your email.</p>
+  <a id="loginBtn" href="graduate-login.html" class="button" style="display:none;">Go to Login</a>
+</div>
+
+<script type="module">
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+
+const SUPABASE_URL = 'https://euclknvsppptbfclwxqq.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV1Y2xrbnZzcHBwdGJmY2x3eHFxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc2Mjc2NTQsImV4cCI6MjA3MzIwMzY1NH0.HlGW3kZJ4CPnF2JuZGs_4ObkhxwVFTSedb7O8HHDEag';
+const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+const statusEl = document.getElementById('status');
+const messageEl = document.getElementById('message');
+const loginBtn = document.getElementById('loginBtn');
+
+async function verifyAndInsertGraduate() {
+  // Supabase puts tokens in the hash fragment, not query string
+  const hashParams = new URLSearchParams(window.location.hash.substring(1));
+  const access_token = hashParams.get("access_token");
+  const refresh_token = hashParams.get("refresh_token");
+
+  if (!access_token || !refresh_token) {
+    statusEl.textContent = 'Verification Failed';
+    messageEl.textContent = 'Invalid or expired verification link.';
+    statusEl.classList.add('error');
+    return;
+  }
+
+  try {
+    // Set session with both tokens
+    const { data: sessionData, error: sessionError } = await supabase.auth.setSession({
+      access_token,
+      refresh_token
+    });
+    if (sessionError) throw sessionError;
+
+    const user = sessionData.user;
+
+    // Insert into graduates table only if not already inserted
+    const { data: existing } = await supabase
+      .from('graduates')
+      .select('id')
+      .eq('id', user.id)
+      .maybeSingle();
+
+    if (!existing) {
+      const { error: insertError } = await supabase.from('graduates').insert([{
+        id: user.id,
+        full_name: user.user_metadata.full_name,
+        email: user.email,
+        phone: user.user_metadata.phone,
+        qualification: user.user_metadata.qualification,
+        created_at: new Date().toISOString()
+      }]);
+      if (insertError) throw insertError;
+    }
+
+    statusEl.textContent = 'Email Verified!';
+    messageEl.textContent = 'Thank you for verifying your email. You will be redirected to the login page shortly.';
+    statusEl.classList.add('success');
+    loginBtn.style.display = 'inline-block';
+
+    // Auto redirect to login after 5 seconds
+    setTimeout(() => {
+      window.location.href = 'graduate-login.html';
+    }, 5000);
+
+  } catch (err) {
+    console.error('Verification error:', err);
+    statusEl.textContent = 'Verification Failed';
+    messageEl.textContent = 'There was a problem verifying your email. Please try again.';
+    statusEl.classList.add('error');
+  }
+}
+
+verifyAndInsertGraduate();
+</script>
+
+</body>
+</html>

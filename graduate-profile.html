@@ -6,154 +6,118 @@
 <title>Graduate Profile</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
 <style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Inter', sans-serif; margin:0; background:#f0f4ff; color:#333; }
 
-  body { 
-    font-family: 'Inter', sans-serif; 
-    background: #f4f6f9; 
-    color: #333;
-  }
-
-  /* Navbar */
+  /* Navbar / Header */
   .navbar {
     display: flex;
     justify-content: flex-end;
     gap: 12px;
     padding: 15px 30px;
-    background: #1e3a8a;
-    flex-wrap: wrap;
+    background: linear-gradient(90deg,#1e3a8a,#3b82f6);
+    border-radius: 0 0 20px 20px;
   }
   .navbar button {
-    padding: 8px 18px;
-    background: white;
-    color: #1e3a8a;
-    border: 1px solid #1e3a8a;
-    border-radius: 20px;
+    padding: 10px 20px;
     font-weight: 600;
+    border: none;
+    border-radius: 12px;
+    color: white;
     cursor: pointer;
+    background: linear-gradient(145deg, #1e3a8a,#3b82f6);
     transition: 0.3s;
+    position: relative;
+    overflow: hidden;
   }
   .navbar button:hover {
-    background: #16275f;
-    color: white;
-    border-color: #16275f;
+    background: linear-gradient(145deg, #16275f,#2563eb);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(30,58,138,0.2);
   }
 
-  /* Container */
-  .container { 
-    max-width: 700px; 
-    margin: 40px auto; 
-    background: white; 
-    padding: 40px 30px; 
-    border-radius: 16px; 
-    box-shadow: 0 8px 20px rgba(0,0,0,0.08); 
+  /* Container card */
+  .container {
+    max-width: 700px;
+    margin: 40px auto;
+    background: white;
+    border-radius: 16px;
+    padding: 40px 30px;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.08);
   }
 
   h2 { 
-    color: #1e3a8a; 
-    text-align: center; 
-    margin-bottom: 30px; 
-    font-weight: 600;
-    font-size: 28px;
+    color:#1e3a8a;
+    text-align:center;
+    font-weight:600;
+    margin-bottom:30px;
+    font-size:28px;
   }
 
-  /* Profile Info */
+  /* Form styling */
   .profile-info {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
+    display:flex;
+    flex-direction:column;
+    gap:15px;
   }
-
-  .profile-info label {
-    font-weight: 500;
-    margin-bottom: 6px;
-  }
-
-  .profile-info input, 
-  .profile-info select, 
+  .profile-info label { color:#1e3a8a; font-weight:500; }
+  .profile-info input,
+  .profile-info select,
   .profile-info datalist {
-    width: 100%;
-    padding: 12px 14px;
-    border-radius: 10px;
-    border: 1px solid #ccc;
-    font-size: 1rem;
-    transition: 0.3s;
+    width:100%;
+    padding:12px;
+    border-radius:10px;
+    border:1px solid #ccc;
+    font-size:1rem;
+    transition:0.3s;
   }
-
   .profile-info input:focus,
   .profile-info select:focus {
-    border-color: #1e3a8a;
-    box-shadow: 0 0 6px rgba(30, 58, 138, 0.15);
-    outline: none;
+    border-color:#1e3a8a;
+    box-shadow:0 0 6px rgba(30,58,138,0.2);
+    outline:none;
   }
+  .profile-info a { color:#1e3a8a; font-weight:500; text-decoration:none; }
+  .profile-info a:hover { text-decoration:underline; }
 
-  .profile-info a {
-    color: #1e3a8a;
-    font-weight: 500;
-    text-decoration: none;
-  }
+  #profilePicPreview { max-width:120px; border-radius:12px; border:1px solid #ccc; display:none; margin-top:10px; }
+  .cv-filename { font-size:0.95rem; color:#555; margin-top:4px; }
 
-  .profile-info a:hover {
-    text-decoration: underline;
-  }
-
-  #profilePicPreview {
-    display: none;
-    max-width: 120px;
-    margin-top: 10px;
-    border-radius: 12px;
-    border: 1px solid #ccc;
-  }
-
-  .cv-filename {
-    font-size: 0.95rem;
-    margin-top: 4px;
-    color: #555;
-  }
-
+  /* Shiny Save button */
   .profile-info button {
     padding: 12px 18px;
-    background: #1e3a8a;
-    color: white;
-    border: none;
-    border-radius: 12px;
-    font-weight: 600;
-    font-size: 1rem;
-    cursor: pointer;
-    transition: 0.3s;
-    margin-top: 10px;
+    font-weight:600;
+    color:white;
+    border:none;
+    border-radius:12px;
+    cursor:pointer;
+    background: linear-gradient(145deg,#1e3a8a,#3b82f6);
+    transition:0.3s;
+    position:relative;
+    overflow:hidden;
   }
-
   .profile-info button:hover {
-    background: #16275f;
+    background: linear-gradient(145deg,#16275f,#2563eb);
     transform: translateY(-2px);
-    box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+    box-shadow:0 6px 12px rgba(30,58,138,0.2);
   }
 
   /* Responsive */
-  @media (max-width: 600px) {
-    .container {
-      margin: 20px;
-      padding: 30px 20px;
-    }
-    .navbar {
-      justify-content: center;
-      gap: 8px;
-    }
-    .navbar button { padding: 8px 12px; font-size: 0.95rem; }
+  @media (max-width:600px){
+    .container { margin:20px; padding:30px 20px; }
+    .navbar { justify-content:center; gap:8px; }
+    .navbar button{ padding:8px 12px; font-size:0.95rem; }
   }
+
 </style>
 </head>
 <body>
 
-<!-- Navigation -->
 <div class="navbar">
   <button id="homeBtn">Home</button>
   <button id="browseJobsBtn">Browse Jobs</button>
   <button id="logoutBtn">Logout</button>
 </div>
 
-<!-- Profile Container -->
 <div class="container">
   <h2>Your Profile</h2>
   <div class="profile-info">
@@ -206,37 +170,23 @@
 
 <script type="module" src="graduate-profile.js"></script>
 <script>
-  // Navigation buttons
-  document.getElementById("homeBtn").addEventListener("click", () => {
-    window.location.href = "homepageRegisteredUser.html";
-  });
-  document.getElementById("browseJobsBtn").addEventListener("click", () => {
-    window.location.href = "browse-jobs.html";
-  });
+document.getElementById("homeBtn").addEventListener("click", ()=>{ window.location.href="homepageRegisteredUser.html"; });
+document.getElementById("browseJobsBtn").addEventListener("click", ()=>{ window.location.href="browse-jobs.html"; });
 
-  // Profile picture live preview
-  const profilePicInput = document.getElementById('profilePic');
-  const profilePicPreview = document.getElementById('profilePicPreview');
+const profilePicInput = document.getElementById('profilePic');
+const profilePicPreview = document.getElementById('profilePicPreview');
+profilePicInput.addEventListener('change',(e)=>{
+  const file = e.target.files[0];
+  if(file){ profilePicPreview.src = URL.createObjectURL(file); profilePicPreview.style.display='block'; }
+  else { profilePicPreview.style.display='none'; profilePicPreview.src='#'; }
+});
 
-  profilePicInput.addEventListener('change', (e) => {
-    const file = e.target.files[0];
-    if(file) {
-      profilePicPreview.src = URL.createObjectURL(file);
-      profilePicPreview.style.display = 'block';
-    } else {
-      profilePicPreview.style.display = 'none';
-      profilePicPreview.src = '#';
-    }
-  });
-
-  // CV file name display
-  const cvFileInput = document.getElementById('cvFile');
-  const cvFileName = document.getElementById('cvFileName');
-
-  cvFileInput.addEventListener('change', (e) => {
-    const file = e.target.files[0];
-    cvFileName.textContent = file ? file.name : 'No file selected';
-  });
+const cvFileInput = document.getElementById('cvFile');
+const cvFileName = document.getElementById('cvFileName');
+cvFileInput.addEventListener('change',(e)=>{
+  const file=e.target.files[0];
+  cvFileName.textContent=file?file.name:'No file selected';
+});
 </script>
 
 </body>

@@ -11,16 +11,7 @@ const loginBtn = document.getElementById('loginBtn');
 const message = document.getElementById('message');
 const togglePassword = document.getElementById('togglePassword');
 
-// Toggle password visibility
-togglePassword.addEventListener('click', () => {
-  if(passwordInput.type === 'password'){
-    passwordInput.type = 'text';
-    togglePassword.textContent = 'Hide';
-  } else {
-    passwordInput.type = 'password';
-    togglePassword.textContent = 'Show';
-  }
-});
+
 
 // Login logic
 loginBtn.addEventListener('click', async () => {

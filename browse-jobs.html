@@ -3,53 +3,70 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Browse Jobs - Graduateinhunt</title>
+<title>Browse Jobs - GraduateInHunt</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
 <style>
   body { 
     font-family: 'Inter', sans-serif; 
-    background-color: #f4f7fb; 
+    background: #f5f7fa; 
     margin: 0; 
     padding: 0; 
   }
 
+  /* Header */
   header {
-    background-color: #1e3a8a; 
-    color: white; 
-    padding: 30px 15px; 
-    text-align: center; 
+    background: linear-gradient(90deg,#1e3a8a,#3b82f6);
+    color: white;
+    padding: 25px 20px;
+    text-align: center;
     border-radius: 0 0 20px 20px;
+    position: relative;
+    box-shadow: 0 6px 12px rgba(0,0,0,0.1);
   }
 
   header h1 {
     margin: 0;
-    font-weight: 600;
+    font-weight: 700;
     font-size: 1.8rem;
   }
 
   nav ul {
+    position: absolute;
+    right: 20px;
+    top: 50%;
+    transform: translateY(-50%);
     display: flex;
-    justify-content: center;
-    gap: 20px;
-    padding: 15px 0 0;
+    gap: 15px;
     margin: 0;
+    padding: 0;
     list-style: none;
-    flex-wrap: wrap;
   }
 
   nav ul li a {
+    text-decoration: none;
+  }
+
+  /* Blue gradient button style for all buttons */
+  .blue-btn {
+    display: inline-block;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: 600;
     color: white;
     text-decoration: none;
-    font-weight: 500;
-    padding: 8px 16px;
-    border-radius: 8px;
-    transition: background 0.3s;
+    background: linear-gradient(145deg, #1e3a8a, #3b82f6);
+    border: none;
+    cursor: pointer;
+    transition: 0.3s;
+    text-align: center;
   }
 
-  nav ul li a:hover {
-    background-color: #16275f;
+  .blue-btn:hover {
+    background: linear-gradient(145deg, #16275f, #2563eb);
+    transform: translateY(-2px);
   }
 
+  /* Container */
   .container {
     max-width: 900px;
     margin: 30px auto;
@@ -57,10 +74,30 @@
   }
 
   h3 {
-    margin-bottom: 25px;
+    margin-bottom: 20px;
     color: #1e3a8a;
     text-align: center;
     font-weight: 600;
+  }
+
+  /* Filter/Search section */
+  .filters {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 25px;
+    justify-content: center;
+  }
+
+  .filters select, .filters input {
+    padding: 8px 12px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    font-size: 0.95rem;
+  }
+
+  .filters button {
+    padding: 8px 16px;
   }
 
   #publicJobList {
@@ -70,16 +107,16 @@
 
   #publicJobList li {
     background: white;
-    border-radius: 12px;
+    border-radius: 16px;
     padding: 25px;
     margin-bottom: 20px;
-    box-shadow: 0 6px 12px rgba(0,0,0,0.08);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.08);
     transition: transform 0.2s, box-shadow 0.2s;
   }
 
   #publicJobList li:hover {
     transform: translateY(-3px);
-    box-shadow: 0 8px 18px rgba(0,0,0,0.15);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.12);
   }
 
   #publicJobList h4 {
@@ -96,25 +133,24 @@
 
   .applyBtn {
     display: inline-block;
-    padding: 12px 22px;
-    background-color: #28a745;
-    color: #fff;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    font-weight: 600;
-    transition: background 0.3s, transform 0.2s;
     margin-top: 10px;
   }
 
-  .applyBtn:hover {
-    background-color: #218838;
-    transform: translateY(-2px);
+  .viewMore {
+    color: #1e3a8a;
+    cursor: pointer;
+    font-weight: 600;
+    display: inline-block;
+    margin-top: 5px;
   }
 
   @media (max-width: 500px) {
     nav ul {
       flex-direction: column;
+      position: static;
+      transform: none;
+      margin-top: 10px;
+      text-align: center;
       gap: 10px;
     }
   }
@@ -123,18 +159,35 @@
 <body>
 
 <header>
-  <h1>Graduateinhunt - Jobs</h1>
+  <h1>GraduateInHunt - Jobs</h1>
   <nav>
     <ul>
-      <li><a href="homepageRegisteredUser.html">Home</a></li>
-      <li><a href="browse-jobs.html">Browse Jobs</a></li>
-      <li><a href="graduate-profile.html">My Profile</a></li>
+      <li><a href="homepageRegisteredUser.html" class="blue-btn">Home</a></li>
+      <li><a href="graduate-profile.html" class="blue-btn">My Profile</a></li>
     </ul>
   </nav>
 </header>
 
 <section class="container">
   <h3>Available Jobs</h3>
+
+  <!-- Filter/Search -->
+  <div class="filters">
+    <select id="jobTypeFilter">
+      <option value="">All Job Types</option>
+      <option value="Internship">Internship</option>
+        <option value="Learnership">Learnership</option>
+        <option value="Training Program">Training Program</option>
+        <option value="Part-time">part-time</option>
+        <option value="Permanent">Permanent</option>
+        <option value="Contract">Contract</option>
+    </select>
+
+    <input type="text" id="jobTitleSearch" placeholder="Search by job title...">
+
+    <button id="searchBtn" class="blue-btn">Search</button>
+  </div>
+
   <ul id="publicJobList">
     <li class="loading">Loading jobs...</li>
   </ul>
