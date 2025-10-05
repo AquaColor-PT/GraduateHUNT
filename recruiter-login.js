@@ -53,7 +53,7 @@ if(!recruiter.verified){
 
     message.style.color = 'green';
     message.textContent = "Login successful! Redirecting...";
-    setTimeout(() => window.location.href = 'recruiter-dashboard.html', 1200);
+    setTimeout(() => window.location.href = 'recruiters-buycredits.html', 1200);
 
   } catch(err) {
     console.error(err);
@@ -61,3 +61,4 @@ if(!recruiter.verified){
     message.textContent = err.message;
   }
 });
+
