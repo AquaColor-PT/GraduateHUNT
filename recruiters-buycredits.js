@@ -1,10 +1,9 @@
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
 
-// Supabase setup
+// ---------------- Supabase setup ----------------
 const SUPABASE_URL = 'https://euclknvsppptbfclwxqq.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV1Y2xrbnZzcHBwdGJmY2x3eHFxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc2Mjc2NTQsImV4cCI6MjA3MzIwMzY1NH0.HlGW3kZJ4CPnF2JuZGs_4ObkhxwVFTSedb7O8HHDEag';
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
-
 
 // DOM refs
 const creditsBtn = document.getElementById('buyCreditsBtn');
@@ -40,12 +39,14 @@ function openModal(amount, type) {
   payRefEl.textContent = currentRef;
   userRef.value = currentRef;
 
+  confirmPaid.disabled = true; // Disable until proof is uploaded
   modal.classList.add('show');
 }
 
 // Hide modal
 function closeModalFunc() {
   modal.classList.remove('show');
+  proofFile.value = ''; // reset file input
 }
 
 // Event listeners
@@ -60,30 +61,35 @@ monthlyBtn.addEventListener('click', () => {
 
 closeModal.addEventListener('click', closeModalFunc);
 
-// Submit payment to Supabase
+// Enable confirm button only after proof is selected
+proofFile.addEventListener('change', () => {
+  confirmPaid.disabled = !proofFile.files.length;
+});
+
+// Submit payment
 confirmPaid.addEventListener('click', async () => {
   try {
-    // Upload proof if exists
+    // Get current logged-in recruiter
+    const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+    if (sessionError || !session?.user) throw new Error("User must be logged in");
+    const recruiterId = session.user.id;
+
+    // Upload proof
     let proof_url = null;
     const file = proofFile.files[0];
     if (file) {
+      const filePath = `payment-proofs/${recruiterId}/${currentRef}-${file.name}`;
       const { data: uploadData, error: uploadError } = await supabase.storage
         .from('payment-proofs')
-        .upload(`proofs/${currentRef}-${file.name}`, file, {
-          cacheControl: '3600',
-          upsert: true,
-          contentType: file.type
-        });
+        .upload(filePath, file, { upsert: true, contentType: file.type });
+
       if (uploadError) throw new Error(uploadError.message);
-      proof_url = `${SUPABASE_URL}/storage/v1/object/public/payment-proofs/${uploadData.path}`;
+
+      const { data: publicData } = supabase.storage.from('payment-proofs').getPublicUrl(filePath);
+      proof_url = publicData.publicUrl;
     }
 
-    // Get current logged-in recruiter UUID
-    const { data: { user }, error: userError } = await supabase.auth.getUser();
-    if (userError || !user) throw new Error("User must be logged in");
-    const recruiterId = user.id;
-
-    // Insert payment
+    // Insert payment with recruiter_id
     const { error: insertError } = await supabase.from('payments').insert([{
       recruiter_id: recruiterId,
       reference: userRef.value,
