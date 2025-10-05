@@ -23,6 +23,7 @@ const declarationCheckbox = document.getElementById('declaration');
 
 let currentUserId = null;
 let editingJobId = null;
+let currentCredits = 0;
 
 // ===============================
 // Auth check
@@ -41,7 +42,7 @@ async function checkUser() {
 checkUser();
 
 // ===============================
-// Load profile
+// Load profile + disable if no credits
 // ===============================
 async function loadProfile() {
   try {
@@ -52,9 +53,10 @@ async function loadProfile() {
       .single();
     if (error) throw error;
 
+    currentCredits = data.credits || 0;
     profileNameEl.textContent = `${data.first_name} ${data.last_name}`;
     profileCompanyEl.textContent = data.company_name || 'Your Company/Agency';
-    profileCreditsEl.textContent = `Credits: ${data.credits || 0}`;
+    profileCreditsEl.textContent = `Credits: ${currentCredits}`;
 
     if (data.profile_url) {
       const { data: urlData } = supabase.storage
@@ -66,7 +68,45 @@ async function loadProfile() {
         profilePicContainer.style.display = 'none';
       }
     }
-  } catch (err) { console.error('Profile load error:', err); }
+
+    // Handle credit restrictions
+    handleCreditLock(currentCredits);
+
+  } catch (err) {
+    console.error('Profile load error:', err);
+  }
+}
+
+// ===============================
+// Lock features when credits = 0
+// ===============================
+function handleCreditLock(credits) {
+  const postJobBtn = document.getElementById('postJobBtn');
+  const viewGraduates = document.querySelector('a[href="homepage-for-recruiters.html"]');
+
+  if (credits <= 0) {
+    // Disable post job button
+    if (postJobBtn) {
+      postJobBtn.disabled = true;
+      postJobBtn.style.opacity = '0.5';
+      postJobBtn.addEventListener('click', e => {
+        e.preventDefault();
+        alert('You have 0 credits. Please buy more to post jobs.');
+        window.location.href = 'recruiters-buycredits.html';
+      });
+    }
+
+    // Redirect if they try to view graduates
+    if (viewGraduates) {
+      viewGraduates.addEventListener('click', e => {
+        e.preventDefault();
+        alert('You have 0 credits. Please buy more to view graduates.');
+        window.location.href = 'recruiters-buycredits.html';
+      });
+    }
+  } else {
+    if (postJobBtn) postJobBtn.disabled = false;
+  }
 }
 
 // ===============================
@@ -127,20 +167,65 @@ jobForm.addEventListener('submit', async e => {
   const description = document.getElementById('description').value.trim();
   const companyName = document.getElementById('jobCompany').value.trim();
   if (!title || !location || !jobType || !description || !companyName) {
-    alert('Please fill all fields.'); return;
+    alert('Please fill all fields.');
+    return;
+  }
+
+  // Prevent posting when no credits
+  if (currentCredits <= 0) {
+    alert('You have 0 credits. Please buy more to post jobs.');
+    window.location.href = 'recruiters-buycredits.html';
+    return;
   }
 
   try {
     if (editingJobId) {
-      const { error } = await supabase.from('jobs').update({ title, location, job_type: jobType, description, company_name: companyName }).eq('id', editingJobId);
-      if (error) throw error; editingJobId = null; alert('Job updated successfully!');
+      const { error } = await supabase
+        .from('jobs')
+        .update({ title, location, job_type: jobType, description, company_name: companyName })
+        .eq('id', editingJobId);
+      if (error) throw error;
+      editingJobId = null;
+      alert('Job updated successfully!');
     } else {
-      const { error } = await supabase.from('jobs').insert([{ recruiter_id: currentUserId, title, location, job_type: jobType, description, company_name: companyName }]);
-      if (error) throw error; alert('Job posted successfully!');
+      const { error } = await supabase
+        .from('jobs')
+        .insert([{ recruiter_id: currentUserId, title, location, job_type: jobType, description, company_name: companyName }]);
+      if (error) throw error;
+
+      // Decrement recruiter credits by 1
+      await decrementRecruiterCredits();
+      alert('Job posted successfully! 1 credit deducted.');
     }
-    jobForm.reset(); await loadJobs();
-  } catch (err) { console.error('Job save error:', err); alert(err.message || 'Failed to save job.'); }
+
+    jobForm.reset();
+    await loadProfile(); // refresh credits
+    await loadJobs();
+
+  } catch (err) {
+    console.error('Job save error:', err);
+    alert(err.message || 'Failed to save job.');
+  }
 });
+
+// ===============================
+// Decrement recruiter credits
+// ===============================
+async function decrementRecruiterCredits() {
+  try {
+    const { error } = await supabase
+      .from('recruiters')
+      .update({ credits: currentCredits - 1 })
+      .eq('id', currentUserId);
+
+    if (error) throw error;
+    currentCredits -= 1;
+    profileCreditsEl.textContent = `Credits: ${currentCredits}`;
+    handleCreditLock(currentCredits);
+  } catch (err) {
+    console.error('Credit decrement error:', err);
+  }
+}
 
 // ===============================
 // Edit / Delete / Show More
@@ -153,13 +238,20 @@ jobListEl.addEventListener('click', async e => {
 
     if (btn.classList.contains('deleteBtn')) {
       if (!confirm('Are you sure you want to delete this job?')) return;
-      try { const { error } = await supabase.from('jobs').delete().eq('id', jobId); if (error) throw error; btn.closest('.job-item')?.remove(); }
-      catch (err) { console.error('Delete error:', err); alert(err.message || 'Failed to delete job.'); }
+      try {
+        const { error } = await supabase.from('jobs').delete().eq('id', jobId);
+        if (error) throw error;
+        btn.closest('.job-item')?.remove();
+      } catch (err) {
+        console.error('Delete error:', err);
+        alert(err.message || 'Failed to delete job.');
+      }
     }
 
     if (btn.classList.contains('editBtn')) {
       try {
-        const { data: job, error } = await supabase.from('jobs').select('*').eq('id', jobId).single(); if (error) throw error;
+        const { data: job, error } = await supabase.from('jobs').select('*').eq('id', jobId).single();
+        if (error) throw error;
         document.getElementById('jobTitle').value = job.title;
         document.getElementById('location').value = job.location;
         document.getElementById('jobType').value = job.job_type;
@@ -167,7 +259,10 @@ jobListEl.addEventListener('click', async e => {
         document.getElementById('jobCompany').value = job.company_name;
         editingJobId = jobId;
         window.scrollTo({ top: jobForm.offsetTop, behavior: 'smooth' });
-      } catch (err) { console.error('Edit load error:', err); alert(err.message || 'Failed to load job for editing.'); }
+      } catch (err) {
+        console.error('Edit load error:', err);
+        alert(err.message || 'Failed to load job for editing.');
+      }
     }
   }
 
@@ -176,12 +271,20 @@ jobListEl.addEventListener('click', async e => {
   if (toggle) {
     const descEl = toggle.previousElementSibling;
     const fullText = descEl.dataset.full;
-    if (toggle.textContent === 'Show More') { descEl.textContent = fullText; toggle.textContent = 'Show Less'; }
-    else { descEl.textContent = fullText.slice(0, 100) + '...'; toggle.textContent = 'Show More'; }
+    if (toggle.textContent === 'Show More') {
+      descEl.textContent = fullText;
+      toggle.textContent = 'Show Less';
+    } else {
+      descEl.textContent = fullText.slice(0, 100) + '...';
+      toggle.textContent = 'Show More';
+    }
   }
 });
 
 // ===============================
 // Logout
 // ===============================
-logoutBtn.addEventListener('click', async () => { await supabase.auth.signOut(); window.location.href = 'homepage.html'; });
+logoutBtn.addEventListener('click', async () => {
+  await supabase.auth.signOut();
+  window.location.href = 'homepage.html';
+});
