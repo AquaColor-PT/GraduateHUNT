@@ -24,16 +24,19 @@ if (!studentId || !jobId) {
   chatMessages.innerHTML = '<p style="text-align:center;color:red;">Cannot load chat without graduate ID and job ID.</p>';
 }
 
+let loadedMessages = new Set(); // prevent duplicates
+
 // Render message
 function renderMessage(msg) {
+  const key = msg.id;
+  if (loadedMessages.has(key)) return; // skip duplicates
+  loadedMessages.add(key);
+
   const div = document.createElement('div');
-  div.classList.add('message');
-  div.classList.add(msg.sender === 'recruiter' ? 'recruiter' : 'student');
+  div.classList.add('message', msg.sender === 'recruiter' ? 'recruiter' : 'student');
 
   let content = msg.message || '';
-  if (msg.file_url) {
-    content += `<a href="${msg.file_url}" target="_blank" class="file-link">${msg.file_name}</a>`;
-  }
+  if (msg.file_url) content += `<a href="${msg.file_url}" target="_blank" class="file-link">${msg.file_name}</a>`;
 
   const timestamp = msg.created_at
     ? new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
@@ -48,11 +51,7 @@ function renderMessage(msg) {
 // Load graduate info
 async function loadGraduateInfo() {
   try {
-    const { data: student, error } = await supabase
-      .from('graduates')
-      .select('*')
-      .eq('id', studentId)
-      .single();
+    const { data: student, error } = await supabase.from('graduates').select('*').eq('id', studentId).single();
     if (error) throw error;
 
     gradNameEl.textContent = student.full_name || 'Unknown';
@@ -83,28 +82,8 @@ async function loadMessages() {
     chatMessages.innerHTML = '';
     messages.forEach(renderMessage);
 
-    // ✅ Real-time listener FIXED
-    supabase
-      .channel(`recruiter-chat-${studentId}-${jobId}`)
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'messages',
-          filter: `student_id=eq.${studentId}`
-        },
-        payload => {
-          const newMsg = payload.new;
-          // Show only messages for this job that belong to this conversation
-          if (newMsg.job_id == jobId && !newMsg.recruiter_deleted) {
-            renderMessage(newMsg);
-          }
-        }
-      )
-      .subscribe((status) => {
-        console.log("Realtime subscription:", status);
-      });
+    // ✅ Real-time listener
+    subscribeRealtime(user);
 
   } catch (err) {
     chatMessages.innerHTML = `<p style="text-align:center;color:red;">Failed to load messages: ${err.message}</p>`;
@@ -123,11 +102,9 @@ sendReplyBtn.addEventListener('click', async () => {
   feedback.innerHTML = '';
 
   try {
-    // Get logged-in recruiter
     const { data: { user }, error: userError } = await supabase.auth.getUser();
     if (userError || !user) throw new Error("Recruiter not logged in");
 
-    // Get recruiter info
     const { data: recruiter, error: recruiterInfoError } = await supabase
       .from('recruiters')
       .select('*')
@@ -138,20 +115,16 @@ sendReplyBtn.addEventListener('click', async () => {
     const recruiterName = recruiter?.full_name || 'Recruiter';
     const companyName = recruiter?.company_name || 'Company';
 
-    // Optional file upload
     let fileData = {};
     if (file) {
       const fileName = `graduates/${studentId}/${jobId}/${Date.now()}_${file.name}`;
-      const { data: uploaded, error: uploadError } = await supabase.storage
-        .from('attachments')
-        .upload(fileName, file, { cacheControl: '3600', upsert: false });
+      const { error: uploadError } = await supabase.storage.from('attachments').upload(fileName, file, { cacheControl: '3600', upsert: false });
       if (uploadError) throw uploadError;
 
       const { data: publicUrlData } = supabase.storage.from('attachments').getPublicUrl(fileName);
       fileData = { file_url: publicUrlData.publicUrl, file_name: file.name };
     }
 
-    // Insert message
     const { data: inserted, error: insertError } = await supabase.from('messages').insert([{
       student_id: studentId,
       recruiter_id: user.id,
@@ -180,6 +153,23 @@ sendReplyBtn.addEventListener('click', async () => {
     console.error(err);
   }
 });
+
+// Realtime subscription
+function subscribeRealtime(user) {
+  supabase
+    .channel(`recruiter-chat-${studentId}-${jobId}`)
+    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, payload => {
+      const msg = payload.new;
+      if (
+        String(msg.student_id) === String(studentId) &&
+        String(msg.job_id) === String(jobId) &&
+        !msg.recruiter_deleted
+      ) {
+        renderMessage(msg);
+      }
+    })
+    .subscribe();
+}
 
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
