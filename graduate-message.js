@@ -7,11 +7,8 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 const container = document.getElementById("messagesContainer");
 const badge = document.getElementById("messageBadge");
 
-let lastLoaded = 0; // Track last refresh
-let currentMessages = []; // Prevent duplicates
-
 function getStatusInfo(status) {
-  switch (status.toLowerCase()) {
+  switch(status.toLowerCase()){
     case 'unread': return { color: 'orange', icon: '📨' };
     case 'viewed': return { color: 'blue', icon: '👁️' };
     default: return { color: '#2980b9', icon: '' };
@@ -29,7 +26,7 @@ function renderMessages(messages) {
   const unread = messages.filter(m => m.status.toLowerCase() === 'unread');
   badge.style.display = unread.length > 0 ? "inline-block" : "none";
 
-  // Keep only latest message per recruiter/job pair
+  // Keep only the latest message per recruiter/job pair
   const latestByJob = {};
   messages.forEach(msg => {
     const key = `${msg.recruiter_id}_${msg.job_id}`;
@@ -38,6 +35,7 @@ function renderMessages(messages) {
     }
   });
 
+  // Render only the latest messages
   Object.values(latestByJob).forEach(msg => {
     const card = document.createElement("div");
     card.className = "message-card";
@@ -64,7 +62,7 @@ function renderMessages(messages) {
 
     container.appendChild(card);
 
-    // Reply button
+    // Reply button logic
     card.querySelector('.reply-btn').addEventListener('click', () => {
       const recruiterId = msg.recruiter_id;
       const jobId = msg.job_id;
@@ -74,39 +72,43 @@ function renderMessages(messages) {
       window.location.href = `graduate-reply.html?recruiterId=${recruiterId}&jobId=${jobId}&jobTitle=${encodeURIComponent(jobTitle)}&companyName=${encodeURIComponent(companyName)}`;
     });
 
-    // Delete button
+    // Delete button logic
+      // Delete button logic
     card.querySelector('.delete-btn').addEventListener('click', async () => {
-      if (!confirm("Are you sure you want to delete this conversation?")) return;
+  if (!confirm("Are you sure you want to delete this conversation?")) return;
 
-      try {
-        const { data, error: userError } = await supabase.auth.getUser();
-        const user = data?.user;
-        if (userError || !user) throw new Error("You must be logged in.");
+  try {
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    if (userError || !user) throw new Error("You must be logged in.");
 
-        const { error } = await supabase
-          .from('messages')
-          .update({ student_deleted: true })
-          .eq('student_id', user.id)
-          .eq('recruiter_id', msg.recruiter_id)
-          .eq('job_id', msg.job_id)
-          .eq('student_deleted', false);
+    // Mark all messages for this recruiter + job + student as deleted for student
+    const { error } = await supabase
+      .from('messages')
+      .update({ student_deleted: true }) // soft delete for student only
+      .eq('student_id', user.id)
+      .eq('recruiter_id', msg.recruiter_id)
+      .eq('job_id', msg.job_id)
+      .eq('student_deleted', false);
 
-        if (error) throw error;
-        card.remove();
+    if (error) throw error;
 
-      } catch (err) {
-        console.error(err);
-        alert("Failed to delete messages: " + err.message);
-      }
-    });
+    card.remove(); // Remove the card from the student UI
+  } catch (err) {
+    console.error(err);
+    alert("Failed to delete messages: " + err.message);
+  }
+});
+
+
+
   });
 }
 
 async function loadMessages() {
-  try {
-    const { data, error: userError } = await supabase.auth.getUser();
-    const user = data?.user;
+  container.innerHTML = "<p class='empty'>Loading messages...</p>";
 
+  try {
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
     if (userError || !user) {
       container.innerHTML = "<p class='empty'>Please log in to view messages.</p>";
       return;
@@ -116,18 +118,12 @@ async function loadMessages() {
       .from("messages")
       .select("id, message, status, created_at, recruiter_id, company_name, job_title, job_id, student_deleted")
       .eq("student_id", user.id)
-      .eq("student_deleted", false)
+      .eq("student_deleted", false) // <-- only fetch messages not deleted by student
       .order("created_at", { ascending: false });
 
     if (error) throw error;
 
-    // Only re-render if something changed
-    const latestTimestamp = messages.length ? new Date(messages[0].created_at).getTime() : 0;
-    if (latestTimestamp !== lastLoaded) {
-      currentMessages = messages;
-      renderMessages(messages);
-      lastLoaded = latestTimestamp;
-    }
+    renderMessages(messages);
 
     // Mark unread messages as viewed
     const unread = messages.filter(m => m.status.toLowerCase() === 'unread');
@@ -137,37 +133,27 @@ async function loadMessages() {
       badge.style.display = "none";
     }
 
+    // Real-time subscription
+    supabase
+      .channel('graduate-messages')
+      .on('postgres_changes', { 
+        event: 'INSERT', 
+        schema: 'public', 
+        table: 'messages', 
+        filter: `student_id=eq.${user.id},student_deleted=eq.false` // <-- only receive non-deleted messages
+      }, payload => {
+        messages.unshift(payload.new);
+        renderMessages(messages);
+        badge.style.display = "inline-block";
+        setTimeout(() => alert("You have a new message!"), 500);
+      })
+      .subscribe();
+
   } catch (err) {
     console.error(err);
     container.innerHTML = "<p class='empty'>Error loading messages.</p>";
   }
 }
 
-function subscribeRealtime() {
-  supabase.channel('graduate-messages')
-    .on('postgres_changes', {
-      event: 'INSERT',
-      schema: 'public',
-      table: 'messages'
-    }, payload => {
-      const msg = payload.new;
-      if (!msg.student_deleted) {
-        currentMessages.unshift(msg);
-        renderMessages(currentMessages);
-        badge.style.display = "inline-block";
-        setTimeout(() => alert("You have a new message!"), 500);
-      }
-    })
-    .subscribe();
-}
 
-// Init
-document.addEventListener('DOMContentLoaded', () => {
-  loadMessages();
-  subscribeRealtime();
-
-  // Fallback: refresh every 8 seconds only if new messages exist
-  setInterval(async () => {
-    await loadMessages();
-  }, 8000);
-});
+document.addEventListener('DOMContentLoaded', loadMessages);
