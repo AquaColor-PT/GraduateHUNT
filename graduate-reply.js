@@ -50,7 +50,6 @@ function renderMessage(msg) {
 
 // Load chat history
 async function loadChat() {
-  chatMessages.innerHTML = '<p style="text-align:center;color:#666;">Loading messages...</p>';
   try {
     const { data: { user }, error: userError } = await supabase.auth.getUser();
     if (userError || !user) throw new Error("Student not logged in");
@@ -63,13 +62,14 @@ async function loadChat() {
       .order('created_at', { ascending: true });
     if (error) throw error;
 
-    chatMessages.innerHTML = '';
-    messages.forEach(renderMessage);
+    // Only render messages that haven't been rendered yet
+    messages.forEach(msg => renderMessage(msg));
 
   } catch (err) {
     feedback.innerHTML = `<p class="error">Failed to load chat: ${err.message}</p>`;
   }
 }
+
 
 // Upload file
 async function uploadFile(file) {
@@ -153,3 +153,4 @@ document.addEventListener('DOMContentLoaded', () => {
   loadChat();
   subscribeRealtime();
 });
+
