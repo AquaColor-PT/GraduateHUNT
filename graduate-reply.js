@@ -21,7 +21,7 @@ const companyNameFromURL = urlParams.get('companyName');
 recruiterNameEl.textContent = companyNameFromURL || 'Recruiter';
 jobTitleEl.textContent = jobTitleFromURL || 'Job Post';
 
-// Helper: render a single message
+// Render a single message
 function renderMessage(msg) {
   const div = document.createElement('div');
   div.className = `message ${msg.sender === 'student' ? 'student' : 'recruiter'}`;
@@ -40,8 +40,7 @@ async function loadChat() {
     const { data: { user }, error: userError } = await supabase.auth.getUser();
     if (userError || !user) throw new Error("Student not logged in");
 
-    const { data: messages, error } = await supabase
-      .from('messages')
+    const { data: messages, error } = await supabase.from('messages')
       .select('*')
       .eq('student_id', user.id)
       .eq('recruiter_id', recruiterId)
@@ -57,28 +56,14 @@ async function loadChat() {
   }
 }
 
-// Upload file to Supabase bucket
+// Upload file
 async function uploadFile(file) {
-  const { data: { user }, error: userError } = await supabase.auth.getUser();
-  if (userError || !user) throw new Error("Student not logged in");
-
-  const currentUserId = user.id;
-
-  if (!['application/pdf'].includes(file.type)) {
-    throw new Error("Only PDF files are allowed.");
-  }
-
-  const filePath = `graduates/${currentUserId}/${Date.now()}_${file.name}`;
-  const { error: storageError } = await supabase.storage
-    .from('attachments')
-    .upload(filePath, file, { upsert: true });
-
+  const { data: { user } } = await supabase.auth.getUser();
+  const filePath = `graduates/${user.id}/${Date.now()}_${file.name}`;
+  const { error: storageError } = await supabase.storage.from('attachments').upload(filePath, file, { upsert: true });
   if (storageError) throw storageError;
 
-  const { data: { publicUrl }, error: urlError } = supabase.storage
-    .from('attachments')
-    .getPublicUrl(filePath);
-
+  const { data: { publicUrl }, error: urlError } = supabase.storage.from('attachments').getPublicUrl(filePath);
   if (urlError) throw urlError;
 
   return { file_url: publicUrl, file_name: file.name };
@@ -98,9 +83,7 @@ sendReplyBtn.addEventListener('click', async () => {
   try {
     if (file) fileData = await uploadFile(file);
 
-    const { data: { user }, error: userError } = await supabase.auth.getUser();
-    if (userError || !user) throw new Error("Student not logged in");
-
+    const { data: { user } } = await supabase.auth.getUser();
     const { error } = await supabase.from('messages').insert([{
       student_id: user.id,
       recruiter_id: recruiterId,
@@ -117,33 +100,21 @@ sendReplyBtn.addEventListener('click', async () => {
 
     if (error) throw error;
 
-    renderMessage({
-      message,
-      file_url: fileData.file_url,
-      file_name: fileData.file_name,
-      sender: 'student'
-    });
-
+    renderMessage({ message, ...fileData, sender: 'student' });
     replyText.value = '';
     fileInput.value = '';
     feedback.innerHTML = '<p class="success">Message sent!</p>';
 
   } catch (err) {
     feedback.innerHTML = `<p class="error">Failed to send: ${err.message}</p>`;
-    console.error(err);
   }
 });
 
-// Real-time updates for recruiter messages
+// Real-time subscription
 async function subscribeRealtime() {
   const { data: { user } } = await supabase.auth.getUser();
   supabase.channel(`student-chat-${recruiterId}-${jobId}`)
-    .on('postgres_changes', {
-      event: 'INSERT',
-      schema: 'public',
-      table: 'messages',
-      filter: `student_id=eq.${user.id},recruiter_id=eq.${recruiterId},job_id=eq.${jobId}`
-    }, payload => {
+    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages', filter: `student_id=eq.${user.id},recruiter_id=eq.${recruiterId},job_id=eq.${jobId}` }, payload => {
       renderMessage(payload.new);
     })
     .subscribe();
