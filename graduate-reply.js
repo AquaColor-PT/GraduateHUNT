@@ -5,114 +5,122 @@ const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 // Elements
-const recruiterNameEl = document.getElementById('recruiterName');
-const jobTitleEl = document.getElementById('jobTitle');
+const gradNameEl = document.getElementById('gradName');
+const gradEmailEl = document.getElementById('gradEmail');
+const gradPhoneEl = document.getElementById('gradPhone');
 const replyText = document.getElementById('replyText');
 const sendReplyBtn = document.getElementById('sendReplyBtn');
 const fileInput = document.getElementById('fileInput');
 const chatMessages = document.getElementById('chatMessages');
 const feedback = document.getElementById('feedback');
 
-// URL Params
+// URL params
 const urlParams = new URLSearchParams(window.location.search);
-const recruiterId = urlParams.get('recruiterId');
+const studentId = urlParams.get('studentId');
 const jobId = urlParams.get('jobId');
 const jobTitleFromURL = urlParams.get('jobTitle');
-const companyNameFromURL = urlParams.get('companyName');
 
-recruiterNameEl.textContent = companyNameFromURL || 'Recruiter';
-jobTitleEl.textContent = jobTitleFromURL || 'Job Post';
+if (!studentId || !jobId) {
+  chatMessages.innerHTML = '<p style="text-align:center;color:red;">Cannot load chat without graduate ID and job ID.</p>';
+}
 
-let loadedMessages = new Set(); // to prevent duplicates
+let loadedMessages = new Set(); // prevent duplicates
 
 // Render a single message
 function renderMessage(msg) {
-  const messageKey = `${msg.id}`;
-  if (loadedMessages.has(messageKey)) return; // skip duplicates
-  loadedMessages.add(messageKey);
+  if (loadedMessages.has(msg.id)) return;
+  loadedMessages.add(msg.id);
 
   const div = document.createElement('div');
-  div.className = `message ${msg.sender === 'student' ? 'student' : 'recruiter'}`;
-  div.innerHTML = `
-    <div>${msg.message || ''}</div>
-    ${msg.file_url ? `<a href="${msg.file_url}" target="_blank" class="file-link">${msg.file_name}</a>` : ''}
-  `;
+  div.className = `message ${msg.sender === 'recruiter' ? 'recruiter' : 'student'}`;
+  let content = msg.message || '';
+  if (msg.file_url) {
+    content += `<a href="${msg.file_url}" target="_blank" class="file-link">${msg.file_name}</a>`;
+  }
+  const timestamp = msg.created_at
+    ? new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+    : '';
+  div.innerHTML = `<div>${content}</div><div style="font-size:10px;color:#555;margin-top:3px;text-align:right">${timestamp}</div>`;
   chatMessages.appendChild(div);
   chatMessages.scrollTop = chatMessages.scrollHeight;
 }
 
-// Load chat history
-async function loadChat() {
-  chatMessages.innerHTML = '<p style="text-align:center;color:#666;">Loading messages...</p>';
+// Load graduate info
+async function loadGraduateInfo() {
   try {
-    const { data: { user }, error: userError } = await supabase.auth.getUser();
-    if (userError || !user) throw new Error("Student not logged in");
-
-    const { data: messages, error } = await supabase.from('messages')
+    const { data: student, error } = await supabase
+      .from('graduates')
       .select('*')
-      .eq('student_id', user.id)
-      .eq('recruiter_id', recruiterId)
-      .eq('job_id', jobId)
-      .order('created_at', { ascending: true });
-
+      .eq('id', studentId)
+      .single();
     if (error) throw error;
 
-    chatMessages.innerHTML = '';
-    messages.forEach(renderMessage);
-
-    // Start realtime subscription
-    subscribeRealtime(user);
-
+    gradNameEl.textContent = student.full_name || 'Unknown';
+    gradEmailEl.textContent = student.email || 'N/A';
+    gradPhoneEl.textContent = student.phone || 'N/A';
   } catch (err) {
-    feedback.innerHTML = `<p class="error">Failed to load chat: ${err.message}</p>`;
+    gradNameEl.textContent = gradEmailEl.textContent = gradPhoneEl.textContent = 'Error loading graduate info';
+    console.error("Failed to load graduate info:", err);
   }
 }
 
-// Upload file
-async function uploadFile(file) {
-  const { data: { user } } = await supabase.auth.getUser();
-  const filePath = `graduates/${user.id}/${Date.now()}_${file.name}`;
-  const { error: storageError } = await supabase.storage.from('attachments').upload(filePath, file, { upsert: true });
-  if (storageError) throw storageError;
+// Load messages
+async function loadMessages() {
+  try {
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    if (userError || !user) throw new Error("Recruiter not logged in");
 
-  const { data: { publicUrl }, error: urlError } = supabase.storage.from('attachments').getPublicUrl(filePath);
-  if (urlError) throw urlError;
+    const { data: messages, error } = await supabase
+      .from('messages')
+      .select('*')
+      .eq('student_id', studentId)
+      .eq('job_id', jobId)
+      .order('created_at', { ascending: true });
+    if (error) throw error;
 
-  return { file_url: publicUrl, file_name: file.name };
+    messages.forEach(renderMessage);
+  } catch (err) {
+    console.error("Failed to load messages:", err);
+  }
 }
 
 // Send message
 sendReplyBtn.addEventListener('click', async () => {
   const message = replyText.value.trim();
   const file = fileInput.files[0];
-
   if (!message && !file) {
-    feedback.innerHTML = '<p class="error">Please enter a message or choose a file.</p>';
+    feedback.innerHTML = '<p class="error">Enter a message or select a file.</p>';
     return;
   }
-
   feedback.innerHTML = '';
-  let fileData = {};
 
   try {
-    if (file) fileData = await uploadFile(file);
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    if (userError || !user) throw new Error("Recruiter not logged in");
 
-    const { data: { user } } = await supabase.auth.getUser();
-    const { data: inserted, error } = await supabase.from('messages').insert([{
-      student_id: user.id,
-      recruiter_id: recruiterId,
-      company_name: companyNameFromURL || 'Recruiter',
+    let fileData = {};
+    if (file) {
+      const fileName = `graduates/${studentId}/${jobId}/${Date.now()}_${file.name}`;
+      const { error: uploadError } = await supabase.storage.from('attachments').upload(fileName, file, { upsert: true });
+      if (uploadError) throw uploadError;
+      const { data: publicUrlData } = supabase.storage.from('attachments').getPublicUrl(fileName);
+      fileData = { file_url: publicUrlData.publicUrl, file_name: file.name };
+    }
+
+    const { data: inserted, error: insertError } = await supabase.from('messages').insert([{
+      student_id: studentId,
+      recruiter_id: user.id,
       job_id: jobId,
       job_title: jobTitleFromURL || 'Job Post',
-      message: message || null,
-      file_url: fileData.file_url || null,
-      file_name: fileData.file_name || null,
+      message,
+      sender: 'recruiter',
       status: 'unread',
-      sender: 'student',
-      created_at: new Date()
+      student_deleted: false,
+      recruiter_deleted: false,
+      created_at: new Date(),
+      ...fileData
     }]).select();
-
-    if (error) throw error;
+    if (insertError) throw insertError;
 
     renderMessage(inserted[0]);
     replyText.value = '';
@@ -121,31 +129,28 @@ sendReplyBtn.addEventListener('click', async () => {
 
   } catch (err) {
     feedback.innerHTML = `<p class="error">Failed to send: ${err.message}</p>`;
+    console.error(err);
   }
 });
 
 // Realtime subscription
-function subscribeRealtime(user) {
+async function subscribeRealtime() {
+  const { data: { user } } = await supabase.auth.getUser();
   supabase
-    .channel(`student-chat-${recruiterId}-${jobId}`)
-    .on(
-      'postgres_changes',
-      { event: 'INSERT', schema: 'public', table: 'messages' },
-      (payload) => {
-        const msg = payload.new;
-
-        // Match student, recruiter, and job
-        if (
-          String(msg.student_id) === String(user.id) &&
-          String(msg.recruiter_id) === String(recruiterId) &&
-          String(msg.job_id) === String(jobId)
-        ) {
-          renderMessage(msg);
-        }
-      }
-    )
+    .channel(`graduate-chat-${studentId}-${jobId}`)
+    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages', filter: `student_id=eq.${studentId}` }, payload => {
+      const newMsg = payload.new;
+      if (newMsg.job_id == jobId && !loadedMessages.has(newMsg.id)) renderMessage(newMsg);
+    })
     .subscribe();
 }
 
+// Auto-refresh messages every 15 seconds
+setInterval(loadMessages, 15000);
+
 // Initialize
-document.addEventListener('DOMContentLoaded', loadChat);
+document.addEventListener('DOMContentLoaded', () => {
+  loadGraduateInfo();
+  loadMessages();
+  subscribeRealtime();
+});
