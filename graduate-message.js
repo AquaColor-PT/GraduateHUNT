@@ -8,7 +8,7 @@ const container = document.getElementById("messagesContainer");
 const badge = document.getElementById("messageBadge");
 
 function getStatusInfo(status) {
-  switch(status.toLowerCase()){
+  switch (status.toLowerCase()) {
     case 'unread': return { color: 'orange', icon: '📨' };
     case 'viewed': return { color: 'blue', icon: '👁️' };
     default: return { color: '#2980b9', icon: '' };
@@ -62,7 +62,7 @@ function renderMessages(messages) {
 
     container.appendChild(card);
 
-    // Reply button logic
+    // Reply button
     card.querySelector('.reply-btn').addEventListener('click', () => {
       const recruiterId = msg.recruiter_id;
       const jobId = msg.job_id;
@@ -72,35 +72,32 @@ function renderMessages(messages) {
       window.location.href = `graduate-reply.html?recruiterId=${recruiterId}&jobId=${jobId}&jobTitle=${encodeURIComponent(jobTitle)}&companyName=${encodeURIComponent(companyName)}`;
     });
 
-    // Delete button logic
-      // Delete button logic
+    // Delete button
     card.querySelector('.delete-btn').addEventListener('click', async () => {
-  if (!confirm("Are you sure you want to delete this conversation?")) return;
+      if (!confirm("Are you sure you want to delete this conversation?")) return;
 
-  try {
-    const { data: { user }, error: userError } = await supabase.auth.getUser();
-    if (userError || !user) throw new Error("You must be logged in.");
+      try {
+        const { data, error: userError } = await supabase.auth.getUser();
+        const user = data?.user;
 
-    // Mark all messages for this recruiter + job + student as deleted for student
-    const { error } = await supabase
-      .from('messages')
-      .update({ student_deleted: true }) // soft delete for student only
-      .eq('student_id', user.id)
-      .eq('recruiter_id', msg.recruiter_id)
-      .eq('job_id', msg.job_id)
-      .eq('student_deleted', false);
+        if (userError || !user) throw new Error("You must be logged in.");
 
-    if (error) throw error;
+        const { error } = await supabase
+          .from('messages')
+          .update({ student_deleted: true })
+          .eq('student_id', user.id)
+          .eq('recruiter_id', msg.recruiter_id)
+          .eq('job_id', msg.job_id)
+          .eq('student_deleted', false);
 
-    card.remove(); // Remove the card from the student UI
-  } catch (err) {
-    console.error(err);
-    alert("Failed to delete messages: " + err.message);
-  }
-});
+        if (error) throw error;
 
-
-
+        card.remove(); // Remove from UI
+      } catch (err) {
+        console.error(err);
+        alert("Failed to delete messages: " + err.message);
+      }
+    });
   });
 }
 
@@ -108,7 +105,9 @@ async function loadMessages() {
   container.innerHTML = "<p class='empty'>Loading messages...</p>";
 
   try {
-    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    const { data, error: userError } = await supabase.auth.getUser();
+    const user = data?.user;
+
     if (userError || !user) {
       container.innerHTML = "<p class='empty'>Please log in to view messages.</p>";
       return;
@@ -118,7 +117,7 @@ async function loadMessages() {
       .from("messages")
       .select("id, message, status, created_at, recruiter_id, company_name, job_title, job_id, student_deleted")
       .eq("student_id", user.id)
-      .eq("student_deleted", false) // <-- only fetch messages not deleted by student
+      .eq("student_deleted", false)
       .order("created_at", { ascending: false });
 
     if (error) throw error;
@@ -136,16 +135,18 @@ async function loadMessages() {
     // Real-time subscription
     supabase
       .channel('graduate-messages')
-      .on('postgres_changes', { 
-        event: 'INSERT', 
-        schema: 'public', 
-        table: 'messages', 
-        filter: `student_id=eq.${user.id},student_deleted=eq.false` // <-- only receive non-deleted messages
+      .on('postgres_changes', {
+        event: 'INSERT',
+        schema: 'public',
+        table: 'messages',
+        filter: `student_id=eq.${user.id}`
       }, payload => {
-        messages.unshift(payload.new);
-        renderMessages(messages);
-        badge.style.display = "inline-block";
-        setTimeout(() => alert("You have a new message!"), 500);
+        if (!payload.new.student_deleted) {
+          messages.unshift(payload.new);
+          renderMessages(messages);
+          badge.style.display = "inline-block";
+          setTimeout(() => alert("You have a new message!"), 500);
+        }
       })
       .subscribe();
 
@@ -154,6 +155,5 @@ async function loadMessages() {
     container.innerHTML = "<p class='empty'>Error loading messages.</p>";
   }
 }
-
 
 document.addEventListener('DOMContentLoaded', loadMessages);
