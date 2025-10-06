@@ -25,30 +25,27 @@ jobTitleEl.textContent = jobTitleFromURL || 'Job Post';
 
 let loadedMessages = new Set();
 
-// Render a single message
+// Render a single message safely
 function renderMessage(msg) {
-  if (loadedMessages.has(msg.id)) return;
+  if (loadedMessages.has(msg.id)) return; // Prevent duplicates
   loadedMessages.add(msg.id);
 
   const div = document.createElement('div');
   div.className = `message ${msg.sender === 'student' ? 'student' : 'recruiter'}`;
 
   let content = msg.message || '';
-  if (msg.file_url) {
-    content += `<a href="${msg.file_url}" target="_blank" class="file-link">${msg.file_name}</a>`;
-  }
+  if (msg.file_url) content += `<a href="${msg.file_url}" target="_blank" class="file-link">${msg.file_name}</a>`;
 
   const timestamp = msg.created_at
     ? new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     : '';
 
   div.innerHTML = `<div>${content}</div><div style="font-size:10px;color:#555;margin-top:3px;text-align:right">${timestamp}</div>`;
-
   chatMessages.appendChild(div);
   chatMessages.scrollTop = chatMessages.scrollHeight;
 }
 
-// Load chat history
+// Load all chat messages once
 async function loadChat() {
   try {
     const { data: { user }, error: userError } = await supabase.auth.getUser();
@@ -62,14 +59,12 @@ async function loadChat() {
       .order('created_at', { ascending: true });
     if (error) throw error;
 
-    // Only render messages that haven't been rendered yet
     messages.forEach(msg => renderMessage(msg));
 
   } catch (err) {
     feedback.innerHTML = `<p class="error">Failed to load chat: ${err.message}</p>`;
   }
 }
-
 
 // Upload file
 async function uploadFile(file) {
@@ -145,12 +140,8 @@ async function subscribeRealtime() {
     .subscribe();
 }
 
-// Auto-refresh messages every 15 seconds
-setInterval(loadChat, 15000);
-
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
-  loadChat();
-  subscribeRealtime();
+  loadChat();        // Load existing messages
+  subscribeRealtime(); // Append new messages in real-time
 });
-
