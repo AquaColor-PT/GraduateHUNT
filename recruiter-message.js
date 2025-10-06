@@ -5,16 +5,15 @@ const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 // Elements
-const gradNameEl = document.getElementById('gradName');
-const gradEmailEl = document.getElementById('gradEmail');
-const gradPhoneEl = document.getElementById('gradPhone');
+const recruiterNameEl = document.getElementById('recruiterName');
+const jobTitleEl = document.getElementById('jobTitle');
 const replyText = document.getElementById('replyText');
 const sendReplyBtn = document.getElementById('sendReplyBtn');
 const fileInput = document.getElementById('fileInput');
 const chatMessages = document.getElementById('chatMessages');
 const feedback = document.getElementById('feedback');
 
-// URL params
+// URL Params
 const urlParams = new URLSearchParams(window.location.search);
 const studentId = urlParams.get('studentId');
 const jobId = urlParams.get('jobId');
@@ -24,19 +23,20 @@ if (!studentId || !jobId) {
   chatMessages.innerHTML = '<p style="text-align:center;color:red;">Cannot load chat without graduate ID and job ID.</p>';
 }
 
-let loadedMessages = new Set(); // prevent duplicates
+let loadedMessages = new Set();
 
-// Render message
+// Render a single message
 function renderMessage(msg) {
-  const key = msg.id;
-  if (loadedMessages.has(key)) return; // skip duplicates
-  loadedMessages.add(key);
+  if (loadedMessages.has(msg.id)) return;
+  loadedMessages.add(msg.id);
 
   const div = document.createElement('div');
-  div.classList.add('message', msg.sender === 'recruiter' ? 'recruiter' : 'student');
+  div.className = `message ${msg.sender === 'student' ? 'student' : 'recruiter'}`;
 
   let content = msg.message || '';
-  if (msg.file_url) content += `<a href="${msg.file_url}" target="_blank" class="file-link">${msg.file_name}</a>`;
+  if (msg.file_url) {
+    content += `<a href="${msg.file_url}" target="_blank" class="file-link">${msg.file_name}</a>`;
+  }
 
   const timestamp = msg.created_at
     ? new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
@@ -48,25 +48,8 @@ function renderMessage(msg) {
   chatMessages.scrollTop = chatMessages.scrollHeight;
 }
 
-// Load graduate info
-async function loadGraduateInfo() {
-  try {
-    const { data: student, error } = await supabase.from('graduates').select('*').eq('id', studentId).single();
-    if (error) throw error;
-
-    gradNameEl.textContent = student.full_name || 'Unknown';
-    gradEmailEl.textContent = student.email || 'N/A';
-    gradPhoneEl.textContent = student.phone || 'N/A';
-  } catch (err) {
-    gradNameEl.textContent = gradEmailEl.textContent = gradPhoneEl.textContent = 'Error loading graduate info';
-    console.error("Failed to load graduate info:", err);
-  }
-}
-
-// Load messages for this job
+// Load messages
 async function loadMessages() {
-  chatMessages.innerHTML = '<p style="text-align:center;color:#666;">Loading messages...</p>';
-
   try {
     const { data: { user }, error: userError } = await supabase.auth.getUser();
     if (userError || !user) throw new Error("Recruiter not logged in");
@@ -79,14 +62,9 @@ async function loadMessages() {
       .order('created_at', { ascending: true });
     if (error) throw error;
 
-    chatMessages.innerHTML = '';
     messages.forEach(renderMessage);
-
-    // ✅ Real-time listener
-    subscribeRealtime(user);
-
   } catch (err) {
-    chatMessages.innerHTML = `<p style="text-align:center;color:red;">Failed to load messages: ${err.message}</p>`;
+    console.error("Failed to load messages:", err);
   }
 }
 
@@ -99,28 +77,18 @@ sendReplyBtn.addEventListener('click', async () => {
     feedback.innerHTML = '<p class="error">Enter a message or select a file.</p>';
     return;
   }
+
   feedback.innerHTML = '';
 
   try {
     const { data: { user }, error: userError } = await supabase.auth.getUser();
     if (userError || !user) throw new Error("Recruiter not logged in");
 
-    const { data: recruiter, error: recruiterInfoError } = await supabase
-      .from('recruiters')
-      .select('*')
-      .eq('id', user.id)
-      .single();
-    if (recruiterInfoError) throw recruiterInfoError;
-
-    const recruiterName = recruiter?.full_name || 'Recruiter';
-    const companyName = recruiter?.company_name || 'Company';
-
     let fileData = {};
     if (file) {
       const fileName = `graduates/${studentId}/${jobId}/${Date.now()}_${file.name}`;
-      const { error: uploadError } = await supabase.storage.from('attachments').upload(fileName, file, { cacheControl: '3600', upsert: false });
+      const { error: uploadError } = await supabase.storage.from('attachments').upload(fileName, file, { upsert: true });
       if (uploadError) throw uploadError;
-
       const { data: publicUrlData } = supabase.storage.from('attachments').getPublicUrl(fileName);
       fileData = { file_url: publicUrlData.publicUrl, file_name: file.name };
     }
@@ -128,8 +96,6 @@ sendReplyBtn.addEventListener('click', async () => {
     const { data: inserted, error: insertError } = await supabase.from('messages').insert([{
       student_id: studentId,
       recruiter_id: user.id,
-      recruiter_name: recruiterName,
-      company_name: companyName,
       job_id: jobId,
       job_title: jobTitleFromURL || 'Job Post',
       message,
@@ -140,7 +106,6 @@ sendReplyBtn.addEventListener('click', async () => {
       created_at: new Date(),
       ...fileData
     }]).select();
-
     if (insertError) throw insertError;
 
     renderMessage(inserted[0]);
@@ -154,25 +119,23 @@ sendReplyBtn.addEventListener('click', async () => {
   }
 });
 
-// Realtime subscription
-function subscribeRealtime(user) {
+// Real-time subscription
+async function subscribeRealtime() {
+  const { data: { user } } = await supabase.auth.getUser();
   supabase
     .channel(`recruiter-chat-${studentId}-${jobId}`)
-    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, payload => {
-      const msg = payload.new;
-      if (
-        String(msg.student_id) === String(studentId) &&
-        String(msg.job_id) === String(jobId) &&
-        !msg.recruiter_deleted
-      ) {
-        renderMessage(msg);
-      }
+    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages', filter: `student_id=eq.${studentId}` }, payload => {
+      const newMsg = payload.new;
+      if (newMsg.job_id == jobId && !loadedMessages.has(newMsg.id)) renderMessage(newMsg);
     })
     .subscribe();
 }
 
+// Auto-refresh messages every 15 seconds
+setInterval(loadMessages, 15000);
+
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
-  loadGraduateInfo();
   loadMessages();
+  subscribeRealtime();
 });
