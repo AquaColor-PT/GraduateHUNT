@@ -7,6 +7,9 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 const container = document.getElementById("messagesContainer");
 const badge = document.getElementById("messageBadge");
 
+let lastLoaded = 0; // Track last refresh
+let currentMessages = []; // Prevent duplicates
+
 function getStatusInfo(status) {
   switch (status.toLowerCase()) {
     case 'unread': return { color: 'orange', icon: '📨' };
@@ -26,7 +29,7 @@ function renderMessages(messages) {
   const unread = messages.filter(m => m.status.toLowerCase() === 'unread');
   badge.style.display = unread.length > 0 ? "inline-block" : "none";
 
-  // Keep only the latest message per recruiter/job pair
+  // Keep only latest message per recruiter/job pair
   const latestByJob = {};
   messages.forEach(msg => {
     const key = `${msg.recruiter_id}_${msg.job_id}`;
@@ -35,7 +38,6 @@ function renderMessages(messages) {
     }
   });
 
-  // Render only the latest messages
   Object.values(latestByJob).forEach(msg => {
     const card = document.createElement("div");
     card.className = "message-card";
@@ -79,7 +81,6 @@ function renderMessages(messages) {
       try {
         const { data, error: userError } = await supabase.auth.getUser();
         const user = data?.user;
-
         if (userError || !user) throw new Error("You must be logged in.");
 
         const { error } = await supabase
@@ -91,8 +92,8 @@ function renderMessages(messages) {
           .eq('student_deleted', false);
 
         if (error) throw error;
+        card.remove();
 
-        card.remove(); // Remove from UI
       } catch (err) {
         console.error(err);
         alert("Failed to delete messages: " + err.message);
@@ -102,8 +103,6 @@ function renderMessages(messages) {
 }
 
 async function loadMessages() {
-  container.innerHTML = "<p class='empty'>Loading messages...</p>";
-
   try {
     const { data, error: userError } = await supabase.auth.getUser();
     const user = data?.user;
@@ -122,7 +121,13 @@ async function loadMessages() {
 
     if (error) throw error;
 
-    renderMessages(messages);
+    // Only re-render if something changed
+    const latestTimestamp = messages.length ? new Date(messages[0].created_at).getTime() : 0;
+    if (latestTimestamp !== lastLoaded) {
+      currentMessages = messages;
+      renderMessages(messages);
+      lastLoaded = latestTimestamp;
+    }
 
     // Mark unread messages as viewed
     const unread = messages.filter(m => m.status.toLowerCase() === 'unread');
@@ -132,28 +137,37 @@ async function loadMessages() {
       badge.style.display = "none";
     }
 
-    // Real-time subscription
-    supabase
-      .channel('graduate-messages')
-      .on('postgres_changes', {
-        event: 'INSERT',
-        schema: 'public',
-        table: 'messages',
-        filter: `student_id=eq.${user.id}`
-      }, payload => {
-        if (!payload.new.student_deleted) {
-          messages.unshift(payload.new);
-          renderMessages(messages);
-          badge.style.display = "inline-block";
-          setTimeout(() => alert("You have a new message!"), 500);
-        }
-      })
-      .subscribe();
-
   } catch (err) {
     console.error(err);
     container.innerHTML = "<p class='empty'>Error loading messages.</p>";
   }
 }
 
-document.addEventListener('DOMContentLoaded', loadMessages);
+function subscribeRealtime() {
+  supabase.channel('graduate-messages')
+    .on('postgres_changes', {
+      event: 'INSERT',
+      schema: 'public',
+      table: 'messages'
+    }, payload => {
+      const msg = payload.new;
+      if (!msg.student_deleted) {
+        currentMessages.unshift(msg);
+        renderMessages(currentMessages);
+        badge.style.display = "inline-block";
+        setTimeout(() => alert("You have a new message!"), 500);
+      }
+    })
+    .subscribe();
+}
+
+// Init
+document.addEventListener('DOMContentLoaded', () => {
+  loadMessages();
+  subscribeRealtime();
+
+  // Fallback: refresh every 8 seconds only if new messages exist
+  setInterval(async () => {
+    await loadMessages();
+  }, 8000);
+});
