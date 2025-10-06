@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>GraduateInHunt - Coming Soon</title>
 <style>
-  /* Page background - shiny dark blue gradient */
+  /* Animated gradient background */
   body {
     margin: 0;
     font-family: 'Arial', sans-serif;
@@ -14,47 +14,72 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 100vh;
+    min-height: 100vh;
     text-align: center;
     background-size: 400% 400%;
     animation: gradientMove 15s ease infinite;
+    padding: 20px;
   }
 
   @keyframes gradientMove {
-    0% {background-position:0% 50%;}
-    50% {background-position:100% 50%;}
-    100% {background-position:0% 50%;}
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
   }
 
   /* Container box */
   #loginBox {
-    background: rgba(255,255,255,0.05); /* semi-transparent */
-    padding: 40px;
-    border-radius: 15px;
-    box-shadow: 0 0 30px rgba(0,0,0,0.5);
+    background: rgba(255, 255, 255, 0.07);
+    padding: 40px 30px;
+    border-radius: 20px;
+    box-shadow: 0 0 35px rgba(0, 0, 0, 0.5);
     max-width: 400px;
-    width: 90%;
+    width: 100%;
+    backdrop-filter: blur(8px);
+    transition: all 0.3s ease;
   }
 
   h1 {
-    font-size: 2.5em;
+    font-size: 2.3em;
     margin-bottom: 10px;
     color: #00c6ff;
-    text-shadow: 0 0 10px #00c6ff, 0 0 20px #00f, 0 0 30px #0ff;
+    text-shadow: 0 0 10px #00c6ff, 0 0 20px #0072ff, 0 0 30px #0ff;
   }
 
   p {
-    font-size: 1.3em;
-    margin-bottom: 30px;
+    font-size: 1.2em;
+    margin-bottom: 25px;
     color: #99dfff;
   }
 
+  .input-group {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
   input[type="password"] {
-    padding: 12px;
-    width: 80%;
+    padding: 12px 40px 12px 15px;
+    width: 100%;
+    max-width: 280px;
     margin-bottom: 15px;
     border-radius: 8px;
     border: none;
+    font-size: 1rem;
+    text-align: center;
+    outline: none;
+    background-color: rgba(255, 255, 255, 0.9);
+    color: #000;
+  }
+
+  .toggle-password {
+    position: absolute;
+    right: calc(50% - 130px);
+    color: #1a3b7d;
+    font-size: 1.2em;
+    cursor: pointer;
+    user-select: none;
   }
 
   input[type="submit"] {
@@ -67,6 +92,8 @@
     cursor: pointer;
     box-shadow: 0 0 15px #00c6ff;
     transition: all 0.3s ease;
+    width: 100%;
+    max-width: 280px;
   }
 
   input[type="submit"]:hover {
@@ -78,6 +105,30 @@
     margin-top: 15px;
     font-weight: bold;
   }
+
+  /* Responsive adjustments */
+  @media (max-width: 600px) {
+    #loginBox {
+      padding: 30px 20px;
+    }
+
+    h1 {
+      font-size: 1.8em;
+    }
+
+    p {
+      font-size: 1em;
+    }
+
+    input[type="password"], input[type="submit"] {
+      width: 100%;
+      font-size: 0.95rem;
+    }
+
+    .toggle-password {
+      right: 20px;
+    }
+  }
 </style>
 </head>
 <body>
@@ -85,17 +136,31 @@
 <div id="loginBox">
   <h1>GraduateInHUNT</h1>
   <p>Coming Soon</p>
-  <input type="password" id="password" placeholder="Enter Password"><br>
+
+  <div class="input-group">
+    <input type="password" id="password" placeholder="Enter Password">
+    <span class="toggle-password" id="togglePassword">👁️</span>
+  </div>
+
   <input type="submit" value="Unlock" onclick="checkPassword()">
   <div id="error"></div>
 </div>
 
 <script>
+  const togglePassword = document.getElementById('togglePassword');
+  const passwordField = document.getElementById('password');
+
+  togglePassword.addEventListener('click', () => {
+    const type = passwordField.type === 'password' ? 'text' : 'password';
+    passwordField.type = type;
+    togglePassword.textContent = type === 'password' ? '👁️' : '🙈';
+  });
+
   function checkPassword() {
-    const input = document.getElementById('password').value;
+    const input = document.getElementById('password').value.trim();
     const correctPassword = "Tokollo1234@";
 
-    if(input === correctPassword) {
+    if (input === correctPassword) {
       window.location.href = "homepage.html"; // redirect after unlock
     } else {
       document.getElementById('error').innerText = "Incorrect password. Try again!";
@@ -103,7 +168,7 @@
   }
 
   // Allow Enter key to submit
-  document.getElementById("password").addEventListener("keypress", function(e) {
+  passwordField.addEventListener("keypress", function(e) {
     if (e.key === "Enter") {
       checkPassword();
     }
@@ -112,5 +177,3 @@
 
 </body>
 </html>
-
-
