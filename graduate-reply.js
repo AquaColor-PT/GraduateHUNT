@@ -23,8 +23,14 @@ const companyNameFromURL = urlParams.get('companyName');
 recruiterNameEl.textContent = companyNameFromURL || 'Recruiter';
 jobTitleEl.textContent = jobTitleFromURL || 'Job Post';
 
-// Render a message
+let loadedMessages = new Set(); // to prevent duplicates
+
+// Render a single message
 function renderMessage(msg) {
+  const messageKey = `${msg.id}`;
+  if (loadedMessages.has(messageKey)) return; // skip duplicates
+  loadedMessages.add(messageKey);
+
   const div = document.createElement('div');
   div.className = `message ${msg.sender === 'student' ? 'student' : 'recruiter'}`;
   div.innerHTML = `
@@ -54,7 +60,7 @@ async function loadChat() {
     chatMessages.innerHTML = '';
     messages.forEach(renderMessage);
 
-    // Start realtime subscription after loading
+    // Start realtime subscription
     subscribeRealtime(user);
 
   } catch (err) {
@@ -92,7 +98,7 @@ sendReplyBtn.addEventListener('click', async () => {
     if (file) fileData = await uploadFile(file);
 
     const { data: { user } } = await supabase.auth.getUser();
-    const { error } = await supabase.from('messages').insert([{
+    const { data: inserted, error } = await supabase.from('messages').insert([{
       student_id: user.id,
       recruiter_id: recruiterId,
       company_name: companyNameFromURL || 'Recruiter',
@@ -104,11 +110,11 @@ sendReplyBtn.addEventListener('click', async () => {
       status: 'unread',
       sender: 'student',
       created_at: new Date()
-    }]);
+    }]).select();
 
     if (error) throw error;
 
-    renderMessage({ message, ...fileData, sender: 'student' });
+    renderMessage(inserted[0]);
     replyText.value = '';
     fileInput.value = '';
     feedback.innerHTML = '<p class="success">Message sent!</p>';
@@ -118,7 +124,7 @@ sendReplyBtn.addEventListener('click', async () => {
   }
 });
 
-// Real-time subscription (fixed)
+// Realtime subscription
 function subscribeRealtime(user) {
   supabase
     .channel(`student-chat-${recruiterId}-${jobId}`)
@@ -127,12 +133,12 @@ function subscribeRealtime(user) {
       { event: 'INSERT', schema: 'public', table: 'messages' },
       (payload) => {
         const msg = payload.new;
-        // Only render messages meant for this chat
+
+        // Match student, recruiter, and job
         if (
-          msg.job_id === jobId &&
-          msg.recruiter_id === recruiterId &&
-          msg.student_id === user.id &&
-          msg.sender === 'recruiter'
+          String(msg.student_id) === String(user.id) &&
+          String(msg.recruiter_id) === String(recruiterId) &&
+          String(msg.job_id) === String(jobId)
         ) {
           renderMessage(msg);
         }
