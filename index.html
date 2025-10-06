@@ -55,15 +55,16 @@
   .input-group {
     position: relative;
     display: flex;
-    justify-content: center;
+    flex-direction: column;
     align-items: center;
   }
 
-  input[type="password"] {
-    padding: 12px 40px 12px 15px;
+  input[type="password"],
+  input[type="text"] {
+    padding: 12px 15px;
     width: 100%;
     max-width: 280px;
-    margin-bottom: 15px;
+    margin-bottom: 8px;
     border-radius: 8px;
     border: none;
     font-size: 1rem;
@@ -74,12 +75,15 @@
   }
 
   .toggle-password {
-    position: absolute;
-    right: calc(50% - 130px);
-    color: #1a3b7d;
-    font-size: 1.2em;
+    font-size: 0.9rem;
+    color: #00c6ff;
     cursor: pointer;
-    user-select: none;
+    margin-bottom: 15px;
+    transition: color 0.2s;
+  }
+
+  .toggle-password:hover {
+    color: #0ff;
   }
 
   input[type="submit"] {
@@ -120,13 +124,9 @@
       font-size: 1em;
     }
 
-    input[type="password"], input[type="submit"] {
+    input[type="password"], input[type="text"], input[type="submit"] {
       width: 100%;
       font-size: 0.95rem;
-    }
-
-    .toggle-password {
-      right: 20px;
     }
   }
 </style>
@@ -139,7 +139,7 @@
 
   <div class="input-group">
     <input type="password" id="password" placeholder="Enter Password">
-    <span class="toggle-password" id="togglePassword">👁️</span>
+    <span class="toggle-password" id="togglePassword">Show</span>
   </div>
 
   <input type="submit" value="Unlock" onclick="checkPassword()">
@@ -150,10 +150,11 @@
   const togglePassword = document.getElementById('togglePassword');
   const passwordField = document.getElementById('password');
 
+  // Toggle Show/Hide password
   togglePassword.addEventListener('click', () => {
     const type = passwordField.type === 'password' ? 'text' : 'password';
     passwordField.type = type;
-    togglePassword.textContent = type === 'password' ? '👁️' : '🙈';
+    togglePassword.textContent = type === 'password' ? 'Show' : 'Hide';
   });
 
   function checkPassword() {
