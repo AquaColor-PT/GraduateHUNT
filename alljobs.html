@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Browse Jobs - GraduateInHunt</title>
+<title>Graduate Jobs Portal</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
 <style>
   body { 
@@ -109,13 +109,24 @@
   }
 
   .applyBtn { display:inline-block; margin-top:10px; }
-  .viewMore { 
+  .toggleDesc { 
     color:#1e3a8a; 
     cursor:pointer; 
     font-weight:600; 
     display:inline-block; 
     margin-top:5px; 
   }
+
+  .desc {
+    overflow: hidden;
+    max-height: 4.5em; /* ~3 lines */
+    line-height: 1.5;
+    white-space: pre-line;
+    transition: max-height 0.4s ease;
+    margin: 8px 0 12px 0;
+  }
+
+  .desc.expanded { max-height: 1000px; }
 
   @media (max-width: 500px) {
     nav ul { flex-direction: column; gap: 10px; text-align: center; }
@@ -126,12 +137,11 @@
 <body>
 
 <header>
-  <h1>GraduateInHunt - Jobs</h1>
+  <h1>Graduate Jobs Portal</h1>
   <nav>
     <ul>
       <li><a href="homepageRegisteredUser.html" class="blue-btn">Home</a></li>
       <li><a href="graduate-profile.html" class="blue-btn">My Profile</a></li>
-      <li><a href="alljobs.html" class="blue-btn">All Jobs Panel</a></li>
     </ul>
   </nav>
 </header>
@@ -140,25 +150,23 @@
   <h3>Available Jobs</h3>
 
   <div class="filters">
-    <select id="jobTypeFilter">
-      <option value="">All Job Types</option>
-      <option value="Internship">Internship</option>
-      <option value="Learnership">Learnership</option>
-      <option value="Training Program">Training Program</option>
-      <option value="Part-time">Part-time</option>
-      <option value="Permanent">Permanent</option>
-      <option value="Contract">Contract</option>
-    </select>
-
-    <input type="text" id="jobTitleSearch" placeholder="Search by job title...">
-    <button id="searchBtn" class="blue-btn">Search</button>
+      <input type="text" id="jobTitleSearch" placeholder="Search by job title">
+      <select id="jobTypeFilter">
+          <option value="">All Job Types</option>
+          <option value="Internship">Internship</option>
+          <option value="Learnership">Learnership</option>
+          <option value="Training">Training</option>
+          <option value="Permanent">Permanent</option>
+          <option value="Contract">Contract</option>
+      </select>
+      <button id="searchBtn" class="blue-btn">Search</button>
   </div>
 
   <ul id="publicJobList">
-    <li class="loading">Loading jobs...</li>
+      <li class="loading">Loading jobs...</li>
   </ul>
 </section>
 
-<script type="module" src="browse-jobs.js"></script>
+<script type="module" src="alljobs.js"></script>
 </body>
 </html>

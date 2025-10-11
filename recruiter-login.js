@@ -9,10 +9,6 @@ const emailInput = document.getElementById('email');
 const passwordInput = document.getElementById('password');
 const loginBtn = document.getElementById('loginBtn');
 const message = document.getElementById('message');
-const togglePassword = document.getElementById('togglePassword');
-
-// Toggle password visibility
-
 
 // Login logic
 loginBtn.addEventListener('click', async () => {
@@ -29,30 +25,30 @@ loginBtn.addEventListener('click', async () => {
     const { data: authData, error: authError } = await supabase.auth.signInWithPassword({ email, password });
     if(authError) throw authError;
 
-    // Optional: check if recruiter exists in your table
-    // Optional: check if recruiter exists in your table
-const { data: recruiter, error: recruiterError } = await supabase
-  .from('recruiters')
-  .select('verified')
-  .eq('email', email)
-  .single();
+    // Check if recruiter exists in your table
+    const { data: recruiter, error: recruiterError } = await supabase
+      .from('recruiters')
+      .select('verified')
+      .eq('email', email)
+      .single();
 
-if(recruiterError || !recruiter){
-  await supabase.auth.signOut();
-  message.style.color = 'red';
-  message.textContent = "This account is not registered as a recruiter.";
-  return;
-}
+    if(recruiterError || !recruiter){
+      await supabase.auth.signOut();
+      message.style.color = 'red';
+      message.textContent = "This account is not registered as a recruiter.";
+      return;
+    }
 
-if(!recruiter.verified){
-  message.style.color = 'red';
-  message.textContent = "Your email is verified, but your account is pending approval. Please wait for the GraduateinHunt team to verify you.";
-  return;
-}
-
+    if(!recruiter.verified){
+      message.style.color = 'red';
+      message.textContent = "Your account is pending approval. Please wait for the GraduateinHunt team to verify you.";
+      return;
+    }
 
     message.style.color = 'green';
     message.textContent = "Login successful! Redirecting...";
+
+    // Redirect to recruiter-credits page instead of dashboard
     setTimeout(() => window.location.href = 'recruiters-buycredits.html', 1200);
 
   } catch(err) {
@@ -61,4 +57,3 @@ if(!recruiter.verified){
     message.textContent = err.message;
   }
 });
-

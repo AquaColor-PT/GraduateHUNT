@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GraduateInHunt Pre-Launch Checklist</title>
+<style>
+  body {
+    font-family: 'Inter', sans-serif;
+    background: #f4f7fb;
+    margin: 0;
+    padding: 0;
+    color: #333;
+  }
+  header {
+    background: linear-gradient(90deg,#1e3a8a,#3b82f6);
+    color: white;
+    text-align: center;
+    padding: 20px;
+    font-size: 1.5rem;
+    font-weight: 600;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  }
+  main {
+    max-width: 900px;
+    margin: 30px auto;
+    padding: 20px;
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+  }
+  h2 {
+    color: #1e3a8a;
+    margin-bottom: 20px;
+    text-align: center;
+  }
+  ul {
+    list-style: none;
+    padding: 0;
+  }
+  li {
+    margin-bottom: 12px;
+    padding: 10px;
+    border-bottom: 1px solid #eee;
+    display: flex;
+    align-items: center;
+  }
+  input[type="checkbox"] {
+    margin-right: 15px;
+    transform: scale(1.3);
+  }
+  .section-title {
+    margin-top: 25px;
+    color: #3b82f6;
+    font-weight: 600;
+    font-size: 1.1rem;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  GraduateInHunt Pre-Launch Checklist
+</header>
+
+<main>
+  <h2>Checklist</h2>
+
+  <div class="section">
+    <div class="section-title">Authentication & Access</div>
+    <ul>
+      <li><input type="checkbox"> Recruiters can log in and log out correctly</li>
+      <li><input type="checkbox"> Session persistence works</li>
+      <li><input type="checkbox"> Pages redirect properly if unauthenticated</li>
+      <li><input type="checkbox"> Admin pages restricted correctly</li>
+    </ul>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Recruiter Profile</div>
+    <ul>
+      <li><input type="checkbox"> Profile data loads correctly</li>
+      <li><input type="checkbox"> Password updates work</li>
+      <li><input type="checkbox"> Profile picture upload and preview works</li>
+      <li><input type="checkbox"> Credits display correctly</li>
+    </ul>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Credits System</div>
+    <ul>
+      <li><input type="checkbox"> Posting a job decrements credits</li>
+      <li><input type="checkbox"> Buttons disabled when credits = 0</li>
+      <li><input type="checkbox"> Disabled buttons redirect to "Buy Credits" page</li>
+      <li><input type="checkbox"> Buying credits updates balance correctly</li>
+    </ul>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Job Posting & Management</div>
+    <ul>
+      <li><input type="checkbox"> New jobs can be posted</li>
+      <li><input type="checkbox"> Editing and deleting jobs works</li>
+      <li><input type="checkbox"> Job descriptions toggle correctly</li>
+      <li><input type="checkbox"> Jobs visible only to posting recruiter</li>
+    </ul>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Payments (Admin Panel)</div>
+    <ul>
+      <li><input type="checkbox"> Pending payments load correctly</li>
+      <li><input type="checkbox"> Approve/reject buttons update status and credits</li>
+      <li><input type="checkbox"> Only pending payments appear</li>
+      <li><input type="checkbox"> Proof URLs display correctly</li>
+    </ul>
+  </div>
+
+  <div class="section">
+    <div class="section-title">UI & Responsiveness</div>
+    <ul>
+      <li><input type="checkbox"> Layout works on desktop, tablet, mobile</li>
+      <li><input type="checkbox"> Buttons, inputs, navigation function correctly</li>
+      <li><input type="checkbox"> Visual styles render correctly</li>
+    </ul>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Error Handling</div>
+    <ul>
+      <li><input type="checkbox"> Network/server errors handled properly</li>
+      <li><input type="checkbox"> Input validation works</li>
+      <li><input type="checkbox"> File upload restrictions enforced</li>
+    </ul>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Links & Navigation</div>
+    <ul>
+      <li><input type="checkbox"> All links navigate correctly</li>
+      <li><input type="checkbox"> Logout clears session</li>
+      <li><input type="checkbox"> Unauthorized redirects work</li>
+    </ul>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Security & Policies</div>
+    <ul>
+      <li><input type="checkbox"> RLS rules restrict access correctly</li>
+      <li><input type="checkbox"> No sensitive keys exposed</li>
+      <li><input type="checkbox"> Users cannot modify others’ data</li>
+    </ul>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Final Checks</div>
+    <ul>
+      <li><input type="checkbox"> Multiple recruiter accounts tested</li>
+      <li><input type="checkbox"> Multiple jobs posting/editing/deleting tested</li>
+      <li><input type="checkbox"> Credits flow tested</li>
+      <li><input type="checkbox"> Alerts and console errors handled</li>
+    </ul>
+  </div>
+</main>
+
+</body>
+</html>

@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Edit Job</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  body { font-family: 'Inter', sans-serif; background: #f4f7fb; margin:0; padding:0; display:flex; justify-content:center; align-items:flex-start; min-height:100vh; }
+  .container { width:100%; max-width:600px; margin:40px 20px; }
+
+  form { background:white; padding:25px; border-radius:12px; box-shadow:0 6px 18px rgba(0,0,0,0.08); display:flex; flex-direction:column; gap:15px; }
+  form input, form select, form textarea { width:100%; padding:12px; border-radius:8px; border:1px solid #ccc; font-size:1rem; }
+  form button { width:100%; padding:14px; border:none; border-radius:8px; font-size:1rem; font-weight:600; cursor:pointer; background: linear-gradient(90deg,#1e3a8a,#3b82f6); color:white; box-shadow:0 4px 10px rgba(0,0,0,0.15); transition:0.3s; }
+  form button:hover { background: linear-gradient(90deg,#16275f,#2563eb); }
+
+  .declaration-section { font-size:0.95rem; }
+  .declaration-section input[type="checkbox"] { margin-bottom:10px; }
+  .declaration-section span { display:block; margin-left:25px; }
+
+  h2 { text-align:center; color:#1e3a8a; margin-bottom:20px; }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <h2>Edit Job</h2>
+  <form id="editJobForm" novalidate>
+    <input type="text" id="jobTitle" placeholder="Job Title" required>
+    <input type="text" id="jobCompany" placeholder="Company / Agency Name" required>
+    <input type="text" id="location" placeholder="Location" required>
+    <select id="jobType" required>
+      <option value="">-- Select Type --</option>
+      <option value="Internship">Internship</option>
+      <option value="Learnership">Learnership</option>
+      <option value="Training Program">Training Program</option>
+      <option value="Part-time">Part-time</option>
+      <option value="Permanent">Permanent</option>
+      <option value="Contract">Contract</option>
+    </select>
+    <input type="text" id="requiredQualifications" placeholder="Required Qualifications (comma separated)" required>
+    <textarea id="description" placeholder="Job Description" rows="4" required></textarea>
+
+    <div class="declaration-section">
+      <label>
+        <input type="checkbox" id="declaration" required>
+        <span>I declare that this job is genuine, interviews will be conducted, and no prior experience is required.</span>
+      </label>
+    </div>
+
+    <button type="submit" id="saveJobBtn">Save Changes</button>
+  </form>
+</div>
+
+<script type="module">
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+
+const SUPABASE_URL = 'https://euclknvsppptbfclwxqq.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV1Y2xrbnZzcHBwdGJmY2x3eHFxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc2Mjc2NTQsImV4cCI6MjA3MzIwMzY1NH0.HlGW3kZJ4CPnF2JuZGs_4ObkhxwVFTSedb7O8HHDEag';
+const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+const params = new URLSearchParams(window.location.search);
+const jobId = params.get('jobId');
+const form = document.getElementById('editJobForm');
+
+async function loadJob() {
+  if (!jobId) return alert('No job ID provided');
+
+  const { data: job, error } = await supabase.from('jobs').select('*').eq('id', jobId).single();
+  if (error || !job) return alert('Job not found');
+
+  document.getElementById('jobTitle').value = job.title;
+  document.getElementById('jobCompany').value = job.company_name;
+  document.getElementById('location').value = job.location;
+  document.getElementById('jobType').value = job.job_type;
+  document.getElementById('requiredQualifications').value = job.required_qualifications || '';
+  document.getElementById('description').value = job.description;
+}
+
+form.addEventListener('submit', async e => {
+  e.preventDefault();
+  if (!document.getElementById('declaration').checked) return alert('Please agree to declaration');
+
+  const updates = {
+    title: document.getElementById('jobTitle').value.trim(),
+    company_name: document.getElementById('jobCompany').value.trim(),
+    location: document.getElementById('location').value.trim(),
+    job_type: document.getElementById('jobType').value,
+    required_qualifications: document.getElementById('requiredQualifications').value.trim(),
+    description: document.getElementById('description').value.trim()
+  };
+
+  try {
+    const { error } = await supabase.from('jobs').update(updates).eq('id', jobId);
+    if (error) throw error;
+    alert('Job updated successfully!');
+    window.location.href = 'recruiter-dashboard.html';
+  } catch (err) {
+    console.error(err);
+    alert('Failed to update job');
+  }
+});
+
+loadJob();
+</script>
+
+</body>
+</html>
