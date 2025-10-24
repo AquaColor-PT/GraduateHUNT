@@ -7,28 +7,110 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
 <style>
   body { font-family: 'Inter', sans-serif; background: #f4f7fb; margin: 0; padding: 0; color: #333; }
-  header { display:flex; justify-content:space-between; align-items:center; background: linear-gradient(90deg,#1e3a8a,#3b82f6); color:white; padding:20px 30px; border-radius:0 0 20px 20px; box-shadow:0 4px 12px rgba(0,0,0,0.15); flex-wrap: wrap; }
-  header h1 { margin:0; font-weight:600; font-size:1.5rem; }
-  header nav a { color:white; text-decoration:none; margin-left:20px; font-weight:500; padding:8px 12px; border-radius:8px; transition:0.2s; }
-  header nav a:hover { background: rgba(255,255,255,0.2); color:white; }
 
-  .main { max-width:1200px; margin:30px auto; }
-  #searchBar { width:100%; padding:12px; margin-bottom:20px; border-radius:8px; border:1px solid #ccc; font-size:1rem; }
+  /* Header */
+  header {
+    background: linear-gradient(90deg,#1e3a8a,#3b82f6);
+    color:white;
+    padding: 20px 15px;
+    border-radius: 0 0 20px 20px;
+    box-shadow:0 4px 12px rgba(0,0,0,0.15);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+  }
+
+  header h1 {
+    margin:0;
+    font-weight:600;
+    font-size:1.5rem;
+    text-align: center;
+  }
+
+  header nav {
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  header nav a {
+    flex: 1 1 120px;
+    max-width: 180px;
+    text-align: center;
+    padding: 10px 0;
+    font-weight: 600;
+    color: white;
+    text-decoration: none;
+    border-radius: 8px;
+    background: linear-gradient(90deg,#1e3a8a,#3b82f6);
+    transition: 0.3s;
+  }
+
+  header nav a:hover {
+    background: linear-gradient(90deg,#16275f,#2563eb);
+  }
+
+  /* Main Content */
+  .main { max-width:1200px; margin:30px auto; padding:0 15px; }
+  #searchBar {
+    width:100%;
+    padding:12px;
+    margin-bottom:20px;
+    border-radius:8px;
+    border:1px solid #ccc;
+    font-size:1rem;
+  }
 
   .job-item {
-    background:white; padding:15px; margin-bottom:15px; border-radius:12px; box-shadow:0 6px 18px rgba(0,0,0,0.08);
-    display:flex; justify-content:space-between; flex-wrap:wrap;
+    background:white;
+    padding:15px;
+    margin-bottom:15px;
+    border-radius:12px;
+    box-shadow:0 6px 18px rgba(0,0,0,0.08);
+    display:flex;
+    justify-content:space-between;
+    flex-wrap:wrap;
   }
-  .job-item div { max-width: 70%; }
-  .job-item button { margin-left:10px; padding:8px 14px; border:none; border-radius:6px; cursor:pointer; font-weight:500; transition:0.2s; color:white; }
+
+  .job-item div { max-width:70%; }
+
+  .job-item button {
+    margin-left:10px;
+    padding:10px 16px;
+    border:none;
+    border-radius:8px;
+    cursor:pointer;
+    font-weight:600;
+    transition:0.3s;
+    color:white;
+  }
+
   .editBtn { background: linear-gradient(90deg,#1e3a8a,#3b82f6); }
   .editBtn:hover { background: linear-gradient(90deg,#16275f,#2563eb); }
+
   .deleteBtn { background:#dc3545; }
   .deleteBtn:hover { background:#a71d2a; }
+
   .toggleVisibilityBtn { background:#f59e0b; }
   .toggleVisibilityBtn:hover { background:#b45309; }
-  .toggleDesc { display:inline-block; margin-top:5px; cursor:pointer; color:#3b82f6; font-weight:600; text-decoration:underline; }
+
+  .toggleDesc {
+    display:inline-block;
+    margin-top:5px;
+    cursor:pointer;
+    color:#3b82f6;
+    font-weight:600;
+    text-decoration:underline;
+  }
   .toggleDesc:hover { color:#1e3a8a; }
+
+  /* Responsive */
+  @media (max-width:600px){
+    header nav { flex-direction: column; width:100%; gap:10px; }
+    header nav a { max-width:100%; }
+  }
 </style>
 </head>
 <body>
@@ -38,7 +120,7 @@
   <nav>
     <a href="recruiter-dashboard.html">Dashboard</a>
     <a href="messages.html">Messages</a>
-    <a href="homepage.html" id="logoutBtn">Logout</a>
+    <a href="homepage.html">Logout</a>
   </nav>
 </header>
 

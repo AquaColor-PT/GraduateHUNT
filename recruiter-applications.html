@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Recruiter Applications - Graduateinhunt</title>
+<title>Recruiter Applications - GraduateInHunt</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
 <style>
   body {
@@ -19,12 +19,12 @@
     background: linear-gradient(90deg, #1e3a8a, #3b82f6);
     color: white;
     padding: 20px 15px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
     border-radius: 0 0 20px 20px;
     box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
   }
 
   header h1 {
@@ -33,18 +33,29 @@
     font-weight: 600;
   }
 
+  /* Header buttons like recruiter dashboard */
+  header nav {
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
   header nav a {
+    flex: 1 1 120px;
+    max-width: 180px;
+    text-align: center;
+    padding: 10px 0;
+    font-weight: 600;
     color: white;
     text-decoration: none;
-    margin-left: 20px;
-    font-weight: 500;
-    padding: 8px 15px;
     border-radius: 8px;
-    transition: background 0.3s;
+    background: linear-gradient(90deg, #1e3a8a, #3b82f6);
+    transition: 0.3s;
   }
 
   header nav a:hover {
-    background: rgba(255,255,255,0.15);
+    background: linear-gradient(90deg, #16275f, #2563eb);
   }
 
   /* Container */
@@ -72,30 +83,14 @@
     box-shadow: 0 3px 6px rgba(0,0,0,0.05);
   }
 
-  /* Job Group */
-  .job-group {
-    margin-bottom: 30px;
-  }
-
-  .job-title {
-    background: linear-gradient(90deg, #e0e7ff, #c7d2fe);
-    color: #1e3a8a;
-    font-weight: 600;
-    font-size: 1.2rem;
-    padding: 12px 20px;
-    border-radius: 12px 12px 0 0;
-  }
-
+  /* Applications list */
   .applicationsList {
-    border: 1px solid #e0e7ff;
-    border-top: none;
-    border-radius: 0 0 12px 12px;
     background: white;
+    border-radius: 12px;
     padding: 15px;
     box-shadow: 0 6px 12px rgba(0,0,0,0.05);
   }
 
-  /* Application Items */
   .application-item {
     padding: 15px;
     border-bottom: 1px solid #eee;
@@ -137,30 +132,26 @@
   .status-accepted { background-color: #28a745; }
   .status-rejected { background-color: #dc3545; }
 
-  /* Buttons */
+  /* Buttons in applications (styled like dashboard buttons) */
   .application-item button {
     padding: 10px 18px;
     border: none;
-    border-radius: 10px;
-    margin-left: 10px;
-    font-weight: 500;
+    border-radius: 8px;
+    font-weight: 600;
     cursor: pointer;
-    transition: transform 0.2s, box-shadow 0.2s;
+    transition: 0.3s;
     color: white;
     font-size: 0.95rem;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
   }
 
-  .accept-btn { background: linear-gradient(135deg, #28a745, #218838); }
-  .accept-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 10px rgba(0,0,0,0.15); }
+  .accept-btn { background: linear-gradient(90deg, #28a745, #218838); }
+  .accept-btn:hover { background: linear-gradient(90deg, #218838, #1e7e34); }
 
-  .reject-btn { background: linear-gradient(135deg, #dc3545, #c82333); }
-  .reject-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 10px rgba(0,0,0,0.15); }
+  .reject-btn { background: linear-gradient(90deg, #dc3545, #c82333); }
+  .reject-btn:hover { background: linear-gradient(90deg, #c82333, #bd2130); }
 
-  .delete-btn { background: linear-gradient(135deg, #6c757d, #5a6268); }
-  .delete-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 10px rgba(0,0,0,0.15); }
-
- 
+  .delete-btn { background: linear-gradient(90deg, #6c757d, #5a6268); }
+  .delete-btn:hover { background: linear-gradient(90deg, #5a6268, #495057); }
 
   /* Responsive */
   @media (max-width: 600px) {
@@ -169,7 +160,12 @@
       text-align: center;
       gap: 10px;
     }
-    header nav a { margin-left: 0; }
+    header nav {
+      flex-direction: column;
+      width: 100%;
+      gap: 10px;
+    }
+    header nav a { max-width: 100%; }
   }
 </style>
 </head>
@@ -179,8 +175,8 @@
   <h1>Recruiter Applications</h1>
   <nav>
     <a href="recruiter-dashboard.html">Dashboard</a>
-    <a href="homepage.html" id="logoutBtn">Logout</a>
-    <a href="messages.html" id="logoutBtn">messages</a>
+    <a href="homepage.html">Logout</a>
+    <a href="messages.html">Messages</a>
   </nav>
 </header>
 
@@ -199,7 +195,9 @@
         <span class="badge status-pending">Pending</span>
       </div>
       <div>
-        <button class="reply-btn" onclick="window.location.href='recruiter-message.html'">Reply</button>
+        <button class="accept-btn">Accept</button>
+        <button class="reject-btn">Reject</button>
+        <button class="delete-btn">Delete</button>
       </div>
     </div>
     -->
