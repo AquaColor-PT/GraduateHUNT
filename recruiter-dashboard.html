@@ -6,44 +6,215 @@
 <title>Recruiter Dashboard</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
 <style>
-  body { font-family: 'Inter', sans-serif; background: #f4f7fb; margin: 0; padding: 0; color: #333; }
+  body {
+    font-family: 'Inter', sans-serif;
+    background: #f4f7fb;
+    margin: 0;
+    padding: 0;
+    color: #333;
+  }
+
   header {
-    display:flex; justify-content:space-between; align-items:center;
-    background: linear-gradient(90deg,#1e3a8a,#3b82f6); color:white;
-    padding:20px 30px; border-radius:0 0 20px 20px; box-shadow:0 4px 12px rgba(0,0,0,0.15); flex-wrap: wrap;
+    text-align: center;
+    background: linear-gradient(90deg, #1e3a8a, #3b82f6);
+    color: white;
+    padding: 20px 15px;
+    border-radius: 0 0 20px 20px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   }
-  header h1 { margin:0; font-weight:600; font-size:1.5rem; }
-  header nav a { color:white; text-decoration:none; margin-left:20px; font-weight:500; padding:8px 12px; border-radius:8px; transition:0.2s; }
-  header nav a:hover { background: rgba(255,255,255,0.2); color:white; }
 
-  .main { display:flex; max-width:1200px; margin:30px auto; gap:20px; flex-wrap:wrap; }
+  header h1 {
+    margin: 0 0 15px;
+    font-weight: 600;
+    font-size: 2rem;
+  }
 
-  .left-panel { flex:1; min-width:280px; background:white; border-radius:12px; padding:20px; box-shadow:0 6px 18px rgba(0,0,0,0.08); text-align:center; }
-  .left-panel img, #profilePicContainer { width:120px; height:120px; border-radius:50%; object-fit:cover; display:block; margin:0 auto 10px; }
-  #profilePicContainer { display:flex; align-items:center; justify-content:center; font-weight:bold; font-size:14px; color:white; background: linear-gradient(135deg,#1e3a8a,#3b82f6); }
-  .left-panel h2 { margin:10px 0 5px; color:#1e3a8a; font-weight:600; }
-  .left-panel p { margin:5px 0; font-weight:500; color:#555; }
-  #buyCreditsBtn { margin-top:10px; padding:10px 20px; border:none; border-radius:8px; background:#16a34a; color:white; font-weight:600; cursor:pointer; transition:0.2s; }
-  #buyCreditsBtn:hover { background:#15803d; }
+  header nav {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
 
-  .right-panel { flex:2; display:flex; flex-direction:column; gap:20px; min-width:300px; }
+  header nav a {
+    flex: 1 1 150px;
+    max-width: 180px;
+    text-align: center;
+    background: rgba(255, 255, 255, 0.15);
+    color: white;
+    text-decoration: none;
+    font-weight: 600;
+    padding: 10px 0;
+    border-radius: 8px;
+    transition: 0.3s;
+  }
+
+  header nav a:hover {
+    background: rgba(255, 255, 255, 0.3);
+  }
+
+  .main {
+    display: flex;
+    max-width: 1200px;
+    margin: 30px auto;
+    gap: 20px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .left-panel {
+    flex: 1;
+    min-width: 280px;
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+    text-align: center;
+  }
+
+  .left-panel img,
+  #profilePicContainer {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    object-fit: cover;
+    display: block;
+    margin: 0 auto 10px;
+  }
+
+  #profilePicContainer {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 14px;
+    color: white;
+    background: linear-gradient(135deg, #1e3a8a, #3b82f6);
+  }
+
+  .left-panel h2 {
+    margin: 10px 0 5px;
+    color: #1e3a8a;
+    font-weight: 600;
+  }
+
+  .left-panel p {
+    margin: 5px 0;
+    font-weight: 500;
+    color: #555;
+  }
+
+  #buyCreditsBtn {
+    margin-top: 10px;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    background: #16a34a;
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.2s;
+  }
+
+  #buyCreditsBtn:hover {
+    background: #15803d;
+  }
+
+  .right-panel {
+    flex: 2;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    min-width: 300px;
+  }
+
   #jobForm {
-    background:white; padding:25px; border-radius:12px; box-shadow:0 6px 18px rgba(0,0,0,0.08);
+    background: white;
+    padding: 25px;
+    border-radius: 12px;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
   }
-  #jobForm input, #jobForm select, #jobForm textarea { width:100%; padding:12px; margin:10px 0; border-radius:8px; border:1px solid #ccc; font-size:1rem; }
-  #jobForm button, #viewMyJobsBtn {
-    width:100%; padding:14px; border:none; border-radius:8px; font-size:1rem; font-weight:600; cursor:pointer; transition:0.3s;
+
+  #jobForm input,
+  #jobForm select,
+  #jobForm textarea {
+    width: 100%;
+    padding: 12px;
+    margin: 10px 0;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    font-size: 1rem;
   }
-  #jobForm button { background: linear-gradient(90deg,#1e3a8a,#3b82f6); color:white; box-shadow:0 4px 10px rgba(0,0,0,0.15); }
-  #jobForm button:hover { background: linear-gradient(90deg,#16275f,#2563eb); }
-  #viewMyJobsBtn { margin-top:10px; background:#3b82f6; color:white; }
-  #viewMyJobsBtn:hover { background:#1e3a8a; }
 
-  .declaration-section { margin:15px 0; font-size:0.95rem; }
-  .declaration-section input[type="checkbox"] { margin-bottom:10px; }
-  .declaration-section span { display:block; margin-left:25px; }
+  #jobForm button,
+  #viewMyJobsBtn {
+    width: 100%;
+    padding: 14px;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.3s;
+  }
 
-  @media (max-width:800px) { .main { flex-direction:column; } }
+  #jobForm button {
+    background: linear-gradient(90deg, #1e3a8a, #3b82f6);
+    color: white;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+  }
+
+  #jobForm button:hover {
+    background: linear-gradient(90deg, #16275f, #2563eb);
+  }
+
+  #viewMyJobsBtn {
+    margin-top: 10px;
+    background: #3b82f6;
+    color: white;
+  }
+
+  #viewMyJobsBtn:hover {
+    background: #1e3a8a;
+  }
+
+  .declaration-section {
+    margin: 15px 0;
+    font-size: 0.95rem;
+  }
+
+  .declaration-section input[type="checkbox"] {
+    margin-bottom: 10px;
+  }
+
+  .declaration-section span {
+    display: block;
+    margin-left: 25px;
+  }
+
+  @media (max-width: 768px) {
+    header nav a {
+      flex: 1 1 45%;
+      font-size: 0.9rem;
+      padding: 8px 0;
+    }
+
+    header h1 {
+      font-size: 1.5rem;
+    }
+
+    body {
+      transform: scale(0.9);
+      transform-origin: top center;
+    }
+  }
+
+  @media (max-width: 480px) {
+    body {
+      transform: scale(0.8);
+      transform-origin: top center;
+    }
+  }
 </style>
 </head>
 <body>
@@ -52,7 +223,7 @@
   <h1>Recruiter Dashboard</h1>
   <nav>
     <a href="recruiter-profile.html">Update Profile</a>
-    <a href="my-post.html">My posts</a>
+    <a href="my-post.html">My Posts</a>
     <a href="homepage-for-recruiters.html">View Graduates</a>
     <a href="messages.html">Messages</a>
     <a href="recruiter-applications.html">View Applications</a>
