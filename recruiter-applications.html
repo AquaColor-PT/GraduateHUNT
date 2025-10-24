@@ -18,10 +18,14 @@
   header {
     background: linear-gradient(90deg, #1e3a8a, #3b82f6);
     color: white;
-    padding: 30px 20px 40px; /* more bottom padding for buttons */
+    padding: 20px 15px;
+    text-align: center;
     border-radius: 0 0 20px 20px;
     box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-    text-align: center;
+    display: flex;
+    flex-direction: column; /* stack title and nav vertically */
+    align-items: center;    /* center horizontally */
+    gap: 15px;              /* spacing between title and buttons */
   }
 
   header h1 {
@@ -30,28 +34,24 @@
     font-weight: 600;
   }
 
-  /* Header buttons */
-  .header-buttons {
+  header nav {
     display: flex;
-    justify-content: center;
-    gap: 15px;
-    flex-wrap: wrap;
-    margin-top: 20px;
+    gap: 15px;       /* spacing between buttons */
+    justify-content: center; /* center buttons */
+    flex-wrap: wrap; /* wrap on small screens */
   }
 
-  .header-buttons a {
-    padding: 10px 20px;
-    font-weight: 600;
+  header nav a {
+    padding: 8px 20px;
+    border-radius: 10px;
+    font-weight: 500;
     color: white;
     text-decoration: none;
-    border-radius: 12px;
     background: linear-gradient(90deg, #1e3a8a, #3b82f6);
     transition: 0.3s;
-    min-width: 120px;
-    text-align: center;
   }
 
-  .header-buttons a:hover {
+  header nav a:hover {
     background: linear-gradient(90deg, #16275f, #2563eb);
   }
 
@@ -80,14 +80,30 @@
     box-shadow: 0 3px 6px rgba(0,0,0,0.05);
   }
 
-  /* Applications list */
+  /* Job Group */
+  .job-group {
+    margin-bottom: 30px;
+  }
+
+  .job-title {
+    background: linear-gradient(90deg, #e0e7ff, #c7d2fe);
+    color: #1e3a8a;
+    font-weight: 600;
+    font-size: 1.2rem;
+    padding: 12px 20px;
+    border-radius: 12px 12px 0 0;
+  }
+
   .applicationsList {
+    border: 1px solid #e0e7ff;
+    border-top: none;
+    border-radius: 0 0 12px 12px;
     background: white;
-    border-radius: 12px;
     padding: 15px;
     box-shadow: 0 6px 12px rgba(0,0,0,0.05);
   }
 
+  /* Application Items */
   .application-item {
     padding: 15px;
     border-bottom: 1px solid #eee;
@@ -98,7 +114,11 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    flex-wrap: wrap;
+  }
+
+  .application-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 16px rgba(0,0,0,0.08);
   }
 
   .application-item div { margin-bottom: 6px; }
@@ -125,34 +145,35 @@
   .status-accepted { background-color: #28a745; }
   .status-rejected { background-color: #dc3545; }
 
-  /* Buttons in applications */
+  /* Buttons */
   .application-item button {
     padding: 10px 18px;
     border: none;
-    border-radius: 8px;
-    font-weight: 600;
+    border-radius: 10px;
+    margin-left: 10px;
+    font-weight: 500;
     cursor: pointer;
-    transition: 0.3s;
+    transition: transform 0.2s, box-shadow 0.2s;
     color: white;
     font-size: 0.95rem;
-    margin-left: 8px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
   }
 
-  .accept-btn { background: linear-gradient(90deg, #28a745, #218838); }
-  .accept-btn:hover { background: linear-gradient(90deg, #218838, #1e7e34); }
+  .accept-btn { background: linear-gradient(135deg, #28a745, #218838); }
+  .accept-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 10px rgba(0,0,0,0.15); }
 
-  .reject-btn { background: linear-gradient(90deg, #dc3545, #c82333); }
-  .reject-btn:hover { background: linear-gradient(90deg, #c82333, #bd2130); }
+  .reject-btn { background: linear-gradient(135deg, #dc3545, #c82333); }
+  .reject-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 10px rgba(0,0,0,0.15); }
 
-  .delete-btn { background: linear-gradient(90deg, #6c757d, #5a6268); }
-  .delete-btn:hover { background: linear-gradient(90deg, #5a6268, #495057); }
+  .delete-btn { background: linear-gradient(135deg, #6c757d, #5a6268); }
+  .delete-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 10px rgba(0,0,0,0.15); }
 
   /* Responsive */
   @media (max-width: 600px) {
-    .header-buttons { flex-direction: column; gap: 10px; }
-    .header-buttons a { width: 100%; max-width: 300px; margin: 0 auto; }
-    .application-item { flex-direction: column; align-items: flex-start; gap: 8px; }
-    .application-item button { margin-left: 0; }
+    header nav {
+      flex-direction: column;
+      gap: 10px;
+    }
   }
 </style>
 </head>
@@ -160,11 +181,11 @@
 
 <header>
   <h1>Recruiter Applications</h1>
-  <div class="header-buttons">
+  <nav>
     <a href="recruiter-dashboard.html">Dashboard</a>
+    <a href="homepage.html" id="logoutBtn">Logout</a>
     <a href="messages.html">Messages</a>
-    <a href="homepage.html">Logout</a>
-  </div>
+  </nav>
 </header>
 
 <div class="container">
