@@ -6,16 +6,18 @@
 <title>Graduate Portal - Home</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
 <style>
-  body { font-family: 'Inter', sans-serif; margin: 0; background: #f4f7fb; }
+  body { 
+    font-family: 'Inter', sans-serif; 
+    margin: 0; 
+    background: #f4f7fb; 
+  }
 
   /* Header with shiny gradient */
   header {
     background: linear-gradient(90deg,#1e3a8a,#3b82f6);
     color: white;
-    padding: 20px 25px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    padding: 20px 25px 10px 25px;
+    text-align: center;
     position: relative;
     border-radius: 0 0 20px 20px;
   }
@@ -23,13 +25,32 @@
   header h1 {
     margin: 0;
     font-weight: 600;
-    font-size: 1.5rem;
+    font-size: 1.8rem;
   }
 
+  /* Logout button below title */
+  #logoutBtn {
+    margin-top: 10px;
+    padding: 10px 22px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    background: linear-gradient(145deg, #1e3a8a, #3b82f6);
+    color: white;
+    transition: 0.3s;
+  }
+
+  #logoutBtn:hover {
+    background: linear-gradient(145deg, #16275f, #2563eb);
+  }
+
+  /* Hamburger menu */
   .hamburger {
     cursor: pointer;
     position: absolute;
     left: 25px;
+    top: 28px;
     display: inline-block;
   }
 
@@ -39,23 +60,6 @@
     background: white;
     margin: 5px 0;
     transition: 0.3s;
-  }
-
-  /* Logout button with gradient */
-  #logoutBtn {
-    position: absolute;
-    right: 25px;
-    padding: 8px 20px;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    font-weight: 600;
-    background: linear-gradient(145deg, #1e3a8a, #3b82f6);
-    color: white;
-    transition: 0.3s;
-  }
-  #logoutBtn:hover {
-    background: linear-gradient(145deg, #16275f, #2563eb);
   }
 
   /* Sidebar */
@@ -73,6 +77,7 @@
     color: white;
     box-shadow: 2px 0 12px rgba(0,0,0,0.3);
   }
+
   #sidebar .closebtn { position: absolute; top: 20px; right: 25px; font-size: 36px; cursor: pointer; }
   #sidebar img { border-radius: 50%; width: 120px; height: 120px; object-fit: cover; display: block; margin: 0 auto 15px; border: 3px solid white; box-shadow: 0 4px 12px rgba(0,0,0,0.4); }
   #sidebar p { text-align: center; margin: 8px 0; color: white; font-weight: 500; }
@@ -81,13 +86,30 @@
 
   .container { padding: 40px 20px 20px 20px; max-width: 900px; margin: auto; }
 
-  /* Hero section styled with shiny blue buttons */
-  .hero { background: white; padding: 50px 20px; text-align: center; border-radius: 12px; box-shadow: 0 6px 18px rgba(0,0,0,0.08); }
+  /* Hero section */
+  .hero { 
+    background: white; 
+    padding: 50px 20px; 
+    text-align: center; 
+    border-radius: 12px; 
+    box-shadow: 0 6px 18px rgba(0,0,0,0.08); 
+  }
+
   .hero h2 { font-size: 2em; margin-bottom: 15px; color: #1e3a8a; }
   .hero p { font-size: 1.1em; margin-bottom: 25px; color: #333; }
-  .job-buttons { display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; }
+
+  .job-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    flex-wrap: wrap;
+  }
+
   .job-buttons a {
-    padding: 12px 25px;
+    flex: 1 1 200px; /* same width for all buttons */
+    max-width: 220px;
+    padding: 12px 0;
+    text-align: center;
     border-radius: 8px;
     font-weight: 600;
     color: white;
@@ -95,9 +117,16 @@
     background: linear-gradient(145deg, #1e3a8a, #3b82f6);
     transition: 0.3s;
   }
+
   .job-buttons a:hover { background: linear-gradient(145deg, #16275f, #2563eb); }
 
-  @media (max-width: 500px) { .job-buttons { flex-direction: column; } }
+  /* Keep proportional scaling */
+  @media (max-width: 480px) {
+    body {
+      transform: scale(0.9);
+      transform-origin: top center;
+    }
+  }
 </style>
 </head>
 <body>
