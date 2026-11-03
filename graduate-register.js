@@ -13,9 +13,6 @@ const passwordInput = document.getElementById('password');
 const registerBtn = document.getElementById('registerBtn');
 const messageEl = document.getElementById('message');
 
-// Optional: toggle password visibility
-
-
 registerBtn.addEventListener('click', async () => {
   messageEl.textContent = '';
   messageEl.className = 'message';
@@ -46,19 +43,22 @@ registerBtn.addEventListener('click', async () => {
       return;
     }
 
+    // Builds the link from the page's current address, so it works on any domain
+    const verifyUrl = new URL('verify.html', window.location.href).href;
+
     // Sign up with Supabase Auth (email verification required)
     const { data: authData, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
-        emailRedirectTo: window.location.origin + "/verify.html",
+        emailRedirectTo: verifyUrl,
         data: { full_name, phone, qualification }
       }
     });
 
     if (error) throw error;
 
-    // ✅ Do not insert into graduates table yet.
+    // Do not insert into graduates table yet.
     // Wait until user verifies their email, then handle insert on verify.html page.
 
     messageEl.textContent = 'Registration successful! Please check your email to verify your account before logging in.';
