@@ -6,6 +6,10 @@
 <title>Graduate Job Portal</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
 body{
   font-family: 'Inter', sans-serif;
   margin: 0;
@@ -25,6 +29,8 @@ header {
   align-items: center;
   justify-content: center;
   position: relative;
+  min-height: 64px;
+  box-sizing: border-box;
 }
 
 header h1 {
@@ -34,33 +40,45 @@ header h1 {
   position: absolute;
   left: 50%;
   transform: translateX(-50%);
+  white-space: nowrap;
 }
 .hamburger {
-  font-size: 1.6rem;
+  font-size: 1.8rem;
+  line-height: 1;
   cursor: pointer;
   background: none;
   border: none;
   color: white;
   position: absolute;
-  left: 20px;
+  left: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 48px;
+  height: 48px;
 }
 
 /* Sidebar */
 .sidebar {
   position: fixed;
   top: 0;
-  left: -280px;
-  width: 260px;
+  left: 0;
+  width: min(280px, 85vw);
   height: 100%;
+  height: 100dvh;
+  box-sizing: border-box;
   background: #1e3a8a;
   color: white;
   padding: 20px;
-  transition: left 0.3s ease;
+  padding-top: 60px;
+  transform: translateX(-105%);
+  visibility: hidden;
+  transition: transform 0.3s ease, visibility 0.3s;
   z-index: 2000;
   overflow-y: auto;
 }
 .sidebar.active {
-  left: 0;
+  transform: translateX(0);
+  visibility: visible;
 }
 .sidebar h2 {
   font-size: 1.4rem;
@@ -75,11 +93,31 @@ header h1 {
   background: none;
   border: none;
   color: white;
-  font-size: 1.4rem;
+  font-size: 1.8rem;
+  line-height: 1;
   cursor: pointer;
   position: absolute;
-  top: 15px;
-  right: 15px;
+  top: 8px;
+  right: 8px;
+  width: 48px;
+  height: 48px;
+}
+
+/* Dim background behind the sidebar (tap it to close) */
+.overlay {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.45);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+  z-index: 1500;
+}
+.overlay.active {
+  opacity: 1;
+  pointer-events: auto;
 }
 
 /* Hero Section with Background Image */
@@ -118,6 +156,9 @@ header h1 {
 .hero p {
   font-size: 1.2rem;
   margin-bottom: 30px;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
 }
 .hero .auth-buttons {
   display: flex;
@@ -189,47 +230,6 @@ header h1 {
   color: #555;
 }
 
-/* Modal */
-#roleModal {
-  display: none;
-  position: fixed;
-  top:0; left:0;
-  width:100%;
-  height:100%;
-  background: rgba(0,0,0,0.5);
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
-}
-.modal-content {
-  background: white;
-  padding: 30px;
-  border-radius: 16px;
-  text-align: center;
-  width: 300px;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-}
-.modal-content h3 {
-  margin-bottom: 20px;
-  color: #1e3a8a;
-}
-.modal-content button {
-  width: 100%;
-  margin: 10px 0;
-  padding: 12px;
-  border-radius: 12px;
-  font-weight: 600;
-  border: none;
-  cursor: pointer;
-  transition: 0.3s;
-}
-#graduateLogin { background: #1e3a8a; color:white; }
-#graduateLogin:hover { background:#16275f; }
-#recruiterLogin { background: #28a745; color:white; }
-#recruiterLogin:hover { background:#1e7e34; }
-#closeModal { background:#dc3545; color:white; }
-#closeModal:hover { background:#a71d2a; }
-
 /* Footer */
 footer {
   background: #1e3a8a;
@@ -242,32 +242,57 @@ footer p {
   margin: 0;
 }
 
-/* Responsive */
+/* Responsive: tablets and phones */
 @media (max-width:600px){
+  .hero { padding: 70px 18px; border-radius: 0 0 28px 28px; margin-bottom: 24px; }
   .hero h2 { font-size: 2rem; }
   .hero p { font-size: 1rem; }
+
+  /* Big, full-width, easy-to-tap buttons */
+  .hero .auth-buttons { flex-direction: column; align-items: center; gap: 14px; }
+  .hero .auth-buttons a,
+  .hero .auth-buttons button {
+    width: 100%;
+    max-width: 320px;
+    box-sizing: border-box;
+    padding: 16px 20px;
+    text-align: center;
+  }
+
+  .how-it-works { padding: 44px 16px; }
+  .how-it-works h3 { font-size: 1.7rem; margin-bottom: 28px; }
   .step { max-width: 100%; }
+
+  footer { padding: 18px 16px; }
+}
+
+/* Small phones */
+@media (max-width:380px){
+  header h1 { font-size: 1.3rem; }
+  .hero { padding: 56px 16px; }
+  .hero h2 { font-size: 1.65rem; }
+  .sidebar h2 { font-size: 1.25rem; }
 }
 </style>
 </head>
 <body>
 
 <header>
-  <button class="hamburger" id="hamburger">☰</button>
+  <button class="hamburger" id="hamburger" aria-label="Open menu" aria-expanded="false">☰</button>
   <h1>GraduateInHunt</h1>
 </header>
 
 <!-- Sidebar -->
+<div class="overlay" id="overlay"></div>
 <div class="sidebar" id="sidebar">
-  <button class="close-btn" id="closeSidebar">&times;</button>
+  <button class="close-btn" id="closeSidebar" aria-label="Close menu">&times;</button>
   <h2>My Story</h2>
-  <p>Hi, my name is <strong>Tokollo Simbini</strong>, an unemployed Electrical Engineering graduate.  
-  After finishing my degree, I realized how tough it is for graduates with no experience to find real opportunities.  
-  I created GraduateInHunt to connect graduates like myself with recruiters willing to give us a chance through internships, learnerships, and entry-level positions.  
+  <p>Hi, my name is <strong>Tokollo Simbini</strong>, an unemployed Electrical Engineering graduate.
+  After finishing my degree, I realized how tough it is for graduates with no experience to find real opportunities.
+  I created GraduateInHunt to connect graduates like myself with recruiters willing to give us a chance through internships, learnerships, and entry-level positions.
   This platform is built to inspire hope and create a bridge between education and employment.</p>
 </div>
 
-<!-- Hero Section -->
 <!-- Hero Section -->
 <section class="hero">
   <div class="hero-overlay"></div>
@@ -275,7 +300,7 @@ footer p {
   <p>Find internships, learnerships, training programs, and entry-level jobs tailored just for graduates.</p>
   <div class="auth-buttons">
     <a href="select-role.html">Register</a>
-    <a href="login-type.html" id="loginBtn">Login</a> <!-- Changed from button to link -->
+    <a href="login-type.html" id="loginBtn">Login</a>
   </div>
 </section>
 
@@ -302,20 +327,30 @@ footer p {
 </footer>
 
 <script>
-const loginBtn = document.getElementById('loginBtn');
-const roleModal = document.getElementById('roleModal');
-const graduateLogin = document.getElementById('graduateLogin');
-const recruiterLogin = document.getElementById('recruiterLogin');
-const closeModal = document.getElementById('closeModal');
-
-
-
 // Sidebar toggle
 const hamburger = document.getElementById('hamburger');
 const sidebar = document.getElementById('sidebar');
 const closeSidebar = document.getElementById('closeSidebar');
-hamburger.addEventListener('click', () => sidebar.classList.add('active'));
-closeSidebar.addEventListener('click', () => sidebar.classList.remove('active'));
+const overlay = document.getElementById('overlay');
+
+function openMenu() {
+  sidebar.classList.add('active');
+  overlay.classList.add('active');
+  hamburger.setAttribute('aria-expanded', 'true');
+}
+
+function closeMenu() {
+  sidebar.classList.remove('active');
+  overlay.classList.remove('active');
+  hamburger.setAttribute('aria-expanded', 'false');
+}
+
+hamburger.addEventListener('click', openMenu);
+closeSidebar.addEventListener('click', closeMenu);
+overlay.addEventListener('click', closeMenu);
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') closeMenu();
+});
 </script>
 
 </body>
