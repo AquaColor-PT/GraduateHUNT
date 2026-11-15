@@ -162,6 +162,30 @@
   .current-doc a:hover { background: #1e7e34; }
   .privacy-note { margin: 16px 0 0; font-size: 0.82rem; color: var(--muted); }
 
+  /* ---------- Additional qualifications ---------- */
+  .field .label { font-size: 0.88rem; font-weight: 600; color: var(--blue-900); }
+  .extra-row {
+    display: grid; gap: 10px; padding: 14px; margin-bottom: 12px;
+    border: 1.5px solid var(--line); border-radius: 14px; background: #fbfcff;
+  }
+  .extra-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+  .extra-actions .file-name { flex: 1 1 140px; margin: 0; }
+  .mini-btn {
+    font: 600 0.85rem 'Inter', sans-serif; color: var(--blue-900); background: var(--blue-50);
+    border: 1px solid #d3defa; padding: 8px 14px; border-radius: 999px;
+    cursor: pointer; text-decoration: none; transition: background .2s;
+  }
+  .mini-btn:hover { background: #e0e9ff; }
+  .mini-btn:focus-within { outline: 3px solid var(--gold); outline-offset: 2px; }
+  .mini-btn.danger { color: #b00020; background: #fff; border-color: #f0c6cc; }
+  .mini-btn.danger:hover { background: #fff0f2; }
+  .add-btn {
+    align-self: flex-start; font: 600 0.92rem 'Inter', sans-serif; color: var(--blue-900);
+    background: #fff; border: 2px dashed #b9c6e8; padding: 11px 18px; border-radius: 12px; cursor: pointer;
+    transition: border-color .2s, background .2s;
+  }
+  .add-btn:hover { border-color: var(--blue-500); background: var(--blue-50); }
+
   /* ---------- Save bar ---------- */
   .actions {
     position: sticky; bottom: 0; z-index: 20;
@@ -314,7 +338,7 @@
     </h2>
     <div class="grid">
       <div class="field full">
-        <label for="qualification">Qualification</label>
+        <label for="qualification">Main qualification</label>
         <input list="qualificationOptions" type="text" id="qualification" placeholder="Select or type your qualification" autocomplete="off">
         <datalist id="qualificationOptions">
           <option value="B.Eng Electrical Engineering">
@@ -340,6 +364,12 @@
         <label for="skills">Skills (comma-separated)</label>
         <input type="text" id="skills" placeholder="e.g. Python, MATLAB, C++">
         <div class="chips" id="skillChips" aria-label="Your skills"></div>
+      </div>
+      <div class="field full">
+        <span class="label">Other qualifications</span>
+        <p class="hint">Add any other qualifications you have, with a certificate for each (PDF, JPG or PNG, max 10 MB).</p>
+        <div id="extraList"></div>
+        <button type="button" id="addQualBtn" class="add-btn">+ Add another qualification</button>
       </div>
     </div>
   </section>
