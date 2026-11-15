@@ -3,22 +3,24 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Recruiter Registration</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+<title>Recruiter Registration - GraduateInHunt</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
 
   body {
-    font-family: 'Inter', sans-serif;
+    font-family: 'Inter', system-ui, sans-serif;
     background: #f4f6f9;
     display: flex;
     justify-content: center;
-    align-items: center;
-    height: 100vh;
+    align-items: flex-start;
+    min-height: 100vh;
+    padding: 32px 16px;
+    color: #1f2937;
   }
 
   .register-container {
-    background: white;
+    background: #fff;
     padding: 40px 30px;
     border-radius: 16px;
     box-shadow: 0 6px 20px rgba(0,0,0,0.1);
@@ -26,153 +28,108 @@
     max-width: 450px;
   }
 
-  h2 {
-    text-align: center;
-    color: #1e3a8a;
-    margin-bottom: 30px;
-    font-weight: 600;
-  }
+  h2 { text-align: center; color: #1e3a8a; margin-bottom: 6px; font-weight: 600; }
+  .subtitle { text-align: center; color: #6b7280; font-size: 0.9rem; margin-bottom: 14px; }
 
-  label {
-    display: block;
-    margin-top: 15px;
-    font-weight: 600;
-    font-size: 0.95rem;
+  .section-label {
+    margin-top: 26px; padding-top: 18px; border-top: 1px solid #e5e7eb;
+    font-size: 0.8rem; font-weight: 600; color: #6b7280; text-transform: uppercase; letter-spacing: .06em;
   }
+  .section-label:first-of-type { margin-top: 10px; padding-top: 0; border-top: none; }
 
-  .input-wrapper {
-    position: relative;
-    margin-top: 5px;
-  }
+  label { display: block; margin-top: 15px; font-weight: 600; font-size: 0.95rem; }
+  .hint { font-size: 0.8rem; color: #6b7280; margin-top: 5px; font-weight: 400; }
 
-  input {
+  .input-wrapper { position: relative; margin-top: 5px; }
+
+  input[type="text"], input[type="email"], input[type="password"], input[type="tel"] {
     width: 100%;
     padding: 12px 14px;
-    padding-right: 50px;
     border-radius: 10px;
     border: 1px solid #ccc;
-    font-size: 1rem;
+    font: 400 1rem 'Inter', sans-serif;
   }
-
-  input:focus {
-    border-color: #1e3a8a;
-    outline: none;
-    box-shadow: 0 0 6px rgba(30,58,138,0.2);
-  }
+  input.has-toggle { padding-right: 64px; }
+  input:focus { border-color: #1e3a8a; outline: none; box-shadow: 0 0 6px rgba(30,58,138,0.2); }
+  input.invalid { border-color: #b00020; }
 
   .toggle-password {
-    position: absolute;
-    top: 50%;
-    right: 14px;
-    transform: translateY(-50%);
-    cursor: pointer;
-    font-size: 0.9rem;
-    color: #555;
-    user-select: none;
+    position: absolute; top: 50%; right: 10px; transform: translateY(-50%);
+    margin: 0; padding: 6px 8px; width: auto;
+    background: none; border: none; color: #555; font: 500 0.85rem 'Inter', sans-serif; cursor: pointer;
   }
+  .toggle-password:hover { background: none; transform: translateY(-50%); color: #1e3a8a; }
 
-  button {
-    margin-top: 25px;
-    width: 100%;
-    padding: 12px;
-    background: #1e3a8a;
-    color: white;
-    border: none;
-    border-radius: 10px;
-    cursor: pointer;
-    font-size: 1rem;
-    font-weight: 600;
-    transition: background 0.3s, transform 0.2s;
-  }
+  .consent { display: flex; gap: 10px; align-items: flex-start; margin-top: 22px; font-weight: 400; font-size: 0.88rem; color: #374151; }
+  .consent input { width: 18px; height: 18px; margin-top: 2px; flex: none; accent-color: #1e3a8a; }
 
-  button:hover {
-    background: #16275f;
-    transform: translateY(-2px);
-  }
+  button { margin-top: 25px; width: 100%; padding: 12px; background: #1e3a8a; color: #fff; border: none; border-radius: 10px; cursor: pointer; font: 600 1rem 'Inter', sans-serif; transition: background .3s, transform .2s; }
+  button:hover:not(:disabled) { background: #16275f; transform: translateY(-2px); }
+  button:disabled { opacity: .7; cursor: progress; }
+  #goBackBtn { margin-top: 10px; background: #6b7280; }
+  #goBackBtn:hover { background: #4b5563; }
 
-  #goBackBtn {
-    margin-top: 10px;
-    background: #6b7280;
-  }
+  .message { text-align: center; margin-top: 15px; font-weight: 500; font-size: 0.95rem; }
+  .message.error { color: #b00020; }
+  .message.success { color: #1e7e34; }
 
-  #goBackBtn:hover {
-    background: #4b5563;
-  }
-
-  #message {
-    text-align: center;
-    margin-top: 15px;
-    font-weight: 500;
-  }
+  a:focus-visible, button:focus-visible, input:focus-visible { outline: 3px solid #ffd23f; outline-offset: 2px; }
 </style>
 </head>
 <body>
 
-<div class="register-container">
+<main class="register-container">
   <h2>Recruiter Registration</h2>
+  <p class="subtitle">Create your account to post jobs and review graduates.</p>
 
-  <label for="firstName">First Name</label>
-  <div class="input-wrapper">
-    <input type="text" id="firstName" placeholder="First Name" required>
-  </div>
+  <form id="registerForm" novalidate>
+    <p class="section-label">Your details</p>
 
-  <label for="lastName">Last Name</label>
-  <div class="input-wrapper">
-    <input type="text" id="lastName" placeholder="Last Name" required>
-  </div>
+    <label for="firstName">First name</label>
+    <div class="input-wrapper"><input type="text" id="firstName" placeholder="First name" autocomplete="given-name" required></div>
 
-  <label for="email">Email</label>
-  <div class="input-wrapper">
-    <input type="email" id="email" placeholder="Email" required>
-  </div>
+    <label for="lastName">Last name</label>
+    <div class="input-wrapper"><input type="text" id="lastName" placeholder="Last name" autocomplete="family-name" required></div>
 
-  <label for="password">Password</label>
-  <div class="input-wrapper">
-    <input type="password" id="password" placeholder="Password" required>
-    <span class="toggle-password" id="togglePassword">Show</span>
-  </div>
+    <label for="email">Work email</label>
+    <div class="input-wrapper"><input type="email" id="email" placeholder="you@company.co.za" autocomplete="email" required></div>
 
-  <label for="company">Company Name</label>
-  <div class="input-wrapper">
-    <input type="text" id="company" placeholder="Company Name" required>
-  </div>
+    <label for="contact">Contact number</label>
+    <div class="input-wrapper"><input type="tel" id="contact" placeholder="e.g. 082 123 4567" autocomplete="tel" required></div>
 
-  <label for="registrationNumber">Company Registration Number</label>
-  <div class="input-wrapper">
-    <input type="text" id="registrationNumber" placeholder="Registration Number" required>
-  </div>
+    <label for="password">Password</label>
+    <div class="input-wrapper">
+      <input type="password" id="password" class="has-toggle" placeholder="Password" autocomplete="new-password" required>
+      <button type="button" class="toggle-password" data-target="password" aria-label="Show password">Show</button>
+    </div>
+    <p class="hint">At least 8 characters, with a letter and a number.</p>
 
-  <label for="contact">Contact Number</label>
-  <div class="input-wrapper">
-    <input type="text" id="contact" placeholder="Contact Number" required>
-  </div>
+    <label for="confirmPassword">Confirm password</label>
+    <div class="input-wrapper">
+      <input type="password" id="confirmPassword" class="has-toggle" placeholder="Repeat password" autocomplete="new-password" required>
+      <button type="button" class="toggle-password" data-target="confirmPassword" aria-label="Show password">Show</button>
+    </div>
 
-  <button id="registerBtn">Register</button>
-  <button id="goBackBtn" type="button">Go Back</button>
-  <p id="message"></p>
-</div>
+    <p class="section-label">Your company</p>
+
+    <label for="company">Company name</label>
+    <div class="input-wrapper"><input type="text" id="company" placeholder="Company name" autocomplete="organization" required></div>
+
+    <label for="registrationNumber">Company registration number</label>
+    <div class="input-wrapper"><input type="text" id="registrationNumber" placeholder="e.g. 2015/123456/07" required></div>
+    <p class="hint">Your CIPC number. We check companies before they can contact graduates.</p>
+
+    <label class="consent" for="consent">
+      <input type="checkbox" id="consent" required>
+      <span>I confirm these company details are correct, and I will handle graduates' personal information (including ID copies and equity details) in line with POPIA.</span>
+    </label>
+
+    <button id="registerBtn" type="submit">Register</button>
+    <button id="goBackBtn" type="button">Go back</button>
+    <p id="message" class="message" role="status" aria-live="polite"></p>
+  </form>
+</main>
 
 <script type="module" src="recruiter-register.js"></script>
-<script>
-  // Go Back button
-  const goBackBtn = document.getElementById('goBackBtn');
-  goBackBtn.addEventListener('click', () => {
-    history.back();
-  });
-
-  // 
-  const togglePassword = document.getElementById('togglePassword');
-  const passwordInput = document.getElementById('password');
-  togglePassword.addEventListener('click', () => {
-    if (passwordInput.type === "password") {
-      passwordInput.type = "text";
-      togglePassword.textContent = "Hide";
-    } else {
-      passwordInput.type = "password";
-      togglePassword.textContent = "Show";
-    }
-  }); 
-</script>
-
 </body>
 </html>
