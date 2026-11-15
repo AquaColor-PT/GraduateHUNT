@@ -1,147 +1,227 @@
-import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
 
 const SUPABASE_URL = 'https://euclknvsppptbfclwxqq.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_90JbyFsa4BuuyeuLCIActg_yXfbHQ30';
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
-// Elements
-const nameInput = document.getElementById('name');
-const emailInput = document.getElementById('email');
-const companyInput = document.getElementById('company');
-const creditsEl = document.getElementById('credits');
-const profilePicInput = document.getElementById('profilePic');
-const profilePicPreview = document.getElementById('profilePicPreview');
-const saveBtn = document.getElementById('saveBtn');
-const logoutBtn = document.getElementById('logoutBtn');
+const LOGIN_PAGE = 'recruiter-login.html';
+const HOME_PAGE = 'homepage.html';
+const DASHBOARD_PAGE = 'recruiter-dashboard.html';
+const BUCKET = 'recruiter-profile-pics';
+const MAX_PIC_BYTES = 2 * 1024 * 1024;
+const PIC_TYPES = { 'image/png': 'png', 'image/jpeg': 'jpg' };
 
-let currentUserId = null;
+const $ = (id) => document.getElementById(id);
 
-// ---------------- AUTH CHECK ----------------
-// ---------------- AUTH CHECK ----------------
-async function checkUser() {
-  const { data: { session } } = await supabase.auth.getSession();
-  if (!session?.user) {
-    alert("Please log in first.");
-    window.location.href = "recruiter-login.html";
-    return;
-  }
+let userId = null;
+let recruiter = null;
+let pendingFile = null;
+let saving = false;
+let loggingOut = false;
 
-  currentUserId = session.user.id;
-
-  // Fill email immediately from session
-  emailInput.value = session.user.email;
-
-  // Load the profile data
-  await loadProfile();
-
-  // Disable editing AFTER loading values
-  const disabledFields = [nameInput, emailInput, companyInput];
-  // Disable editing completely
-nameInput.readOnly = true;
-emailInput.readOnly = true;
-companyInput.readOnly = true;
-
-  disabledFields.forEach(field => {
-    field.readOnly = true;
-    field.style.backgroundColor = "#f0f0f0"; // light gray
-    field.style.cursor = "not-allowed";
-  });
+/* ---------- Helpers ---------- */
+function setMsg(text, type = '') {
+  $('msg').textContent = text;
+  $('msg').className = type;
 }
 
+function statusOf(r) {
+  return r.status || (r.verified ? 'approved' : 'pending');
+}
 
+function initials(name) {
+  const parts = name.split(/\s+/).filter(Boolean);
+  if (!parts.length) return '?';
+  return (parts[0][0] + (parts.length > 1 ? parts[parts.length - 1][0] : '')).toUpperCase();
+}
 
-checkUser();
+function fmtDate(value) {
+  const d = new Date(value);
+  return isNaN(d) ? '' : d.toLocaleDateString('en-ZA', { day: 'numeric', month: 'short', year: 'numeric' });
+}
 
+function showView(view, text) {
+  $('loadingView').hidden = view !== 'loading';
+  $('errorView').hidden = view !== 'error';
+  $('appView').hidden = view !== 'app';
+  if (text) $('errorText').textContent = text;
+}
 
+function showImage(url) {
+  const avatar = $('avatar');
+  const img = new Image();
+  img.alt = '';
+  img.onload = () => { avatar.textContent = ''; avatar.appendChild(img); };
+  img.src = url;
+}
 
+/* ---------- Load and render ---------- */
+async function loadRecruiter() {
+  const { data, error } = await supabase.from('recruiters').select('*').eq('id', userId).maybeSingle();
+  if (error) throw error;
+  return data;
+}
 
-// ---------------- LOAD PROFILE ----------------
-async function loadProfile() {
-  const { data, error } = await supabase
-    .from('recruiters')
-    .select('*')
-    .eq('id', currentUserId)
-    .single();
+function render(r, authEmail) {
+  const name = `${r.first_name || ''} ${r.last_name || ''}`.trim() || 'Recruiter';
+  $('factName').textContent = name;
+  $('factEmail').textContent = authEmail || r.email || 'Not provided';
+  $('factCompany').textContent = r.company_name || 'Not provided';
+  $('factReg').textContent = r.registration_number || 'Not provided';
 
-  if (error) return console.error("Failed to load profile:", error);
+  $('avatar').textContent = initials(name);
+  if (r.profile_url) {
+    const { data } = supabase.storage.from(BUCKET).getPublicUrl(r.profile_url);
+    // The picture keeps the same file name each time, so a timestamp stops the browser showing an old copy
+    if (data?.publicUrl) showImage(data.publicUrl + '?t=' + Date.now());
+  }
 
-  nameInput.value = `${data.first_name} ${data.last_name}`;
-  companyInput.value = data.company_name || '';
-  creditsEl.textContent = data.credits || 0;
-
-  if (data.profile_url) {
-    // Get public URL for the stored profile pic
-    const { data: urlData, error: urlError } = supabase
-      .storage.from('recruiter-profile-pics')
-      .getPublicUrl(data.profile_url);
-
-    if (urlError) console.error(urlError);
-    else {
-      profilePicPreview.src = urlData.publicUrl;
-      profilePicPreview.style.display = 'block';
-    }
+  const until = r.unlimited_until ? new Date(r.unlimited_until) : null;
+  if (until && until > new Date()) {
+    $('creditsLabel').textContent = 'Monthly plan';
+    $('creditsValue').textContent = 'Unlimited';
+    $('creditsValue').classList.add('plan');
+    $('creditsSub').textContent = 'Active until ' + fmtDate(until) + '.';
+  } else {
+    $('creditsLabel').textContent = 'Job credits';
+    $('creditsValue').textContent = Number(r.credits) || 0;
+    $('creditsValue').classList.remove('plan');
+    $('creditsSub').textContent = 'One credit posts one job.';
   }
 }
 
-// ---------------- FILENAME SANITIZATION ----------------
-function sanitizeFileName(name) {
-  return name.replace(/\s+/g, '_').replace(/[^\w.-]/g, '');
+async function init() {
+  const slow = setTimeout(() => {
+    if (!$('loadingView').hidden) showView('error', 'This is taking too long. Check your internet connection and refresh the page.');
+  }, 15000);
+  try {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session?.user) { window.location.href = LOGIN_PAGE; return; }
+    userId = session.user.id;
+
+    const r = await loadRecruiter();
+    if (!r) return showView('error', 'We could not find your recruiter profile. Please contact support.');
+    // Pending and rejected recruiters see the explanation on the dashboard instead
+    if (statusOf(r) !== 'approved') { window.location.href = DASHBOARD_PAGE; return; }
+
+    recruiter = r;
+    render(r, session.user.email);
+    showView('app');
+  } catch (err) {
+    console.error('Profile load error:', err);
+    showView('error', 'We could not load your profile: ' + (err.message || 'please refresh the page.'));
+  } finally {
+    clearTimeout(slow);
+  }
 }
 
-// ---------------- PROFILE PICTURE PREVIEW & UPLOAD ----------------
-profilePicInput.addEventListener('change', async () => {
-  const file = profilePicInput.files[0];
-  if (!file || !['image/png','image/jpeg'].includes(file.type)) {
-    alert("Invalid file type. Only PNG or JPEG allowed.");
-    return;
+/* ---------- Picture: choose now, upload when saving ---------- */
+$('profilePic').addEventListener('change', () => {
+  const file = $('profilePic').files[0];
+  pendingFile = null;
+  setMsg('');
+  if (!file) return;
+
+  if (!PIC_TYPES[file.type]) {
+    $('profilePic').value = '';
+    return setMsg('Please choose a PNG or JPG picture.', 'error');
+  }
+  if (file.size > MAX_PIC_BYTES) {
+    $('profilePic').value = '';
+    return setMsg('That picture is too big. The limit is 2 MB.', 'error');
   }
 
-  // Preview locally
-  const reader = new FileReader();
-  reader.onload = e => {
-    profilePicPreview.src = e.target.result;
-    profilePicPreview.style.display = 'block';
-  };
-  reader.readAsDataURL(file);
+  pendingFile = file;
+  showImage(URL.createObjectURL(file));
+  setMsg('Picture ready. Select Save changes to apply it.');
+});
 
-  // Upload to Supabase Storage
-  const filePath = `${currentUserId}/${sanitizeFileName(file.name)}`;
+async function savePicture() {
+  // One fixed file name per recruiter, so old pictures are replaced and do not pile up
+  const path = `${userId}/avatar.${PIC_TYPES[pendingFile.type]}`;
   const { error } = await supabase.storage
-    .from('recruiter-profile-pics')
-    .upload(filePath, file, { upsert: true });
+    .from(BUCKET)
+    .upload(path, pendingFile, { upsert: true, contentType: pendingFile.type });
+  if (error) throw error;
 
-  if (error) return alert("Upload failed: " + error.message);
+  const oldPath = recruiter.profile_url;
+  const { error: updateError } = await supabase.from('recruiters').update({ profile_url: path }).eq('id', userId);
+  if (updateError) throw updateError;
 
-  // Update profile_url in table
-  const { error: updateError } = await supabase
-    .from('recruiters')
-    .update({ profile_url: filePath })
-    .eq('id', currentUserId);
+  // Tidy up the old file if it had a different name (for example an earlier PNG when this one is a JPG)
+  if (oldPath && oldPath !== path) await supabase.storage.from(BUCKET).remove([oldPath]);
 
-  if (updateError) console.error("Failed to update profile URL:", updateError);
-});
+  recruiter.profile_url = path;
+  pendingFile = null;
+  $('profilePic').value = '';
+}
 
-// ---------------- SAVE PROFILE ----------------
-// ---------------- SAVE PROFILE ----------------
-saveBtn.addEventListener('click', async () => {
-  // Only update password if entered
-  const passwordInput = document.getElementById('password').value.trim();
+/* ---------- Password ---------- */
+function passwordProblem(pw, confirm) {
+  if (pw.length < 8) return 'Your new password needs at least 8 characters.';
+  if (pw !== confirm) return 'The two passwords do not match.';
+  return '';
+}
 
-  if (passwordInput) {
-    const { error: pwError } = await supabase.auth.updateUser({
-      password: passwordInput
-    });
+async function savePassword(pw) {
+  const { error } = await supabase.auth.updateUser({ password: pw });
+  if (error) throw error;
+  $('newPassword').value = '';
+  $('confirmPassword').value = '';
+}
 
-    if (pwError) return alert("Failed to update password: " + pwError.message);
+function friendlyPasswordError(err) {
+  const m = err.message || '';
+  if (/same|different from the old/i.test(m)) return 'Choose a password you have not used before.';
+  if (/reauth|recently/i.test(m)) return 'For security, log out, log in again, then change your password.';
+  return m || 'Could not change the password.';
+}
+
+/* ---------- Save ---------- */
+$('saveBtn').addEventListener('click', async () => {
+  if (saving) return;
+  const pw = $('newPassword').value;
+  const confirm = $('confirmPassword').value;
+
+  if (!pendingFile && !pw) return setMsg('Nothing to save yet. Choose a picture or enter a new password.', 'error');
+  if (pw) {
+    const problem = passwordProblem(pw, confirm);
+    if (problem) { $('newPassword').focus(); return setMsg(problem, 'error'); }
   }
 
-  alert("Profile updated successfully!");
-  await loadProfile(); // refresh profile pic/credits if needed
+  saving = true;
+  $('saveBtn').disabled = true;
+  $('saveBtn').textContent = 'Saving...';
+  setMsg('');
+
+  const done = [];
+  const problems = [];
+
+  if (pendingFile) {
+    try { await savePicture(); done.push('Picture updated.'); }
+    catch (err) { console.error('Picture error:', err); problems.push('Picture not saved: ' + (err.message || 'please try again.')); }
+  }
+  if (pw) {
+    try { await savePassword(pw); done.push('Password changed.'); }
+    catch (err) { console.error('Password error:', err); problems.push('Password not changed: ' + friendlyPasswordError(err)); }
+  }
+
+  setMsg([...done, ...problems].join(' '), problems.length ? 'error' : 'success');
+  saving = false;
+  $('saveBtn').disabled = false;
+  $('saveBtn').textContent = 'Save changes';
 });
 
-
-// ---------------- LOGOUT ----------------
-logoutBtn.addEventListener('click', async () => {
+/* ---------- Logout ---------- */
+$('logoutBtn').addEventListener('click', async () => {
+  loggingOut = true;
   await supabase.auth.signOut();
-  window.location.href = 'homepage.html';
+  window.location.href = HOME_PAGE;
 });
+
+// If the session ends in another tab, go to the login page
+supabase.auth.onAuthStateChange((event) => {
+  if (event === 'SIGNED_OUT' && !loggingOut) window.location.href = LOGIN_PAGE;
+});
+
+init();
