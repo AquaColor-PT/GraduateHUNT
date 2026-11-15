@@ -135,7 +135,7 @@
     <a id="registerBtn" href="graduate-register.html" class="button secondary">Register Again</a>
   </div>
 
-  <!-- NEW: resend a verification email -->
+  <!-- Resend a verification email -->
   <form id="resendForm" class="resend" hidden>
     <label for="resendEmail">Your email</label>
     <input type="email" id="resendEmail" placeholder="Enter the email you registered with" autocomplete="email" inputmode="email" autocapitalize="none" required>
@@ -331,6 +331,8 @@ async function verifyAndInsertGraduate() {
         email: user.email,
         phone: meta.phone,
         qualification: meta.qualification,
+        // NEW: field of study (empty for matric and no-matric graduates)
+        field_of_study: meta.field_of_study || null,
         created_at: new Date().toISOString()
       }]);
       if (insertError) throw insertError;
