@@ -47,7 +47,7 @@ const STOP_WORDS = new Set([
     'in', 'of', 'and', 'the', 'for', 'with', 'to', 'an', 'or', 'on', 'at', 'by', 'from',
     'degree', 'degrees', 'diploma', 'diplomas', 'bachelor', 'bachelors', 'certificate',
     'national', 'higher', 'advanced', 'honours', 'hons', 'bsc', 'btech', 'beng',
-    'nqf', 'level', 'qualification', 'qualifications', 'related', 'field', 'equivalent',
+    'sc', 'eng', 'hon', 'nqf', 'level', 'qualification', 'qualifications', 'related', 'field', 'equivalent',
     'relevant', 'matric', 'grade', 'plus'
 ]);
 
