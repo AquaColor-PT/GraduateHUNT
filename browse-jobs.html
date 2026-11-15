@@ -4,10 +4,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Browse Jobs - GraduateInHunt</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
+  * { box-sizing: border-box; }
+
   body { 
-    font-family: 'Inter', sans-serif; 
+    font-family: 'Inter', Arial, sans-serif; 
     background: #f5f7fa; 
     margin: 0; 
     padding: 0; 
@@ -28,23 +30,24 @@
     font-size: 1.8rem; 
   }
 
-  /* ✅ Keep navigation always horizontal */
+  /* Navigation: horizontal, and wraps neatly on very small phones
+     (replaces the old transform: scale() trick, which shrank the buttons
+     but left the layout width unchanged) */
   nav ul {
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: 20px;
+    flex-wrap: wrap;
+    gap: 12px 20px;
     list-style: none;
     margin: 15px 0 0 0;
     padding: 0;
-    flex-wrap: nowrap; /* Prevent stacking */
   }
 
-  nav ul li a {
-    text-decoration: none;
-  }
+  nav ul li a { text-decoration: none; }
 
   .blue-btn {
+    display: inline-block;
     padding: 10px 20px;
     border-radius: 8px;
     font-weight: 600;
@@ -56,10 +59,26 @@
     transition: 0.3s;
     white-space: nowrap;
     font-size: 1rem;
+    font-family: inherit;
   }
 
-  .blue-btn:hover {
-    background: linear-gradient(145deg, #16275f, #2563eb);
+  .blue-btn:hover { background: linear-gradient(145deg, #16275f, #2563eb); }
+
+  /* Disabled state ("Already Applied") - done in CSS because an inline
+     background-color cannot override the gradient above */
+  .blue-btn:disabled,
+  .blue-btn:disabled:hover {
+    background: #ccc;
+    color: #666;
+    cursor: not-allowed;
+  }
+
+  .blue-btn:focus-visible,
+  .viewMore:focus-visible,
+  .filters select:focus-visible,
+  .filters input:focus-visible {
+    outline: 3px solid #f5b800;
+    outline-offset: 2px;
   }
 
   .container {
@@ -71,8 +90,8 @@
   h3 { 
     margin-bottom: 20px; 
     color: #1e3a8a; 
-    text-align:center; 
-    font-weight:600; 
+    text-align: center; 
+    font-weight: 600; 
   }
 
   .filters {
@@ -88,7 +107,21 @@
     border-radius: 8px;
     border: 1px solid #ccc;
     font-size: 0.95rem;
+    font-family: inherit;
   }
+
+  .filters input[type="text"] { flex: 1 1 220px; max-width: 360px; }
+
+  .notice {
+    background: #fff8e1;
+    border: 1px solid #f5b800;
+    color: #6b5200;
+    border-radius: 10px;
+    padding: 12px 16px;
+    margin: 0 0 20px 0;
+    font-size: 0.95rem;
+  }
+  .notice[hidden] { display: none; }
 
   #publicJobList {
     list-style: none;
@@ -109,6 +142,9 @@
     box-shadow: 0 10px 25px rgba(0,0,0,0.12);
   }
 
+  #publicJobList li.loading { color: #555; text-align: center; }
+  #publicJobList li.error { color: #b00020; border-left: 5px solid #b00020; }
+
   #publicJobList h4 {
     margin: 0 0 10px 0;
     color: #1e3a8a;
@@ -116,32 +152,62 @@
   }
 
   #publicJobList div, #publicJobList p { 
-    color:#555; 
-    margin-bottom:8px; 
-    font-size:0.95rem; 
+    color: #555; 
+    margin-bottom: 8px; 
+    font-size: 0.95rem; 
   }
 
-  .applyBtn { display:inline-block; margin-top:10px; }
+  #publicJobList .desc { white-space: pre-line; margin: 8px 0 12px 0; line-height: 1.4; }
+
+  #publicJobList small { display: block; color: #777; margin: 6px 0 4px 0; }
+
+  .applyBtn { display: inline-block; margin-top: 10px; }
+
   .viewMore { 
-    color:#1e3a8a; 
-    cursor:pointer; 
-    font-weight:600; 
-    display:inline-block; 
-    margin-top:5px; 
+    background: none;
+    border: none;
+    padding: 0;
+    font: inherit;
+    font-size: 0.85rem;
+    color: #1e3a8a; 
+    cursor: pointer; 
+    font-weight: 600; 
+    display: inline-block; 
+    margin: 0 0 6px 0;
+    text-decoration: underline;
   }
 
-  /* ✅ Scale the whole header slightly on smaller devices but keep layout */
-  @media (max-width: 768px) {
-    nav ul {
-      gap: 12px;
-      transform: scale(0.95);
-    }
+  /* ---- Styles merged from the old stylesheet ----
+     Kept: the rules that don't fight this page's design.
+     (.job-card and form styles aren't used on this page yet, but are
+     here so they're ready for other pages.) */
+  .job-card { 
+    background: white; 
+    padding: 20px; 
+    margin-bottom: 20px; 
+    border-radius: 8px; 
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1); 
+  }
+  .job-card h3 { margin: 0; }
+  .job-card p { margin: 5px 0; }
+
+  form { 
+    display: flex; 
+    flex-direction: column; 
+    gap: 10px; 
+    margin-top: 10px; 
+  }
+  form input, form textarea { 
+    padding: 10px; 
+    border-radius: 5px; 
+    border: 1px solid #ccc; 
+    width: 100%; 
   }
 
   @media (max-width: 480px) {
-    nav ul {
-      transform: scale(0.85);
-    }
+    header h1 { font-size: 1.5rem; }
+    .blue-btn { padding: 9px 16px; font-size: 0.95rem; }
+    #publicJobList li { padding: 20px 16px; }
   }
 </style>
 </head>
@@ -158,11 +224,13 @@
   </nav>
 </header>
 
-<section class="container">
+<main class="container">
   <h3>Available Jobs</h3>
 
+  <p id="notice" class="notice" role="status" hidden></p>
+
   <div class="filters">
-    <select id="jobTypeFilter">
+    <select id="jobTypeFilter" aria-label="Filter by job type">
       <option value="">All Job Types</option>
       <option value="Internship">Internship</option>
       <option value="Learnership">Learnership</option>
@@ -172,14 +240,14 @@
       <option value="Contract">Contract</option>
     </select>
 
-    <input type="text" id="jobTitleSearch" placeholder="Search by job title...">
-    <button id="searchBtn" class="blue-btn">Search</button>
+    <input type="text" id="jobTitleSearch" placeholder="Search by job title..." aria-label="Search by job title">
+    <button id="searchBtn" class="blue-btn" type="button">Search</button>
   </div>
 
-  <ul id="publicJobList">
+  <ul id="publicJobList" aria-live="polite">
     <li class="loading">Loading jobs...</li>
   </ul>
-</section>
+</main>
 
 <script type="module" src="browse-jobs.js"></script>
 </body>
