@@ -16,7 +16,6 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    /* FIX: was "height: 100vh", which can cut the card off on small phones */
     min-height: 100vh;
     min-height: 100dvh;
   }
@@ -72,6 +71,53 @@
   .success { color: #15803d; }
   .error { color: #c0392b; }
 
+  /* Resend form (only shown when a new link is needed) */
+  .resend {
+    margin-top: 24px;
+    text-align: left;
+  }
+  .resend label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    color: #333;
+  }
+  .resend input {
+    width: 100%;
+    padding: 12px 14px;
+    border-radius: 10px;
+    border: 1px solid #ccc;
+    font-size: 1rem;
+    font-family: inherit;
+  }
+  .resend input:focus {
+    border-color: #1e3a8a;
+    outline: none;
+    box-shadow: 0 0 6px rgba(30,58,138,0.2);
+  }
+  .resend button {
+    margin-top: 12px;
+    width: 100%;
+    padding: 12px;
+    background: #1e3a8a;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 1rem;
+    font-weight: 600;
+    transition: background 0.3s;
+  }
+  .resend button:hover { background: #16275f; }
+  .resend button:disabled { opacity: 0.7; cursor: not-allowed; }
+  .resend .resend-message {
+    margin: 12px 0 0;
+    font-size: 0.95rem;
+    text-align: center;
+  }
+
   @media (max-width: 480px) {
     .verify-container { padding: 30px 20px; }
     a.button { width: 100%; }
@@ -83,38 +129,139 @@
 <main class="verify-container">
   <h2 id="status" role="status" aria-live="polite">Verifying...</h2>
   <p id="message">Please wait while we verify your email.</p>
+
   <div class="actions">
     <a id="loginBtn" href="graduate-login.html" class="button">Go to Login</a>
     <a id="registerBtn" href="graduate-register.html" class="button secondary">Register Again</a>
   </div>
+
+  <!-- NEW: resend a verification email -->
+  <form id="resendForm" class="resend" hidden>
+    <label for="resendEmail">Your email</label>
+    <input type="email" id="resendEmail" placeholder="Enter the email you registered with" autocomplete="email" inputmode="email" autocapitalize="none" required>
+    <button type="submit" id="resendBtn">Resend verification email</button>
+    <p id="resendMessage" class="resend-message" role="status" aria-live="polite"></p>
+  </form>
 </main>
 
 <script type="module">
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
 
-// FIX: read the link details first, before Supabase has a chance to tidy the address bar
+// Read the link details first, before Supabase has a chance to tidy the address bar
 const hashParams = new URLSearchParams(window.location.hash.substring(1));
 const queryParams = new URLSearchParams(window.location.search);
 
 const SUPABASE_URL = 'https://euclknvsppptbfclwxqq.supabase.co';
-// FIX: this page used a different (older) key from the rest of the site. Now it uses the same one.
 const SUPABASE_KEY = 'sb_publishable_90JbyFsa4BuuyeuLCIActg_yXfbHQ30';
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+// ====================================================================
+// PUT YOUR GITHUB PAGES ADDRESS HERE (the folder your site lives in).
+// It must end with a slash, for example: https://yourname.github.io/yourrepo/
+// Until you change it, the page uses whatever address it is opened from.
+// ====================================================================
+const SITE_URL = 'https://YOUR-USERNAME.github.io/YOUR-REPO/';
+
+function getVerifyUrl() {
+  if (SITE_URL.includes('YOUR-')) {
+    return new URL('verify.html', window.location.href).href;
+  }
+  return new URL('verify.html', SITE_URL).href;
+}
 
 const statusEl = document.getElementById('status');
 const messageEl = document.getElementById('message');
 const loginBtn = document.getElementById('loginBtn');
 const registerBtn = document.getElementById('registerBtn');
+const resendForm = document.getElementById('resendForm');
+const resendEmail = document.getElementById('resendEmail');
+const resendBtn = document.getElementById('resendBtn');
+const resendMessage = document.getElementById('resendMessage');
 
-function showFailure(title, text) {
+function showFailure(title, text, allowResend = true) {
   statusEl.textContent = title;
   statusEl.className = 'error';
   messageEl.textContent = text;
-  // FIX: people who hit a problem now get somewhere to go next
   loginBtn.style.display = 'inline-block';
   registerBtn.style.display = 'inline-block';
+  if (allowResend) resendForm.hidden = false;
 }
 
+// Shown when someone opens this page without a verification link (for example
+// from the "Didn't get the email?" link on the registration page)
+function showResendPrompt() {
+  statusEl.textContent = 'Need a new verification link?';
+  statusEl.className = '';
+  messageEl.textContent = "Enter your email below and we'll send you a fresh link.";
+  loginBtn.style.display = 'inline-block';
+  resendForm.hidden = false;
+}
+
+function showResendMessage(text, type) {
+  resendMessage.textContent = text;
+  resendMessage.className = 'resend-message ' + type;
+}
+
+// ---------- Resend verification email ----------
+let cooldownTimer = null;
+
+function startCooldown(seconds) {
+  let remaining = seconds;
+  resendBtn.disabled = true;
+  resendBtn.textContent = `Resend in ${remaining}s`;
+  clearInterval(cooldownTimer);
+  cooldownTimer = setInterval(() => {
+    remaining -= 1;
+    if (remaining <= 0) {
+      clearInterval(cooldownTimer);
+      resendBtn.disabled = false;
+      resendBtn.textContent = 'Resend verification email';
+    } else {
+      resendBtn.textContent = `Resend in ${remaining}s`;
+    }
+  }, 1000);
+}
+
+resendForm.addEventListener('submit', async (event) => {
+  event.preventDefault();
+  showResendMessage('', '');
+
+  const email = resendEmail.value.trim().toLowerCase();
+  if (!email) {
+    showResendMessage('Please enter your email.', 'error');
+    return;
+  }
+
+  resendBtn.disabled = true;
+  resendBtn.textContent = 'Sending...';
+
+  try {
+    const { error } = await supabase.auth.resend({
+      type: 'signup',
+      email,
+      options: { emailRedirectTo: getVerifyUrl() }
+    });
+    if (error) throw error;
+
+    // Same wording whatever the account status, so this form can't be used to find out who is registered
+    showResendMessage('If this email still needs verifying, a new link is on its way. Check your inbox and spam folder.', 'success');
+    startCooldown(60);
+
+  } catch (err) {
+    console.error('Resend error:', err);
+    const tooMany = err.status === 429 || /rate|seconds|too many/i.test(err.message || '');
+    if (tooMany) {
+      showResendMessage('Please wait a minute before asking for another email.', 'error');
+      startCooldown(60);
+    } else {
+      showResendMessage('We could not send the email. Please try again.', 'error');
+      resendBtn.disabled = false;
+      resendBtn.textContent = 'Resend verification email';
+    }
+  }
+});
+
+// ---------- Verify the link ----------
 async function verifyAndInsertGraduate() {
   // Supabase reports problems (like an expired link) in the address
   const errorCode = hashParams.get('error_code') || queryParams.get('error_code');
@@ -124,10 +271,10 @@ async function verifyAndInsertGraduate() {
     if (errorCode === 'otp_expired') {
       showFailure(
         'Link expired',
-        'This link has expired or was already used. If you have already verified, log in. If not, register again to get a new link.'
+        'This link has expired or was already used. If you have already verified, log in. If not, get a new link below.'
       );
     } else {
-      showFailure('Verification Failed', 'Invalid or expired verification link.');
+      showFailure('Verification Failed', 'Invalid or expired verification link. You can get a new one below.');
     }
     return;
   }
@@ -136,8 +283,9 @@ async function verifyAndInsertGraduate() {
   const refresh_token = hashParams.get('refresh_token');
   const code = queryParams.get('code');
 
+  // No link at all: offer to send a new one
   if (!(access_token && refresh_token) && !code) {
-    showFailure('Verification Failed', 'Invalid or expired verification link.');
+    showResendPrompt();
     return;
   }
 
@@ -154,17 +302,17 @@ async function verifyAndInsertGraduate() {
     }
 
     if (!session || !session.user) {
-      showFailure('Verification Failed', 'Invalid or expired verification link.');
+      showFailure('Verification Failed', 'Invalid or expired verification link. You can get a new one below.');
       return;
     }
 
     const user = session.user;
     const meta = user.user_metadata || {};
 
-    // FIX: this page only creates graduate accounts. Without this check, someone who
+    // This page only creates graduate accounts. Without this check, someone who
     // signed up some other way (for example as a recruiter) could be added as a graduate.
     if (!meta.qualification) {
-      showFailure('Wrong verification page', 'This link is not for a graduate account.');
+      showFailure('Wrong verification page', 'This link is not for a graduate account.', false);
       return;
     }
 
@@ -200,7 +348,7 @@ async function verifyAndInsertGraduate() {
 
   } catch (err) {
     console.error('Verification error:', err);
-    showFailure('Verification Failed', 'There was a problem verifying your email. Please try again.');
+    showFailure('Verification Failed', 'There was a problem verifying your email. You can try again with a new link below.');
   }
 }
 
