@@ -123,6 +123,12 @@ function render(r) {
 }
 
 async function init() {
+  // If the server never answers, show a message instead of loading forever
+  const slow = setTimeout(() => {
+    if (!$('loadingView').hidden) {
+      blocked('This is taking too long', 'We could not reach the server. Check your internet connection and refresh the page.');
+    }
+  }, 15000);
   try {
     const { data: { session } } = await supabase.auth.getSession();
     if (!session?.user) return goLogin();
@@ -147,6 +153,8 @@ async function init() {
   } catch (err) {
     console.error('Dashboard load error:', err);
     blocked('Something went wrong', 'We could not load your dashboard: ' + (err.message || 'please refresh the page.'));
+  } finally {
+    clearTimeout(slow);
   }
 }
 
