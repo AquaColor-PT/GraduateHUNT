@@ -125,20 +125,21 @@
   .field { display: flex; flex-direction: column; gap: 6px; }
   .field.full { grid-column: 1 / -1; }
   .field label { font-size: 0.88rem; font-weight: 600; color: var(--blue-900); }
-  .field input[type="text"], .field input[type="tel"] {
+  .field input[type="text"], .field input[type="tel"], .field input[type="date"], .field select {
     width: 100%; padding: 13px 14px; font: 400 1rem 'Inter', sans-serif; color: var(--ink);
     background: #fbfcff; border: 1.5px solid var(--line); border-radius: 12px;
     transition: border-color .2s, box-shadow .2s, background .2s;
   }
   .field input::placeholder { color: #9aa5c0; }
-  .field input:hover { border-color: #b9c6e8; }
-  .field input:focus { outline: none; background: #fff; border-color: var(--blue-500); box-shadow: 0 0 0 4px rgba(59,130,246,0.18); }
+  .field input:hover, .field select:hover { border-color: #b9c6e8; }
+  .field input:focus, .field select:focus { outline: none; background: #fff; border-color: var(--blue-500); box-shadow: 0 0 0 4px rgba(59,130,246,0.18); }
   .hint { font-size: 0.8rem; color: var(--muted); margin: 0; }
 
   .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
   .chip { background: var(--blue-50); color: var(--blue-900); font-size: 0.85rem; font-weight: 600; padding: 6px 12px; border-radius: 999px; border: 1px solid #d3defa; }
 
-  /* ---------- CV upload ---------- */
+  /* ---------- Document uploads ---------- */
+  .doc-block + .doc-block { margin-top: 18px; }
   .dropzone {
     display: flex; align-items: center; gap: 14px; cursor: pointer;
     padding: 18px; border-radius: 14px; border: 2px dashed #b9c6e8; background: #fbfcff;
@@ -148,17 +149,18 @@
   .dropzone:focus-within { outline: 3px solid var(--gold); outline-offset: 2px; }
   .dropzone .ico { width: 46px; height: 46px; border-radius: 50%; background: var(--blue-50); color: var(--blue-900); display: grid; place-items: center; flex: none; }
   .dropzone strong { display: block; color: var(--blue-900); font-size: 0.97rem; }
-  .cv-filename { margin: 2px 0 0; font-size: 0.85rem; color: var(--muted); word-break: break-all; }
-  .current-cv {
+  .file-name { display: block; margin: 2px 0 0; font-size: 0.85rem; color: var(--muted); word-break: break-all; }
+  .current-doc {
     display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;
     margin-top: 14px; padding: 12px 16px; border-radius: 12px; background: #effaf2; border: 1px solid #c8ebd2; color: #14532d; font-size: 0.92rem;
   }
-  .current-cv[hidden] { display: none; }
-  .current-cv a {
+  .current-doc[hidden] { display: none; }
+  .current-doc a {
     color: #fff; background: #28a745; text-decoration: none; font-weight: 600; font-size: 0.88rem;
     padding: 8px 16px; border-radius: 999px; transition: background .2s;
   }
-  .current-cv a:hover { background: #1e7e34; }
+  .current-doc a:hover { background: #1e7e34; }
+  .privacy-note { margin: 16px 0 0; font-size: 0.82rem; color: var(--muted); }
 
   /* ---------- Save bar ---------- */
   .actions {
@@ -188,7 +190,7 @@
   .toast.success { background: #1e7e34; }
   .toast.error { background: #b00020; }
 
-  a:focus-visible, button:focus-visible, input:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
+  a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
 
   /* ---------- Responsive ---------- */
   @media (max-width: 640px) {
@@ -243,8 +245,8 @@
     <p class="email" id="email">Loading...</p>
 
     <div class="progress-wrap">
-      <div class="progress-text"><span id="progressText">Profile 0 of 6 complete</span><span>A full profile finds better jobs</span></div>
-      <div class="progress" role="progressbar" aria-valuemin="0" aria-valuemax="6" aria-valuenow="0" id="progressTrack"><div id="progressBar"></div></div>
+      <div class="progress-text"><span id="progressText">Profile 0 of 11 complete</span><span>A full profile finds better jobs</span></div>
+      <div class="progress" role="progressbar" aria-valuemin="0" aria-valuemax="11" aria-valuenow="0" id="progressTrack"><div id="progressBar"></div></div>
     </div>
   </section>
 
@@ -262,6 +264,44 @@
       <div class="field">
         <label for="phone">Phone</label>
         <input type="tel" id="phone" placeholder="e.g. 082 123 4567" autocomplete="tel">
+      </div>
+    </div>
+  </section>
+
+  <!-- Learnership details -->
+  <section class="card">
+    <h2 class="section-title">
+      <span class="ico"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4"/><path d="M8 2v4"/><path d="M3 10h18"/></svg></span>
+      Learnership details
+    </h2>
+    <div class="grid">
+      <div class="field">
+        <label for="dob">Date of birth</label>
+        <input type="date" id="dob" autocomplete="bday">
+        <p class="hint" id="ageHint">Used to check age requirements.</p>
+      </div>
+      <div class="field">
+        <label for="gender">Gender</label>
+        <select id="gender">
+          <option value="">Select...</option>
+          <option value="Female">Female</option>
+          <option value="Male">Male</option>
+          <option value="Non-binary">Non-binary</option>
+          <option value="Prefer not to say">Prefer not to say</option>
+        </select>
+      </div>
+      <div class="field full">
+        <label for="race">Race</label>
+        <select id="race">
+          <option value="">Select...</option>
+          <option value="Black African">Black African</option>
+          <option value="Coloured">Coloured</option>
+          <option value="Indian/Asian">Indian/Asian</option>
+          <option value="White">White</option>
+          <option value="Other">Other</option>
+          <option value="Prefer not to say">Prefer not to say</option>
+        </select>
+        <p class="hint">Some learnerships and SETA programmes need this for equity reporting. It is only shared with recruiters you apply to.</p>
       </div>
     </div>
   </section>
@@ -308,20 +348,58 @@
   <section class="card">
     <h2 class="section-title">
       <span class="ico"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8"/><path d="M16 17H8"/></svg></span>
-      CV
+      Documents
     </h2>
-    <label class="dropzone" for="cvFile">
-      <span class="ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m17 8-5-5-5 5"/><path d="M12 3v12"/></svg></span>
-      <span>
-        <strong>Upload your CV (PDF, max 10 MB)</strong>
-        <span class="cv-filename" id="cvFileName">No file selected</span>
-      </span>
-      <input class="sr-only" type="file" id="cvFile" accept="application/pdf">
-    </label>
-    <div class="current-cv" id="currentCv" hidden>
-      <span>Current CV: <strong id="currentCvName"></strong></span>
-      <a id="cvLink" href="#">View CV</a>
+
+    <!-- CV -->
+    <div class="doc-block">
+      <label class="dropzone" for="cvFile">
+        <span class="ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m17 8-5-5-5 5"/><path d="M12 3v12"/></svg></span>
+        <span>
+          <strong>Upload your CV (PDF, max 10 MB)</strong>
+          <span class="file-name" id="cvFileName">No file selected</span>
+        </span>
+        <input class="sr-only" type="file" id="cvFile" accept="application/pdf">
+      </label>
+      <div class="current-doc" id="currentCv" hidden>
+        <span>Current CV: <strong id="currentCvName"></strong></span>
+        <a id="cvLink" href="#">View CV</a>
+      </div>
     </div>
+
+    <!-- ID -->
+    <div class="doc-block">
+      <label class="dropzone" for="idFile">
+        <span class="ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m17 8-5-5-5 5"/><path d="M12 3v12"/></svg></span>
+        <span>
+          <strong>Upload a copy of your ID (PDF, JPG or PNG, max 10 MB)</strong>
+          <span class="file-name" id="idFileName">No file selected</span>
+        </span>
+        <input class="sr-only" type="file" id="idFile" accept="application/pdf, image/png, image/jpeg">
+      </label>
+      <div class="current-doc" id="currentId" hidden>
+        <span>Current ID copy: <strong id="currentIdName"></strong></span>
+        <a id="idLink" href="#">View ID</a>
+      </div>
+    </div>
+
+    <!-- Qualification -->
+    <div class="doc-block">
+      <label class="dropzone" for="qualFile">
+        <span class="ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m17 8-5-5-5 5"/><path d="M12 3v12"/></svg></span>
+        <span>
+          <strong>Upload your qualification certificate (PDF, JPG or PNG, max 10 MB)</strong>
+          <span class="file-name" id="qualFileName">No file selected</span>
+        </span>
+        <input class="sr-only" type="file" id="qualFile" accept="application/pdf, image/png, image/jpeg">
+      </label>
+      <div class="current-doc" id="currentQual" hidden>
+        <span>Current certificate: <strong id="currentQualName"></strong></span>
+        <a id="qualLink" href="#">View certificate</a>
+      </div>
+    </div>
+
+    <p class="privacy-note">Your documents are stored privately and are only shared with recruiters you apply to.</p>
   </section>
 
   <div class="actions">
