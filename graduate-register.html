@@ -14,7 +14,6 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    /* FIX: was "height: 100vh", which cut the form off on phones */
     min-height: 100vh;
     min-height: 100dvh;
     padding: 20px;
@@ -40,19 +39,20 @@
 
   .input-wrapper { position: relative; margin-top: 5px; }
 
-  input {
+  input, select {
     width: 100%;
     padding: 12px 14px;
     border-radius: 10px;
     border: 1px solid #ccc;
     font-size: 1rem;
     font-family: inherit;
+    background: white;
   }
 
   /* Only the password field needs room for the Show/Hide button */
   .has-toggle input { padding-right: 76px; }
 
-  input:focus {
+  input:focus, select:focus {
     border-color: #1e3a8a;
     outline: none;
     box-shadow: 0 0 6px rgba(30,58,138,0.2);
@@ -64,7 +64,9 @@
     color: #6b7280;
   }
 
-  /* Show/Hide is now a real button so it works with keyboards and screen readers */
+  /* Makes sure the hidden attribute really hides the field of study block */
+  [hidden] { display: none !important; }
+
   .toggle-password {
     position: absolute;
     top: 50%;
@@ -102,7 +104,6 @@
   .btn-secondary { margin-top: 10px; background: #6b7280; }
   .btn-secondary:hover { background: #4b5563; }
 
-  /* FIX: the JS adds "error" and "success" but the page had no colours for them */
   #message {
     text-align: center;
     margin-top: 15px;
@@ -132,7 +133,6 @@
 <main class="register-container">
   <h2>Graduate Registration</h2>
 
-  <!-- FIX: wrapped in a real form, so the Enter key and the browser's checks work -->
   <form id="registerForm">
     <label for="fullName">Full Name</label>
     <div class="input-wrapper">
@@ -163,6 +163,32 @@
         <option value="Master's Degree">
         <option value="Other">
       </datalist>
+    </div>
+
+    <!-- Field of study: only shown for qualifications above matric -->
+    <div id="fieldOfStudyGroup" hidden>
+      <label for="fieldOfStudy">Field of Study</label>
+      <div class="input-wrapper">
+        <select id="fieldOfStudy">
+          <option value="">Select your field of study</option>
+          <option value="Engineering">Engineering</option>
+          <option value="Information Technology / Computer Science">Information Technology / Computer Science</option>
+          <option value="Business / Commerce / Management">Business / Commerce / Management</option>
+          <option value="Accounting / Finance">Accounting / Finance</option>
+          <option value="Marketing / Communication / Media">Marketing / Communication / Media</option>
+          <option value="Human Resources / Public Administration">Human Resources / Public Administration</option>
+          <option value="Education / Teaching">Education / Teaching</option>
+          <option value="Health Sciences / Nursing">Health Sciences / Nursing</option>
+          <option value="Natural Sciences (Maths, Physics, Chemistry, Biology)">Natural Sciences (Maths, Physics, Chemistry, Biology)</option>
+          <option value="Agriculture / Environmental Science">Agriculture / Environmental Science</option>
+          <option value="Law / Legal Studies">Law / Legal Studies</option>
+          <option value="Social Sciences / Humanities">Social Sciences / Humanities</option>
+          <option value="Arts / Design / Architecture">Arts / Design / Architecture</option>
+          <option value="Hospitality / Tourism">Hospitality / Tourism</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+      <p class="hint">We use this to show you jobs that match your studies.</p>
     </div>
 
     <label for="password">Password</label>
@@ -201,6 +227,32 @@
     togglePassword.textContent = hidden ? 'Hide' : 'Show';
     togglePassword.setAttribute('aria-label', hidden ? 'Hide password' : 'Show password');
   });
+
+  // Show the Field of Study dropdown only for qualifications above matric
+  const form = document.getElementById('registerForm');
+  const qualificationInput = document.getElementById('qualification');
+  const fieldGroup = document.getElementById('fieldOfStudyGroup');
+  const fieldSelect = document.getElementById('fieldOfStudy');
+
+  function updateFieldOfStudy() {
+    const q = qualificationInput.value.trim().toLowerCase();
+    const belowOrAtMatric = q === '' || q.startsWith('no matric') || q.startsWith('matric');
+
+    if (belowOrAtMatric) {
+      fieldGroup.hidden = true;
+      fieldSelect.required = false;
+      fieldSelect.value = '';
+    } else {
+      fieldGroup.hidden = false;
+      fieldSelect.required = true;
+    }
+  }
+
+  qualificationInput.addEventListener('input', updateFieldOfStudy);
+  qualificationInput.addEventListener('change', updateFieldOfStudy);
+
+  // After a successful registration the form is reset, so hide the field again
+  form.addEventListener('reset', () => setTimeout(updateFieldOfStudy, 0));
 </script>
 
 </body>
