@@ -86,9 +86,17 @@
 
   .container { padding: 40px 20px 20px 20px; max-width: 900px; margin: auto; }
 
-  /* Hero section */
+  /* Hero section - white box now uses 3.jpg as its background.
+     The light overlay keeps the text readable; lower the 0.75 values
+     (e.g. to 0.4) to show more of the picture, or use 0 for none. */
   .hero { 
-    background: white; 
+    background-color: white; /* fallback if 3.jpg is missing */
+    background-image:
+      linear-gradient(rgba(255,255,255,0.75), rgba(255,255,255,0.75)),
+      url('3.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
     padding: 50px 20px; 
     text-align: center; 
     border-radius: 12px; 
