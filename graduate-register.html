@@ -155,37 +155,80 @@
       <datalist id="qualificationOptions">
         <option value="No matric (Grade 11 or lower)">
         <option value="Matric (Grade 12)">
+        <option value="NCV Level 2">
+        <option value="NCV Level 3">
+        <option value="NCV Level 4">
+        <option value="NATED N1">
+        <option value="NATED N2">
+        <option value="NATED N3">
+        <option value="NATED N4">
+        <option value="NATED N5">
+        <option value="NATED N6">
+        <option value="National N Diploma (N6 + work experience)">
+        <option value="Trade Test / Artisan Certificate">
+        <option value="Occupational Certificate">
         <option value="Higher Certificate">
+        <option value="Advanced Certificate">
         <option value="Diploma">
         <option value="Advanced Diploma">
         <option value="Bachelor's Degree">
-        <option value="Honours Degree">
+        <option value="BTech">
+        <option value="Honours Degree / Postgraduate Diploma">
         <option value="Master's Degree">
+        <option value="Doctoral Degree">
         <option value="Other">
       </datalist>
     </div>
 
-    <!-- Field of study: only shown for qualifications above matric -->
+    <!-- Field of study: shown for every qualification above matric -->
     <div id="fieldOfStudyGroup" hidden>
       <label for="fieldOfStudy">Field of Study</label>
       <div class="input-wrapper">
         <select id="fieldOfStudy">
           <option value="">Select your field of study</option>
-          <option value="Engineering">Engineering</option>
-          <option value="Information Technology / Computer Science">Information Technology / Computer Science</option>
-          <option value="Business / Commerce / Management">Business / Commerce / Management</option>
-          <option value="Accounting / Finance">Accounting / Finance</option>
-          <option value="Marketing / Communication / Media">Marketing / Communication / Media</option>
-          <option value="Human Resources / Public Administration">Human Resources / Public Administration</option>
-          <option value="Education / Teaching">Education / Teaching</option>
-          <option value="Health Sciences / Nursing">Health Sciences / Nursing</option>
-          <option value="Natural Sciences (Maths, Physics, Chemistry, Biology)">Natural Sciences (Maths, Physics, Chemistry, Biology)</option>
-          <option value="Agriculture / Environmental Science">Agriculture / Environmental Science</option>
-          <option value="Law / Legal Studies">Law / Legal Studies</option>
-          <option value="Social Sciences / Humanities">Social Sciences / Humanities</option>
-          <option value="Arts / Design / Architecture">Arts / Design / Architecture</option>
-          <option value="Hospitality / Tourism">Hospitality / Tourism</option>
-          <option value="Other">Other</option>
+
+          <optgroup label="Engineering and Technical">
+            <option value="Electrical / Electronics (incl. Electrician)">Electrical / Electronics (incl. Electrician)</option>
+            <option value="Mechanical Engineering">Mechanical Engineering</option>
+            <option value="Civil / Building / Construction">Civil / Building / Construction</option>
+            <option value="Chemical / Industrial / Mining Engineering">Chemical / Industrial / Mining Engineering</option>
+            <option value="Mechatronics / Automation / Instrumentation">Mechatronics / Automation / Instrumentation</option>
+            <option value="Automotive / Diesel / Motor Mechanics">Automotive / Diesel / Motor Mechanics</option>
+            <option value="Welding / Boilermaking / Fitting and Turning">Welding / Boilermaking / Fitting and Turning</option>
+            <option value="Plumbing / Carpentry / Bricklaying">Plumbing / Carpentry / Bricklaying</option>
+          </optgroup>
+
+          <optgroup label="Business and Management">
+            <option value="Business Management / Office Administration">Business Management / Office Administration</option>
+            <option value="Accounting / Finance">Accounting / Finance</option>
+            <option value="Marketing / Sales">Marketing / Sales</option>
+            <option value="Human Resources / Public Management">Human Resources / Public Management</option>
+            <option value="Logistics / Supply Chain / Transport">Logistics / Supply Chain / Transport</option>
+          </optgroup>
+
+          <optgroup label="IT and Sciences">
+            <option value="Information Technology / Computer Science">Information Technology / Computer Science</option>
+            <option value="Natural Sciences (Maths, Physics, Chemistry, Biology)">Natural Sciences (Maths, Physics, Chemistry, Biology)</option>
+            <option value="Agriculture / Environmental Science / Nature Conservation">Agriculture / Environmental Science / Nature Conservation</option>
+          </optgroup>
+
+          <optgroup label="Education, Health and Society">
+            <option value="Education / Teaching / Early Childhood Development">Education / Teaching / Early Childhood Development</option>
+            <option value="Health Sciences / Nursing">Health Sciences / Nursing</option>
+            <option value="Law / Legal Studies / Safety and Security">Law / Legal Studies / Safety and Security</option>
+            <option value="Social Sciences / Humanities">Social Sciences / Humanities</option>
+          </optgroup>
+
+          <optgroup label="Creative and Services">
+            <option value="Media / Communication / Journalism">Media / Communication / Journalism</option>
+            <option value="Arts / Design / Architecture">Arts / Design / Architecture</option>
+            <option value="Hospitality / Catering / Tourism">Hospitality / Catering / Tourism</option>
+            <option value="Hairdressing / Beauty / Cosmetology">Hairdressing / Beauty / Cosmetology</option>
+          </optgroup>
+
+          <optgroup label="Other">
+            <option value="Other">Other</option>
+          </optgroup>
         </select>
       </div>
       <p class="hint">We use this to show you jobs that match your studies.</p>
@@ -228,7 +271,7 @@
     togglePassword.setAttribute('aria-label', hidden ? 'Hide password' : 'Show password');
   });
 
-  // Show the Field of Study dropdown only for qualifications above matric
+  // Show the Field of Study dropdown for every qualification above matric
   const form = document.getElementById('registerForm');
   const qualificationInput = document.getElementById('qualification');
   const fieldGroup = document.getElementById('fieldOfStudyGroup');
