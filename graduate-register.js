@@ -25,6 +25,7 @@ const fullNameInput = document.getElementById('fullName');
 const emailInput = document.getElementById('email');
 const phoneInput = document.getElementById('phone');
 const qualificationInput = document.getElementById('qualification');
+const fieldOfStudyInput = document.getElementById('fieldOfStudy');
 const passwordInput = document.getElementById('password');
 const registerBtn = document.getElementById('registerBtn');
 const messageEl = document.getElementById('message');
@@ -33,6 +34,12 @@ const messageEl = document.getElementById('message');
 function showMessage(text, type) {
   messageEl.textContent = text;
   messageEl.className = type;
+}
+
+// True when the qualification is above matric, so a field of study is needed
+function needsFieldOfStudy(qualification) {
+  const q = qualification.trim().toLowerCase();
+  return !(q === '' || q.startsWith('no matric') || q.startsWith('matric'));
 }
 
 // Listens for the form being submitted, so the Enter key works too
@@ -46,8 +53,18 @@ form.addEventListener('submit', async (event) => {
   const qualification = qualificationInput.value.trim();
   const password = passwordInput.value;
 
+  // Field of study is only kept for qualifications above matric
+  const field_of_study = needsFieldOfStudy(qualification)
+    ? fieldOfStudyInput.value.trim()
+    : null;
+
   if (!full_name || !email || !phone || !qualification || !password) {
     showMessage('Please fill in all fields.', 'error');
+    return;
+  }
+
+  if (needsFieldOfStudy(qualification) && !field_of_study) {
+    showMessage('Please select your field of study.', 'error');
     return;
   }
 
@@ -68,7 +85,7 @@ form.addEventListener('submit', async (event) => {
   registerBtn.textContent = 'Registering...';
 
   try {
-    // The email link now points to your GitHub Pages address (see SITE_URL above)
+    // The email link points to your GitHub Pages address (see SITE_URL above)
     const verifyUrl = getVerifyUrl();
 
     // Supabase Auth checks for duplicate emails itself, so we don't look in the graduates table
@@ -77,7 +94,8 @@ form.addEventListener('submit', async (event) => {
       password,
       options: {
         emailRedirectTo: verifyUrl,
-        data: { full_name, phone, qualification }
+        // field_of_study is saved here so verify.html can insert it later
+        data: { full_name, phone, qualification, field_of_study }
       }
     });
 
@@ -94,7 +112,7 @@ form.addEventListener('submit', async (event) => {
 
     showMessage('Registration successful! Please check your email (and your spam folder) to verify your account before logging in. ', 'success');
 
-    // NEW: a link to the resend page, in case the email never arrives
+    // A link to the resend page, in case the email never arrives
     const resendLink = document.createElement('a');
     resendLink.href = 'verify.html';
     resendLink.textContent = "Didn't get it? Resend the email.";
