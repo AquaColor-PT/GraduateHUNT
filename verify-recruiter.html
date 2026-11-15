@@ -3,15 +3,18 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Recruiter Email Verification</title>
+<title>Recruiter Email Verification - GraduateInHunt</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
 <style>
+  * { box-sizing: border-box; }
   body {
-    font-family: 'Inter', sans-serif;
+    font-family: 'Inter', system-ui, sans-serif;
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 100vh;
+    min-height: 100vh;
+    margin: 0;
+    padding: 20px;
     background: #f4f7fb;
   }
   .verify-container {
@@ -20,98 +23,126 @@
     padding: 30px 40px;
     border-radius: 12px;
     box-shadow: 0px 4px 12px rgba(0,0,0,0.1);
-    max-width: 400px;
+    max-width: 420px;
     width: 100%;
   }
-  h2 { margin-bottom: 15px; color: #333; }
-  p { margin-bottom: 20px; color: #555; }
-  #loginBtn {
+  h2 { margin: 0 0 15px; color: #333; }
+  p { margin: 0 0 20px; color: #555; line-height: 1.5; }
+  .btn {
+    display: inline-block;
     padding: 10px 20px;
-    background: #4caf50;
+    background: #1e3a8a;
     color: white;
     border: none;
     border-radius: 8px;
     cursor: pointer;
     text-decoration: none;
+    font-weight: 600;
   }
-  .success { color: green; }
-  .error { color: red; }
+  .btn:hover { background: #16275f; }
+  .btn:focus-visible { outline: 3px solid #ffd23f; outline-offset: 2px; }
+  .success { color: #1e7e34; }
+  .error { color: #b00020; }
 </style>
 </head>
 <body>
 
-<div class="verify-container">
+<main class="verify-container">
   <h2 id="status">Verifying...</h2>
-  <p id="message">Please wait while we verify your email.</p>
-  <a id="loginBtn" href="recruiter-login.html" style="display:none;">Go to Login</a>
-</div>
+  <p id="message" role="status" aria-live="polite">Please wait while we verify your email.</p>
+  <a id="loginBtn" class="btn" href="recruiter-login.html" style="display:none;">Go to login</a>
+</main>
 
 <script type="module">
-import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
 
 const SUPABASE_URL = 'https://euclknvsppptbfclwxqq.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV1Y2xrbnZzcHBwdGJmY2x3eHFxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc2Mjc2NTQsImV4cCI6MjA3MzIwMzY1NH0.HlGW3kZJ4CPnF2JuZGs_4ObkhxwVFTSedb7O8HHDEag';
-const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+const SUPABASE_KEY = 'sb_publishable_90JbyFsa4BuuyeuLCIActg_yXfbHQ30';
+
+// Read the tokens from the link before anything else can touch the URL
+const hashParams = new URLSearchParams(window.location.hash.substring(1));
+
+// We handle the link ourselves, so stop the client from also reading the URL
+const supabase = createClient(SUPABASE_URL, SUPABASE_KEY, {
+  auth: { detectSessionInUrl: false }
+});
 
 const statusEl = document.getElementById('status');
 const messageEl = document.getElementById('message');
 const loginBtn = document.getElementById('loginBtn');
 
+function showFailure(title, text) {
+  statusEl.textContent = title;
+  messageEl.textContent = text;
+  statusEl.classList.add('error');
+}
+
 async function verifyRecruiter() {
-  // Supabase sends tokens in the URL hash
-  const hashParams = new URLSearchParams(window.location.hash.substring(1));
-  const access_token = hashParams.get("access_token");
-  const refresh_token = hashParams.get("refresh_token");
+  const access_token = hashParams.get('access_token');
+  const refresh_token = hashParams.get('refresh_token');
+  const linkError = hashParams.get('error_code') || hashParams.get('error');
+
+  // Remove the tokens from the address bar and browser history
+  history.replaceState(null, '', window.location.pathname + window.location.search);
+
+  if (linkError) {
+    showFailure(
+      'Link expired',
+      'This verification link has expired or was already used. If you have already verified your email, go to login. Otherwise, please register again.'
+    );
+    loginBtn.style.display = 'inline-block';
+    return;
+  }
 
   if (!access_token || !refresh_token) {
-    statusEl.textContent = 'Verification Failed';
-    messageEl.textContent = 'Invalid or expired verification link.';
-    statusEl.classList.add('error');
+    showFailure('Verification failed', 'Invalid or expired verification link.');
     return;
   }
 
   try {
-    // Set session using tokens
-    const { data: sessionData, error: sessionError } = await supabase.auth.setSession({
-      access_token,
-      refresh_token
-    });
+    const { data: sessionData, error: sessionError } = await supabase.auth.setSession({ access_token, refresh_token });
     if (sessionError) throw sessionError;
 
-    const user = sessionData.user;
+    const user = sessionData.session?.user || sessionData.user;
+    if (!user) throw new Error('No user found for this link.');
 
-    // Insert into recruiters table only if not already inserted
-    const { data: existing } = await supabase
+    // Create the recruiter profile only if it does not exist yet
+    const { data: existing, error: lookupError } = await supabase
       .from('recruiters')
       .select('id')
       .eq('id', user.id)
       .maybeSingle();
+    if (lookupError) throw lookupError;
 
     if (!existing) {
+      const meta = user.user_metadata || {};
       const { error: insertError } = await supabase.from('recruiters').insert([{
         id: user.id,
-        first_name: user.user_metadata.first_name,
-        last_name: user.user_metadata.last_name,
+        first_name: meta.first_name,
+        last_name: meta.last_name,
         email: user.email,
-        company_name: user.user_metadata.company_name,
-        registration_number: user.user_metadata.registration_number,
-        contact: user.user_metadata.contact,
-        verified: false,
+        company_name: meta.company_name,
+        registration_number: meta.registration_number,
+        contact: meta.contact,
+        verified: false,                      // approved later by the GraduateInHunt team
         created_at: new Date().toISOString()
       }]);
-      if (insertError) throw insertError;
+      // 23505 = already inserted (e.g. link opened twice): that is fine
+      if (insertError && insertError.code !== '23505') throw insertError;
     }
 
-    statusEl.textContent = 'Email Verified!';
-    messageEl.textContent = 'Your email has been verified. Now please await approval from the GraduateinHunt team before logging in.';
+    // Sign out so the recruiter must log in through the login page,
+    // which is where the approval check happens
+    await supabase.auth.signOut();
+
+    statusEl.textContent = 'Email verified!';
+    messageEl.textContent = 'Your email has been verified. Please wait for approval from the GraduateInHunt team before logging in.';
     statusEl.classList.add('success');
     loginBtn.style.display = 'inline-block';
 
   } catch (err) {
     console.error('Verification error:', err);
-    statusEl.textContent = 'Verification Failed';
-    messageEl.textContent = 'There was a problem verifying your email. Please try again.';
-    statusEl.classList.add('error');
+    showFailure('Verification failed', 'There was a problem verifying your email: ' + (err.message || 'Please try again.'));
   }
 }
 
