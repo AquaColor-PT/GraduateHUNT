@@ -142,7 +142,6 @@ function safeName(name) {
 
 /* ---------- Additional qualifications ---------- */
 const extraList = $('extraList');
-const addQualBtn = $('addQualBtn');
 let extras = [];          // { id, name, doc, file }  (id = null until saved)
 let removedExtras = [];   // { id, doc } waiting to be deleted on save
 
@@ -151,6 +150,7 @@ function extraPath(doc) {
 }
 
 function renderExtras() {
+  if (!extraList) return;
   extraList.innerHTML = '';
   if (!extras.length) {
     const empty = document.createElement('p');
@@ -319,7 +319,14 @@ async function syncExtras() {
   renderExtras();
 }
 
-addQualBtn.addEventListener('click', () => {
+// Delegated click handler: works even if the button is re-rendered, and never crashes the page
+document.addEventListener('click', (e) => {
+  if (!e.target.closest('#addQualBtn')) return;
+  if (!extraList) {
+    console.error('Missing #extraList in the HTML. Make sure you are using the latest graduate-profile.html.');
+    toast('Page is out of date. Please refresh (Ctrl+F5) or upload the latest HTML.', 'error');
+    return;
+  }
   extras.push({ id: null, name: '', doc: null, file: null });
   renderExtras();
   const last = extraList.querySelector('.extra-row:last-child input[type="text"]');
