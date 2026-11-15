@@ -140,6 +140,192 @@ function safeName(name) {
   return name.replace(/[^A-Za-z0-9._-]+/g, '_');   // spaces/odd characters can break storage paths
 }
 
+/* ---------- Additional qualifications ---------- */
+const extraList = $('extraList');
+const addQualBtn = $('addQualBtn');
+let extras = [];          // { id, name, doc, file }  (id = null until saved)
+let removedExtras = [];   // { id, doc } waiting to be deleted on save
+
+function extraPath(doc) {
+  return `graduates/${currentUserId}/other/${doc}`;
+}
+
+function renderExtras() {
+  extraList.innerHTML = '';
+  if (!extras.length) {
+    const empty = document.createElement('p');
+    empty.className = 'hint';
+    empty.style.marginBottom = '12px';
+    empty.textContent = 'No other qualifications added yet.';
+    extraList.appendChild(empty);
+    return;
+  }
+
+  extras.forEach((q, i) => {
+    const row = document.createElement('div');
+    row.className = 'extra-row';
+
+    // Name
+    const field = document.createElement('div');
+    field.className = 'field';
+    const label = document.createElement('label');
+    const inputId = 'extraQual' + i;
+    label.htmlFor = inputId;
+    label.textContent = 'Qualification ' + (i + 1);
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.id = inputId;
+    input.value = q.name;
+    input.placeholder = 'Select or type a qualification';
+    input.autocomplete = 'off';
+    input.setAttribute('list', 'qualificationOptions');
+    input.addEventListener('input', () => { q.name = input.value; });
+    field.append(label, input);
+
+    // Certificate + actions
+    const actions = document.createElement('div');
+    actions.className = 'extra-actions';
+
+    const pick = document.createElement('label');
+    pick.className = 'mini-btn';
+    const pickText = document.createElement('span');
+    pickText.textContent = (q.doc || q.file) ? 'Replace certificate' : 'Upload certificate';
+    const fileInput = document.createElement('input');
+    fileInput.type = 'file';
+    fileInput.className = 'sr-only';
+    fileInput.accept = 'application/pdf, image/png, image/jpeg';
+    pick.append(pickText, fileInput);
+
+    const fileName = document.createElement('span');
+    fileName.className = 'file-name';
+    fileName.textContent = q.file ? q.file.name : (q.doc || 'No certificate attached');
+
+    fileInput.addEventListener('change', () => {
+      const file = fileInput.files[0];
+      if (!file) return;
+      if (!PDF_OR_IMG.includes(file.type)) {
+        toast('Please upload a PDF, JPG or PNG.', 'error');
+        fileInput.value = '';
+        return;
+      }
+      if (file.size > MAX_DOC) {
+        toast('That file is too big. Please use one under 10 MB.', 'error');
+        fileInput.value = '';
+        return;
+      }
+      q.file = file;
+      fileName.textContent = file.name;
+      pickText.textContent = 'Replace certificate';
+    });
+
+    actions.append(pick, fileName);
+
+    if (q.doc) {
+      const view = document.createElement('a');
+      view.href = '#';
+      view.className = 'mini-btn';
+      view.textContent = 'View';
+      view.addEventListener('click', (e) => { e.preventDefault(); openStored(extraPath(q.doc), q.name || 'certificate'); });
+      actions.appendChild(view);
+    }
+
+    const remove = document.createElement('button');
+    remove.type = 'button';
+    remove.className = 'mini-btn danger';
+    remove.textContent = 'Remove';
+    remove.addEventListener('click', () => {
+      if (q.id) removedExtras.push({ id: q.id, doc: q.doc });
+      extras.splice(i, 1);
+      renderExtras();
+    });
+    actions.appendChild(remove);
+
+    row.append(field, actions);
+    extraList.appendChild(row);
+  });
+}
+
+async function openStored(path, label) {
+  // Open the tab first, inside the click, so phone browsers don't block the pop-up
+  const tab = window.open('', '_blank');
+  try {
+    const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+    if (sessionError || !session?.user) throw new Error('You are not logged in.');
+    const { data, error } = await supabase.storage.from('cv_bucket').createSignedUrl(path, 60);
+    if (error) throw error;
+    if (tab) tab.location.href = data.signedUrl;
+    else window.location.href = data.signedUrl;
+  } catch (err) {
+    if (tab) tab.close();
+    console.error('Failed to open document:', err);
+    toast(`Could not open ${label}: ` + (err.message || 'Please try again.'), 'error');
+  }
+}
+
+async function loadExtras() {
+  const { data, error } = await supabase
+    .from('graduate_qualifications')
+    .select('id, name, doc_url')
+    .eq('graduate_id', currentUserId)
+    .order('created_at', { ascending: true });
+  if (error) {
+    console.error('Error fetching qualifications:', error);
+    toast('Could not load your other qualifications: ' + error.message, 'error');
+    return;
+  }
+  extras = (data || []).map(r => ({ id: r.id, name: r.name, doc: r.doc_url, file: null }));
+  removedExtras = [];
+  renderExtras();
+}
+
+async function syncExtras() {
+  // Deletions first
+  for (const r of removedExtras) {
+    const { error } = await supabase.from('graduate_qualifications').delete().eq('id', r.id);
+    if (error) throw error;
+    if (r.doc) await supabase.storage.from('cv_bucket').remove([extraPath(r.doc)]);
+  }
+  removedExtras = [];
+
+  const kept = [];
+  for (let i = 0; i < extras.length; i++) {
+    const q = extras[i];
+    const name = q.name.trim();
+    if (!q.id && !name && !q.file) continue;          // ignore blank new rows
+
+    let doc = q.doc;
+    if (q.file) {
+      const stored = `${Date.now()}_${i}_${safeName(q.file.name)}`;
+      await upload('cv_bucket', extraPath(stored), q.file);
+      if (q.doc) await supabase.storage.from('cv_bucket').remove([extraPath(q.doc)]);
+      doc = stored;
+    }
+
+    let id = q.id;
+    if (id) {
+      const { error } = await supabase.from('graduate_qualifications')
+        .update({ name, doc_url: doc }).eq('id', id);
+      if (error) throw error;
+    } else {
+      const { data, error } = await supabase.from('graduate_qualifications')
+        .insert({ graduate_id: currentUserId, name, doc_url: doc })
+        .select('id').single();
+      if (error) throw error;
+      id = data.id;
+    }
+    kept.push({ id, name, doc, file: null });
+  }
+  extras = kept;
+  renderExtras();
+}
+
+addQualBtn.addEventListener('click', () => {
+  extras.push({ id: null, name: '', doc: null, file: null });
+  renderExtras();
+  const last = extraList.querySelector('.extra-row:last-child input[type="text"]');
+  if (last) last.focus();
+});
+
 /* ---------- Load profile ---------- */
 async function loadProfile() {
   const { data: { session } } = await supabase.auth.getSession();
@@ -173,6 +359,7 @@ async function loadProfile() {
     setAvatar(currentPicUrl);
   }
   refreshAll();
+  await loadExtras();
 }
 
 /* ---------- Live updates ---------- */
@@ -239,6 +426,12 @@ saveBtn.addEventListener('click', async () => {
     }
   }
 
+  const badExtra = extras.find(q => !q.name.trim() && (q.id || q.file));
+  if (badExtra) {
+    toast('Please enter a name for each additional qualification, or remove it.', 'error');
+    return;
+  }
+
   saveBtn.disabled = true;
   saveBtn.textContent = 'Saving...';
 
@@ -285,6 +478,8 @@ saveBtn.addEventListener('click', async () => {
       ...docNames                       // cv_url, id_doc_url, qualification_doc_url
     });
     if (upsertError) throw upsertError;
+
+    await syncExtras();               // other qualifications (needs the graduate row to exist first)
 
     currentPicUrl = picUrl;
     Object.values(DOCS).forEach(d => { d.current = docNames[d.col]; d.input.value = ''; });
