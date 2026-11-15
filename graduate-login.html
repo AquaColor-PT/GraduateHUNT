@@ -14,7 +14,10 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      height: 100vh;
+      /* FIX: was "height: 100vh", which can clip the card when a phone keyboard opens */
+      min-height: 100vh;
+      min-height: 100dvh;
+      padding: 20px;
     }
 
     .login-container {
@@ -48,12 +51,15 @@
     input {
       width: 100%;
       padding: 12px 14px;
-      padding-right: 50px; /* space for toggle */
       border-radius: 10px;
       border: 1px solid #ccc;
       font-size: 1rem;
+      font-family: inherit;
       transition: border 0.3s, box-shadow 0.3s;
     }
+
+    /* Only the password field needs room for the Show/Hide button */
+    .has-toggle input { padding-right: 76px; }
 
     input:focus {
       border-color: #1e3a8a;
@@ -61,14 +67,20 @@
       outline: none;
     }
 
+    /* Show/Hide is now a real button so it works with keyboards and screen readers */
     .toggle-password {
       position: absolute;
       top: 50%;
-      right: 14px;
+      right: 6px;
       transform: translateY(-50%);
+      background: none;
+      border: none;
+      padding: 8px 10px;
       cursor: pointer;
+      font-family: inherit;
       font-size: 0.9rem;
-      color: #555;
+      font-weight: 600;
+      color: #1e3a8a;
       user-select: none;
     }
 
@@ -86,82 +98,116 @@
       text-decoration: underline;
     }
 
-    button {
+    .btn {
+      display: block;
       margin-top: 25px;
       width: 100%;
-      padding: 12px;
+      padding: 14px;
       background: #1e3a8a;
       color: white;
       border: none;
       border-radius: 10px;
       cursor: pointer;
+      font-family: inherit;
       font-size: 1rem;
       font-weight: 600;
       transition: background 0.3s, transform 0.2s;
     }
 
-    button:hover {
+    .btn:hover {
       background: #16275f;
       transform: translateY(-2px);
     }
 
-    #goBackBtn {
+    .btn:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .btn-secondary {
       margin-top: 10px;
       background: #6b7280;
     }
 
-    #goBackBtn:hover {
+    .btn-secondary:hover {
       background: #4b5563;
     }
 
+    /* FIX: colours now come from classes instead of being set one by one in the JS */
     #message {
       text-align: center;
       margin-top: 15px;
       font-weight: 500;
+      line-height: 1.5;
+    }
+    #message.error { color: #c0392b; }
+    #message.success { color: #15803d; }
+    #message a { color: inherit; font-weight: 600; }
+
+    .register-link {
+      text-align: center;
+      margin-top: 18px;
+      font-size: 0.95rem;
+      color: #555;
+    }
+    .register-link a { color: #1e3a8a; font-weight: 600; text-decoration: none; }
+    .register-link a:hover { text-decoration: underline; }
+
+    @media (max-width: 480px) {
+      body { padding: 12px; align-items: flex-start; }
+      .login-container { padding: 28px 20px; }
     }
   </style>
 </head>
 <body>
-  <div class="login-container">
+  <main class="login-container">
     <h2>Graduate Login</h2>
 
-    <label for="email">Email</label>
-    <div class="input-wrapper">
-      <input type="email" id="email" placeholder="Enter your email" required>
-    </div>
+    <!-- FIX: wrapped in a real form, so the Enter key works -->
+    <form id="loginForm">
+      <label for="email">Email</label>
+      <div class="input-wrapper">
+        <input type="email" id="email" placeholder="Enter your email" autocomplete="email" inputmode="email" autocapitalize="none" required>
+      </div>
 
-    <label for="password">Password</label>
-    <div class="input-wrapper">
-      <input type="password" id="password" placeholder="Enter your password" required>
-      <span class="toggle-password" id="togglePassword">Show</span>
-    </div>
+      <label for="password">Password</label>
+      <div class="input-wrapper has-toggle">
+        <input type="password" id="password" placeholder="Enter your password" autocomplete="current-password" required>
+        <button type="button" class="toggle-password" id="togglePassword" aria-label="Show password">Show</button>
+      </div>
 
-    <!-- Forgot password link -->
-    <a href="forgot-password.html" class="forgot-password">Forgot Password?</a>
+      <!-- Forgot password link -->
+      <a href="forgot-password.html" class="forgot-password">Forgot Password?</a>
 
-    <button id="loginBtn">Login</button>
-    <button id="goBackBtn" type="button">Go Back</button>
-    <p id="message"></p>
-  </div>
+      <button type="submit" class="btn" id="loginBtn">Login</button>
+      <button type="button" class="btn btn-secondary" id="goBackBtn">Go Back</button>
+      <p id="message" role="status" aria-live="polite"></p>
+    </form>
+
+    <p class="register-link">New here? <a href="graduate-register.html">Create an account</a></p>
+  </main>
 
   <script type="module" src="graduate-login.js"></script>
   <script>
+    // Go Back button (falls back to the home page if there is nothing to go back to)
     const goBackBtn = document.getElementById('goBackBtn');
     goBackBtn.addEventListener('click', () => {
-      history.back();
+      if (history.length > 1) {
+        history.back();
+      } else {
+        window.location.href = 'index.html';
+      }
     });
 
-    // Optional: Toggle password visibility
+    // Toggle password visibility
     const togglePassword = document.getElementById('togglePassword');
     const passwordInput = document.getElementById('password');
     togglePassword.addEventListener('click', () => {
-      if (passwordInput.type === "password") {
-        passwordInput.type = "text";
-        togglePassword.textContent = "Hide";
-      } else {
-        passwordInput.type = "password";
-        togglePassword.textContent = "Show";
-      }
+      const hidden = passwordInput.type === 'password';
+      passwordInput.type = hidden ? 'text' : 'password';
+      togglePassword.textContent = hidden ? 'Hide' : 'Show';
+      togglePassword.setAttribute('aria-label', hidden ? 'Hide password' : 'Show password');
     });
   </script>
 </body>
