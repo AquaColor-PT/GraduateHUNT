@@ -6,14 +6,21 @@
 <title>Email Verification</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
 <style>
+  * { box-sizing: border-box; }
+
   body {
     font-family: 'Inter', sans-serif;
     background: #f4f6f9;
+    margin: 0;
+    padding: 20px;
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 100vh;
+    /* FIX: was "height: 100vh", which can cut the card off on small phones */
+    min-height: 100vh;
+    min-height: 100dvh;
   }
+
   .verify-container {
     background: white;
     padding: 40px 30px;
@@ -23,18 +30,29 @@
     max-width: 450px;
     width: 100%;
   }
+
   h2 {
     color: #1e3a8a;
     font-weight: 600;
-    margin-bottom: 20px;
+    margin: 0 0 20px;
   }
+
   p {
-    margin-bottom: 25px;
+    margin: 0 0 25px;
     font-size: 1rem;
+    line-height: 1.5;
     color: #555;
   }
+
+  .actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: center;
+  }
+
   a.button {
-    display: inline-block;
+    display: none;
     padding: 12px 25px;
     background: #1e3a8a;
     color: white;
@@ -47,74 +65,132 @@
     background: #16275f;
     transform: translateY(-2px);
   }
-  .success { color: green; }
-  .error { color: red; }
+  a.button.secondary { background: #6b7280; }
+  a.button.secondary:hover { background: #4b5563; }
+
+  /* Text colours that stay readable on white */
+  .success { color: #15803d; }
+  .error { color: #c0392b; }
+
+  @media (max-width: 480px) {
+    .verify-container { padding: 30px 20px; }
+    a.button { width: 100%; }
+  }
 </style>
 </head>
 <body>
 
-<div class="verify-container">
-  <h2 id="status">Verifying...</h2>
+<main class="verify-container">
+  <h2 id="status" role="status" aria-live="polite">Verifying...</h2>
   <p id="message">Please wait while we verify your email.</p>
-  <a id="loginBtn" href="graduate-login.html" class="button" style="display:none;">Go to Login</a>
-</div>
+  <div class="actions">
+    <a id="loginBtn" href="graduate-login.html" class="button">Go to Login</a>
+    <a id="registerBtn" href="graduate-register.html" class="button secondary">Register Again</a>
+  </div>
+</main>
 
 <script type="module">
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
 
+// FIX: read the link details first, before Supabase has a chance to tidy the address bar
+const hashParams = new URLSearchParams(window.location.hash.substring(1));
+const queryParams = new URLSearchParams(window.location.search);
+
 const SUPABASE_URL = 'https://euclknvsppptbfclwxqq.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV1Y2xrbnZzcHBwdGJmY2x3eHFxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc2Mjc2NTQsImV4cCI6MjA3MzIwMzY1NH0.HlGW3kZJ4CPnF2JuZGs_4ObkhxwVFTSedb7O8HHDEag';
+// FIX: this page used a different (older) key from the rest of the site. Now it uses the same one.
+const SUPABASE_KEY = 'sb_publishable_90JbyFsa4BuuyeuLCIActg_yXfbHQ30';
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 const statusEl = document.getElementById('status');
 const messageEl = document.getElementById('message');
 const loginBtn = document.getElementById('loginBtn');
+const registerBtn = document.getElementById('registerBtn');
+
+function showFailure(title, text) {
+  statusEl.textContent = title;
+  statusEl.className = 'error';
+  messageEl.textContent = text;
+  // FIX: people who hit a problem now get somewhere to go next
+  loginBtn.style.display = 'inline-block';
+  registerBtn.style.display = 'inline-block';
+}
 
 async function verifyAndInsertGraduate() {
-  // Supabase puts tokens in the hash fragment, not query string
-  const hashParams = new URLSearchParams(window.location.hash.substring(1));
-  const access_token = hashParams.get("access_token");
-  const refresh_token = hashParams.get("refresh_token");
+  // Supabase reports problems (like an expired link) in the address
+  const errorCode = hashParams.get('error_code') || queryParams.get('error_code');
+  const hasError = errorCode || hashParams.get('error') || queryParams.get('error');
 
-  if (!access_token || !refresh_token) {
-    statusEl.textContent = 'Verification Failed';
-    messageEl.textContent = 'Invalid or expired verification link.';
-    statusEl.classList.add('error');
+  if (hasError) {
+    if (errorCode === 'otp_expired') {
+      showFailure(
+        'Link expired',
+        'This link has expired or was already used. If you have already verified, log in. If not, register again to get a new link.'
+      );
+    } else {
+      showFailure('Verification Failed', 'Invalid or expired verification link.');
+    }
+    return;
+  }
+
+  const access_token = hashParams.get('access_token');
+  const refresh_token = hashParams.get('refresh_token');
+  const code = queryParams.get('code');
+
+  if (!(access_token && refresh_token) && !code) {
+    showFailure('Verification Failed', 'Invalid or expired verification link.');
     return;
   }
 
   try {
-    // Set session with both tokens
-    const { data: sessionData, error: sessionError } = await supabase.auth.setSession({
-      access_token,
-      refresh_token
-    });
+    // Supabase normally reads the link by itself, so ask it for the session first
+    let { data: { session }, error: sessionError } = await supabase.auth.getSession();
     if (sessionError) throw sessionError;
 
-    const user = sessionData.user;
+    // If it did not, set the session from the tokens in the link
+    if (!session && access_token && refresh_token) {
+      const { data, error } = await supabase.auth.setSession({ access_token, refresh_token });
+      if (error) throw error;
+      session = data.session;
+    }
+
+    if (!session || !session.user) {
+      showFailure('Verification Failed', 'Invalid or expired verification link.');
+      return;
+    }
+
+    const user = session.user;
+    const meta = user.user_metadata || {};
+
+    // FIX: this page only creates graduate accounts. Without this check, someone who
+    // signed up some other way (for example as a recruiter) could be added as a graduate.
+    if (!meta.qualification) {
+      showFailure('Wrong verification page', 'This link is not for a graduate account.');
+      return;
+    }
 
     // Insert into graduates table only if not already inserted
-    const { data: existing } = await supabase
+    const { data: existing, error: existingError } = await supabase
       .from('graduates')
       .select('id')
       .eq('id', user.id)
       .maybeSingle();
+    if (existingError) throw existingError;
 
     if (!existing) {
       const { error: insertError } = await supabase.from('graduates').insert([{
         id: user.id,
-        full_name: user.user_metadata.full_name,
+        full_name: meta.full_name,
         email: user.email,
-        phone: user.user_metadata.phone,
-        qualification: user.user_metadata.qualification,
+        phone: meta.phone,
+        qualification: meta.qualification,
         created_at: new Date().toISOString()
       }]);
       if (insertError) throw insertError;
     }
 
     statusEl.textContent = 'Email Verified!';
+    statusEl.className = 'success';
     messageEl.textContent = 'Thank you for verifying your email. You will be redirected to the login page shortly.';
-    statusEl.classList.add('success');
     loginBtn.style.display = 'inline-block';
 
     // Auto redirect to login after 5 seconds
@@ -124,9 +200,7 @@ async function verifyAndInsertGraduate() {
 
   } catch (err) {
     console.error('Verification error:', err);
-    statusEl.textContent = 'Verification Failed';
-    messageEl.textContent = 'There was a problem verifying your email. Please try again.';
-    statusEl.classList.add('error');
+    showFailure('Verification Failed', 'There was a problem verifying your email. Please try again.');
   }
 }
 
