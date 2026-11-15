@@ -5,6 +5,21 @@ const SUPABASE_URL = 'https://euclknvsppptbfclwxqq.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_90JbyFsa4BuuyeuLCIActg_yXfbHQ30';
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
+// ====================================================================
+// PUT YOUR GITHUB PAGES ADDRESS HERE (the folder your site lives in).
+// It must end with a slash, for example: https://yourname.github.io/yourrepo/
+// Until you change it, the page uses whatever address it is opened from.
+// (This is why the email link was opening on your own computer.)
+// ====================================================================
+const SITE_URL = 'https://YOUR-USERNAME.github.io/YOUR-REPO/';
+
+function getVerifyUrl() {
+  if (SITE_URL.includes('YOUR-')) {
+    return new URL('verify.html', window.location.href).href;
+  }
+  return new URL('verify.html', SITE_URL).href;
+}
+
 const form = document.getElementById('registerForm');
 const fullNameInput = document.getElementById('fullName');
 const emailInput = document.getElementById('email');
@@ -20,7 +35,7 @@ function showMessage(text, type) {
   messageEl.className = type;
 }
 
-// FIX: listens for the form being submitted, so the Enter key works too
+// Listens for the form being submitted, so the Enter key works too
 form.addEventListener('submit', async (event) => {
   event.preventDefault();
   showMessage('', '');
@@ -48,18 +63,15 @@ form.addEventListener('submit', async (event) => {
     return;
   }
 
-  // FIX: stops double-clicks from sending two sign-ups
+  // Stops double-clicks from sending two sign-ups
   registerBtn.disabled = true;
   registerBtn.textContent = 'Registering...';
 
   try {
-    // Builds the link from the page's current address, so it works on any domain
-    const verifyUrl = new URL('verify.html', window.location.href).href;
+    // The email link now points to your GitHub Pages address (see SITE_URL above)
+    const verifyUrl = getVerifyUrl();
 
-    // FIX: the old code looked the email up in the "graduates" table first.
-    // That only works if anyone on the internet is allowed to read that table,
-    // which also exposes graduates' details. Supabase Auth already checks for
-    // duplicates, so we use its answer instead.
+    // Supabase Auth checks for duplicate emails itself, so we don't look in the graduates table
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
@@ -80,7 +92,14 @@ form.addEventListener('submit', async (event) => {
     // Do not insert into graduates table yet.
     // Wait until user verifies their email, then handle insert on verify.html page.
 
-    showMessage('Registration successful! Please check your email to verify your account before logging in.', 'success');
+    showMessage('Registration successful! Please check your email (and your spam folder) to verify your account before logging in. ', 'success');
+
+    // NEW: a link to the resend page, in case the email never arrives
+    const resendLink = document.createElement('a');
+    resendLink.href = 'verify.html';
+    resendLink.textContent = "Didn't get it? Resend the email.";
+    messageEl.appendChild(resendLink);
+
     form.reset();
 
   } catch (err) {
