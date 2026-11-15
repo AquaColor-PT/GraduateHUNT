@@ -8,25 +8,42 @@ const $ = (id) => document.getElementById(id);
 const nameInput = $('name');
 const emailEl = $('email');
 const phoneInput = $('phone');
+const dobInput = $('dob');
+const genderInput = $('gender');
+const raceInput = $('race');
 const qualificationInput = $('qualification');
 const skillsInput = $('skills');
 const skillChips = $('skillChips');
-const cvLinkEl = $('cvLink');
-const cvFileInput = $('cvFile');
-const cvFileName = $('cvFileName');
-const currentCv = $('currentCv');
-const currentCvNameEl = $('currentCvName');
 const profilePicInput = $('profilePic');
 const saveBtn = $('saveBtn');
 const logoutBtn = $('logoutBtn');
 
 const MAX_PIC = 5 * 1024 * 1024;     // 5 MB
-const MAX_CV = 10 * 1024 * 1024;     // 10 MB
+const MAX_DOC = 10 * 1024 * 1024;    // 10 MB
+
+const PDF_ONLY = ['application/pdf'];
+const PDF_OR_IMG = ['application/pdf', 'image/png', 'image/jpeg'];
+
+// One config per document (all stored in the private cv_bucket)
+const DOCS = {
+  cv: {
+    input: $('cvFile'), nameEl: $('cvFileName'), box: $('currentCv'), curEl: $('currentCvName'), link: $('cvLink'),
+    col: 'cv_url', folder: '', types: PDF_ONLY, label: 'CV', current: null
+  },
+  id: {
+    input: $('idFile'), nameEl: $('idFileName'), box: $('currentId'), curEl: $('currentIdName'), link: $('idLink'),
+    col: 'id_doc_url', folder: 'id/', types: PDF_OR_IMG, label: 'ID copy', current: null
+  },
+  qual: {
+    input: $('qualFile'), nameEl: $('qualFileName'), box: $('currentQual'), curEl: $('currentQualName'), link: $('qualLink'),
+    col: 'qualification_doc_url', folder: 'qualification/', types: PDF_OR_IMG, label: 'Qualification certificate', current: null
+  }
+};
+const TOTAL = 11; // name, phone, dob, gender, race, qualification, skills, picture, CV, ID, certificate
 
 let currentUserId = null;
 let currentEmail = '';
 let currentPicUrl = null;            // clean URL stored in the database
-let currentCvName = null;            // CV file name stored in the database
 let previewObjectUrl = null;
 
 /* ---------- UI helpers ---------- */
@@ -72,28 +89,52 @@ function renderChips() {
   });
 }
 
-function refreshCv() {
-  const picked = cvFileInput.files[0];
-  cvFileName.textContent = picked ? picked.name : 'No file selected';
-  currentCv.hidden = !currentCvName;
-  currentCvNameEl.textContent = currentCvName || '';
+function calcAge(dobStr) {
+  if (!dobStr) return null;
+  const dob = new Date(dobStr);
+  if (isNaN(dob)) return null;
+  const now = new Date();
+  let age = now.getFullYear() - dob.getFullYear();
+  const m = now.getMonth() - dob.getMonth();
+  if (m < 0 || (m === 0 && now.getDate() < dob.getDate())) age--;
+  return age;
+}
+
+function refreshAge() {
+  const age = calcAge(dobInput.value);
+  $('ageHint').textContent = age !== null && age >= 0
+    ? `You are ${age} years old.`
+    : 'Used to check age requirements.';
+}
+
+function refreshDocs() {
+  Object.values(DOCS).forEach(d => {
+    const picked = d.input.files[0];
+    d.nameEl.textContent = picked ? picked.name : 'No file selected';
+    d.box.hidden = !d.current;
+    d.curEl.textContent = d.current || '';
+  });
 }
 
 function refreshProgress() {
   const done = [
     nameInput.value.trim(),
     phoneInput.value.trim(),
+    dobInput.value,
+    genderInput.value,
+    raceInput.value,
     qualificationInput.value.trim(),
     skillsInput.value.trim(),
     profilePicInput.files[0] || currentPicUrl,
-    cvFileInput.files[0] || currentCvName
+    ...Object.values(DOCS).map(d => d.input.files[0] || d.current)
   ].filter(Boolean).length;
-  $('progressBar').style.width = (done / 6 * 100) + '%';
-  $('progressText').textContent = `Profile ${done} of 6 complete`;
+  $('progressBar').style.width = (done / TOTAL * 100) + '%';
+  $('progressText').textContent = `Profile ${done} of ${TOTAL} complete`;
+  $('progressTrack').setAttribute('aria-valuemax', TOTAL);
   $('progressTrack').setAttribute('aria-valuenow', done);
 }
 
-function refreshAll() { refreshHeader(); renderChips(); refreshCv(); refreshProgress(); }
+function refreshAll() { refreshHeader(); renderChips(); refreshDocs(); refreshAge(); refreshProgress(); }
 
 function safeName(name) {
   return name.replace(/[^A-Za-z0-9._-]+/g, '_');   // spaces/odd characters can break storage paths
@@ -122,17 +163,21 @@ async function loadProfile() {
   if (data) {
     nameInput.value = data.full_name || '';
     phoneInput.value = data.phone || '';
+    dobInput.value = data.date_of_birth || '';
+    genderInput.value = data.gender || '';
+    raceInput.value = data.race || '';
     qualificationInput.value = data.qualification || '';
     skillsInput.value = data.skills || '';
-    currentCvName = data.cv_url || null;
     currentPicUrl = data.profile_pic_url || null;
+    Object.values(DOCS).forEach(d => { d.current = data[d.col] || null; });
     setAvatar(currentPicUrl);
   }
   refreshAll();
 }
 
 /* ---------- Live updates ---------- */
-[nameInput, phoneInput, qualificationInput, skillsInput].forEach(el => el.addEventListener('input', refreshAll));
+[nameInput, phoneInput, dobInput, genderInput, raceInput, qualificationInput, skillsInput]
+  .forEach(el => el.addEventListener('input', refreshAll));
 
 profilePicInput.addEventListener('change', () => {
   const file = profilePicInput.files[0];
@@ -153,17 +198,19 @@ profilePicInput.addEventListener('change', () => {
   refreshProgress();
 });
 
-cvFileInput.addEventListener('change', () => {
-  const file = cvFileInput.files[0];
-  if (file && file.type !== 'application/pdf') {
-    toast('Please upload your CV as a PDF.', 'error');
-    cvFileInput.value = '';
-  } else if (file && file.size > MAX_CV) {
-    toast('That CV is too big. Please use a PDF under 10 MB.', 'error');
-    cvFileInput.value = '';
-  }
-  refreshCv();
-  refreshProgress();
+Object.values(DOCS).forEach(d => {
+  d.input.addEventListener('change', () => {
+    const file = d.input.files[0];
+    if (file && !d.types.includes(file.type)) {
+      toast(`${d.label}: please upload a ${d.types === PDF_ONLY ? 'PDF' : 'PDF, JPG or PNG'}.`, 'error');
+      d.input.value = '';
+    } else if (file && file.size > MAX_DOC) {
+      toast(`${d.label} is too big. Please use a file under 10 MB.`, 'error');
+      d.input.value = '';
+    }
+    refreshDocs();
+    refreshProgress();
+  });
 });
 
 /* ---------- Save ---------- */
@@ -181,6 +228,15 @@ saveBtn.addEventListener('click', async () => {
     toast('Please type your actual qualification instead of "Other".', 'error');
     qualificationInput.focus();
     return;
+  }
+
+  if (dobInput.value) {
+    const age = calcAge(dobInput.value);
+    if (age === null || age < 14 || age > 100) {
+      toast('Please enter a valid date of birth.', 'error');
+      dobInput.focus();
+      return;
+    }
   }
 
   saveBtn.disabled = true;
@@ -203,13 +259,16 @@ saveBtn.addEventListener('click', async () => {
       picChanged = true;
     }
 
-    // CV
-    let cvName = currentCvName;
-    const cvFile = cvFileInput.files[0];
-    if (cvFile) {
-      const name = safeName(cvFile.name);
-      await upload('cv_bucket', `graduates/${currentUserId}/${name}`, cvFile);
-      cvName = name;
+    // Documents (CV, ID, qualification certificate)
+    const docNames = {};
+    for (const d of Object.values(DOCS)) {
+      docNames[d.col] = d.current;
+      const file = d.input.files[0];
+      if (file) {
+        const name = safeName(file.name);
+        await upload('cv_bucket', `graduates/${currentUserId}/${d.folder}${name}`, file);
+        docNames[d.col] = name;
+      }
     }
 
     const { error: upsertError } = await supabase.from('graduates').upsert({
@@ -217,17 +276,19 @@ saveBtn.addEventListener('click', async () => {
       email: currentEmail,
       full_name: fullName,
       phone: phoneInput.value.trim(),
+      date_of_birth: dobInput.value || null,
+      gender: genderInput.value || null,
+      race: raceInput.value || null,
       qualification,
       skills: skillsInput.value.trim(),
-      cv_url: cvName,
-      profile_pic_url: picUrl
+      profile_pic_url: picUrl,
+      ...docNames                       // cv_url, id_doc_url, qualification_doc_url
     });
     if (upsertError) throw upsertError;
 
     currentPicUrl = picUrl;
-    currentCvName = cvName;
+    Object.values(DOCS).forEach(d => { d.current = docNames[d.col]; d.input.value = ''; });
     profilePicInput.value = '';
-    cvFileInput.value = '';
     if (previewObjectUrl) { URL.revokeObjectURL(previewObjectUrl); previewObjectUrl = null; }
     // cache-buster so a replaced picture with the same file name shows straight away
     setAvatar(picUrl ? picUrl + (picChanged ? (picUrl.includes('?') ? '&' : '?') + 'v=' + Date.now() : '') : null);
@@ -242,29 +303,31 @@ saveBtn.addEventListener('click', async () => {
   }
 });
 
-/* ---------- View CV (signed link) ---------- */
-cvLinkEl.addEventListener('click', async (e) => {
-  e.preventDefault();
-  if (!currentCvName) { toast('No CV uploaded yet.', 'error'); return; }
+/* ---------- View documents (signed links) ---------- */
+Object.values(DOCS).forEach(d => {
+  d.link.addEventListener('click', async (e) => {
+    e.preventDefault();
+    if (!d.current) { toast(`No ${d.label} uploaded yet.`, 'error'); return; }
 
-  // Open the tab first, inside the click, so phone browsers don't block the pop-up
-  const tab = window.open('', '_blank');
-  try {
-    const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-    if (sessionError || !session?.user) throw new Error('You are not logged in.');
+    // Open the tab first, inside the click, so phone browsers don't block the pop-up
+    const tab = window.open('', '_blank');
+    try {
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      if (sessionError || !session?.user) throw new Error('You are not logged in.');
 
-    const { data, error } = await supabase.storage
-      .from('cv_bucket')
-      .createSignedUrl(`graduates/${session.user.id}/${currentCvName}`, 60);
-    if (error) throw error;
+      const { data, error } = await supabase.storage
+        .from('cv_bucket')
+        .createSignedUrl(`graduates/${session.user.id}/${d.folder}${d.current}`, 60);
+      if (error) throw error;
 
-    if (tab) tab.location.href = data.signedUrl;
-    else window.location.href = data.signedUrl;
-  } catch (err) {
-    if (tab) tab.close();
-    console.error('Failed to open CV:', err);
-    toast('Could not open your CV: ' + (err.message || 'Please try again.'), 'error');
-  }
+      if (tab) tab.location.href = data.signedUrl;
+      else window.location.href = data.signedUrl;
+    } catch (err) {
+      if (tab) tab.close();
+      console.error(`Failed to open ${d.label}:`, err);
+      toast(`Could not open your ${d.label}: ` + (err.message || 'Please try again.'), 'error');
+    }
+  });
 });
 
 /* ---------- Logout ---------- */
