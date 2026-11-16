@@ -50,31 +50,44 @@
   /* ===== Hero ===== */
   .hero {
     background: linear-gradient(100deg, #1e3a8a 0%, #2d5bc4 55%, #3b82f6 100%);
-    color: #fff; text-align: center; padding: 44px 24px 52px; border-radius: 0 0 0 28px;
+    color: #fff; padding: 40px 24px 48px; border-radius: 0 0 0 28px;
   }
-  .hero h1 { margin: 0 0 8px; font-size: clamp(1.9rem, 4.5vw, 2.6rem); font-weight: 800; letter-spacing: -0.035em; line-height: 1.1; }
-  .hero p { margin: 0 auto 24px; max-width: 520px; font-size: 1rem; color: rgba(255,255,255,.9); }
-  .search {
-    max-width: 640px; margin: 0 auto; background: #fff; border-radius: 14px; height: 52px; padding: 0 8px 0 16px;
-    display: flex; align-items: center; gap: 10px; color: var(--muted); box-shadow: 0 10px 30px rgba(10,25,80,.25);
+  .hero-inner { max-width: 1100px; margin: 0 auto; display: grid; grid-template-columns: 1fr auto; gap: 32px; align-items: center; }
+  .hero h1 { margin: 0 0 8px; font-size: clamp(1.8rem, 4vw, 2.4rem); font-weight: 800; letter-spacing: -0.035em; line-height: 1.1; }
+  .hero p { margin: 0 0 22px; max-width: 470px; font-size: 1rem; line-height: 1.5; color: rgba(255,255,255,.9); }
+  .hero-actions { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+  .btn-white { background: #fff; color: var(--navy); font-weight: 700; font-size: .92rem; padding: 11px 20px; border-radius: 12px; transition: box-shadow .2s; }
+  .btn-white:hover { box-shadow: 0 8px 20px rgba(10,25,80,.3); }
+  .chip {
+    display: none; align-items: center; gap: 8px; padding: 10px 16px; border-radius: 999px; font-weight: 600; font-size: .88rem;
+    background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.5);
   }
-  .search input { flex: 1; min-width: 0; border: 0; outline: 0; font: inherit; font-size: .95rem; color: var(--ink); background: transparent; }
-  .search button {
-    border: 0; cursor: pointer; font: inherit; font-weight: 600; font-size: .9rem; color: #fff;
-    background: linear-gradient(145deg, var(--navy), var(--blue)); padding: 9px 18px; border-radius: 10px;
+  .chip.show { display: inline-flex; }
+  .chip .dot { width: 8px; height: 8px; border-radius: 50%; background: #fca5a5; }
+  .glass {
+    display: flex; gap: 22px; align-items: center; min-width: 330px; padding: 20px 24px; border-radius: 20px;
+    background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.28); backdrop-filter: blur(6px);
+  }
+  .ring { position: relative; width: 84px; height: 84px; flex: none; }
+  .ring svg { width: 84px; height: 84px; transform: rotate(-90deg); }
+  .ring circle { fill: none; stroke-width: 8; }
+  .ring .bg { stroke: rgba(255,255,255,.25); }
+  .ring .fg { stroke: #fff; stroke-linecap: round; stroke-dasharray: 226.2; stroke-dashoffset: 226.2; transition: stroke-dashoffset .9s ease; }
+  .ring b { position: absolute; inset: 0; display: grid; place-items: center; font-size: 1.15rem; font-weight: 800; }
+  .glass-title { font-weight: 700; font-size: .95rem; margin-bottom: 10px; }
+  .checks { list-style: none; margin: 0; padding: 0; display: grid; gap: 7px; font-size: .88rem; font-weight: 500; }
+  .checks li { display: flex; align-items: center; gap: 9px; opacity: .72; }
+  .checks li::before { content: ""; width: 16px; height: 16px; border-radius: 50%; border: 2px solid rgba(255,255,255,.65); flex: none; }
+  .checks li.done { opacity: 1; }
+  .checks li.done::before {
+    background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%231e3a8a' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12l5 5 9-10'/%3E%3C/svg%3E") center / 10px no-repeat;
+    border-color: #fff;
   }
 
   /* ===== Content ===== */
   .wrap { max-width: 1100px; margin: 0 auto; padding: 24px 24px 56px; }
-  .pills { display: flex; flex-wrap: wrap; gap: 8px; }
-  .pill {
-    padding: 9px 18px; border-radius: 999px; background: #fff; border: 1px solid var(--line);
-    font-weight: 600; font-size: .9rem; transition: box-shadow .15s;
-  }
-  .pill:hover { box-shadow: 0 4px 12px rgba(30,58,138,.12); }
-  .pill.on { background: linear-gradient(145deg, var(--navy), var(--blue)); color: #fff; border-color: transparent; }
 
-  .section-title { margin: 32px 0 14px; font-size: 1.05rem; font-weight: 700; letter-spacing: -0.01em; }
+  .section-title { margin: 4px 0 14px; font-size: 1.05rem; font-weight: 700; letter-spacing: -0.01em; }
   .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 16px; }
   .card {
     position: relative; background: #fff; border: 1px solid var(--line); border-radius: 16px; padding: 20px;
@@ -142,26 +155,34 @@
 </header>
 
 <section class="hero">
-  <h1>Welcome back</h1>
-  <p>Jobs, learnerships and internships that match your qualification.</p>
-  <form class="search" action="browse-jobs.html" method="get" role="search">
-    <svg class="i" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
-    <input type="search" name="q" placeholder="Search by job title..." aria-label="Search by job title">
-    <button type="submit">Search</button>
-  </form>
+  <div class="hero-inner">
+    <div>
+      <h1 id="greeting">Welcome back</h1>
+      <p id="heroSub">Here's where your job hunt stands today.</p>
+      <div class="hero-actions">
+        <a class="btn-white" id="heroCta" href="browse-jobs.html">Browse jobs</a>
+        <a class="chip" id="msgChip" href="graduate-message.html"><span class="dot"></span>You have unread messages</a>
+      </div>
+    </div>
+    <div class="glass" aria-label="Profile completeness">
+      <div class="ring">
+        <svg viewBox="0 0 84 84"><circle class="bg" cx="42" cy="42" r="36"/><circle class="fg" id="ringFg" cx="42" cy="42" r="36"/></svg>
+        <b id="pct">&ndash;</b>
+      </div>
+      <div>
+        <div class="glass-title">Profile strength</div>
+        <ul class="checks" id="checks">
+          <li data-key="photo">Profile photo</li>
+          <li data-key="phone">Phone number</li>
+          <li data-key="skills">Skills added</li>
+          <li data-key="cv">CV uploaded</li>
+        </ul>
+      </div>
+    </div>
+  </div>
 </section>
 
 <main class="wrap">
-  <div class="pills" aria-label="Job types">
-    <a class="pill on" href="browse-jobs.html">All</a>
-    <a class="pill" href="browse-jobs.html?type=Internship">Internship</a>
-    <a class="pill" href="browse-jobs.html?type=Learnership">Learnership</a>
-    <a class="pill" href="browse-jobs.html?type=Training Program">Training Program</a>
-    <a class="pill" href="browse-jobs.html?type=Part-time">Part-time</a>
-    <a class="pill" href="browse-jobs.html?type=Permanent">Permanent</a>
-    <a class="pill" href="browse-jobs.html?type=Contract">Contract</a>
-  </div>
-
   <h2 class="section-title">Your dashboard</h2>
   <div class="cards">
     <a class="card" href="browse-jobs.html">
@@ -202,6 +223,52 @@
 <script>
 function openSidebar() { document.getElementById("sidebar").style.width = "280px"; document.getElementById("overlay").classList.add("open"); }
 function closeSidebar() { document.getElementById("sidebar").style.width = "0"; document.getElementById("overlay").classList.remove("open"); }
+</script>
+<script>
+(function () {
+  const $ = id => document.getElementById(id);
+  function update() {
+    const name = $('profileName').textContent.trim();
+    const loaded = name && name !== 'Full Name';
+    const first = loaded ? name.split(/\s+/)[0] : '';
+    const h = new Date().getHours();
+    const part = h < 12 ? 'Good morning' : h < 18 ? 'Good afternoon' : 'Good evening';
+    $('greeting').textContent = first ? part + ', ' + first : part;
+
+    const src = $('profilePic').getAttribute('src') || '';
+    const phone = $('profilePhone').textContent.trim();
+    const checks = {
+      photo: loaded && src && src !== '#' && !src.includes('placeholder.com'),
+      phone: loaded && phone && phone !== 'Phone',
+      skills: loaded && $('profileSkills').querySelectorAll('.skill-tag').length > 0,
+      cv: loaded && ($('cvLink').getAttribute('href') || '#') !== '#'
+    };
+    let done = 0;
+    document.querySelectorAll('#checks li').forEach(li => {
+      const ok = !!checks[li.dataset.key];
+      li.classList.toggle('done', ok);
+      if (ok) done++;
+    });
+    const pct = loaded ? Math.round(done / 4 * 100) : 0;
+    $('ringFg').style.strokeDashoffset = 226.2 * (1 - pct / 100);
+    $('pct').textContent = loaded ? pct + '%' : '\u2013';
+
+    if (loaded) {
+      const cta = $('heroCta');
+      if (pct < 100) {
+        $('heroSub').textContent = 'Your profile is ' + pct + '% complete. Finish it so employers can see your skills and CV.';
+        cta.textContent = 'Complete your profile'; cta.href = 'graduate-profile.html';
+      } else {
+        $('heroSub').textContent = 'Your profile is complete. Time to find your next role.';
+        cta.textContent = 'Browse jobs'; cta.href = 'browse-jobs.html';
+      }
+    }
+    $('msgChip').classList.toggle('show', $('messageBadge').style.display === 'inline-block');
+  }
+  new MutationObserver(update).observe($('sidebar'), { subtree: true, childList: true, characterData: true, attributes: true });
+  new MutationObserver(update).observe($('messageBadge'), { attributes: true, attributeFilter: ['style'] });
+  update();
+})();
 </script>
 </body>
 </html>
