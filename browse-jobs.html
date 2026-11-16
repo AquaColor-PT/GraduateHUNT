@@ -2,253 +2,313 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#1e3a8a">
 <title>Browse Jobs - GraduateInHunt</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
   * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
 
-  body { 
-    font-family: 'Inter', Arial, sans-serif; 
-    background: #f5f7fa; 
-    margin: 0; 
-    padding: 0; 
+  :root {
+    color-scheme: light dark;
+    --bg: #f4f6fb;
+    --surface: #ffffff;
+    --text: #0f172a;
+    --muted: #64748b;
+    --border: #e2e8f0;
+    --link: #1e3a8a;
+    --accent: #f5b800;
+    --chip-bg: #eef2ff;
+    --topbar: rgba(255, 255, 255, 0.88);
+    --shadow: 0 1px 2px rgba(15, 23, 42, 0.06), 0 8px 24px rgba(15, 23, 42, 0.06);
+    --shadow-hover: 0 2px 4px rgba(15, 23, 42, 0.08), 0 16px 32px rgba(15, 23, 42, 0.12);
+    --new-bg: #dcfce7;
+    --new-fg: #166534;
+    --notice-bg: #fff8e1;
+    --notice-fg: #6b5200;
+    --error: #dc2626;
   }
 
-  header {
-    background: linear-gradient(90deg,#1e3a8a,#3b82f6);
-    color: white;
-    padding: 25px 20px;
-    text-align: center;
-    border-radius: 0 0 20px 20px;
-    box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0b1220;
+      --surface: #121b30;
+      --text: #e6eaf3;
+      --muted: #97a3b9;
+      --border: #223052;
+      --link: #93c5fd;
+      --chip-bg: #1a2745;
+      --topbar: rgba(11, 18, 32, 0.88);
+      --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 8px 24px rgba(0, 0, 0, 0.25);
+      --shadow-hover: 0 2px 4px rgba(0, 0, 0, 0.4), 0 16px 32px rgba(0, 0, 0, 0.4);
+      --new-bg: rgba(34, 197, 94, 0.15);
+      --new-fg: #86efac;
+      --notice-bg: rgba(245, 184, 0, 0.12);
+      --notice-fg: #f5d56a;
+      --error: #f87171;
+    }
   }
 
-  header h1 { 
-    margin: 0; 
-    font-weight: 700; 
-    font-size: 1.8rem; 
+  body {
+    margin: 0;
+    font-family: 'Inter', Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
   }
 
-  /* Navigation: horizontal, and wraps neatly on very small phones
-     (replaces the old transform: scale() trick, which shrank the buttons
-     but left the layout width unchanged) */
-  nav ul {
+  /* ---------- Top bar ---------- */
+  .topbar {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: var(--topbar);
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    padding-top: env(safe-area-inset-top, 0px);
+  }
+  .topbar-inner {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 10px 16px;
     display: flex;
-    justify-content: center;
     align-items: center;
-    flex-wrap: wrap;
-    gap: 12px 20px;
-    list-style: none;
-    margin: 15px 0 0 0;
-    padding: 0;
+    justify-content: space-between;
+    gap: 16px;
   }
-
-  nav ul li a { text-decoration: none; }
-
-  .blue-btn {
-    display: inline-block;
-    padding: 10px 20px;
-    border-radius: 8px;
-    font-weight: 600;
-    color: white;
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
     text-decoration: none;
-    background: linear-gradient(145deg, #1e3a8a, #3b82f6);
+    color: var(--text);
+    font-weight: 800;
+    font-size: 1.1rem;
+    letter-spacing: -0.02em;
+  }
+  .brand-mark {
+    display: grid;
+    place-items: center;
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #1e3a8a, #3b82f6);
+    color: #fff;
+    font-weight: 800;
+  }
+
+  .main-nav { display: flex; gap: 4px; }
+  .nav-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 14px;
+    border-radius: 999px;
+    color: var(--muted);
+    font-weight: 600;
+    font-size: 0.95rem;
+    text-decoration: none;
+    transition: background 0.2s, color 0.2s;
+  }
+  .nav-link:hover { background: var(--chip-bg); color: var(--link); }
+  .nav-link svg { width: 18px; height: 18px; }
+
+  /* ---------- Hero ---------- */
+  .hero {
+    background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+    color: #fff;
+    padding: 34px 16px 40px;
+    text-align: center;
+    border-radius: 0 0 28px 28px;
+  }
+  .hero-inner { max-width: 640px; margin: 0 auto; }
+  .hero h1 {
+    margin: 0 0 8px;
+    font-size: clamp(1.6rem, 4vw, 2.2rem);
+    font-weight: 800;
+    letter-spacing: -0.03em;
+  }
+  .hero p { margin: 0; opacity: 0.9; font-size: 1rem; }
+
+  .search { position: relative; margin-top: 22px; }
+  .search svg {
+    position: absolute;
+    left: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 20px;
+    height: 20px;
+    color: #64748b;
+    pointer-events: none;
+  }
+  .search input {
+    width: 100%;
+    padding: 15px 16px 15px 46px;
     border: none;
-    cursor: pointer;
-    transition: 0.3s;
-    white-space: nowrap;
-    font-size: 1rem;
+    border-radius: 14px;
     font-family: inherit;
+    font-size: 1rem;
+    color: #0f172a;
+    background: #fff;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.18);
+    -webkit-appearance: none;
+    appearance: none;
+  }
+  .search input::placeholder { color: #94a3b8; }
+  .search input:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+
+  /* ---------- Content ---------- */
+  .container { max-width: 1000px; margin: 0 auto; padding: 22px 16px 48px; }
+
+  .notice {
+    background: var(--notice-bg);
+    border: 1px solid var(--accent);
+    color: var(--notice-fg);
+    border-radius: 12px;
+    padding: 12px 16px;
+    margin: 0 0 18px;
+    font-size: 0.93rem;
   }
 
-  .blue-btn:hover { background: linear-gradient(145deg, #16275f, #2563eb); }
-
-  /* Disabled state ("Already Applied") - done in CSS because an inline
-     background-color cannot override the gradient above */
-  .blue-btn:disabled,
-  .blue-btn:disabled:hover {
-    background: #ccc;
-    color: #666;
-    cursor: not-allowed;
+  .chips {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    padding-bottom: 6px;
+    margin: 0 -16px;
+    padding-left: 16px;
+    padding-right: 16px;
+    scrollbar-width: none;
   }
-
-  .blue-btn:focus-visible,
-  .viewMore:focus-visible,
-  .filters select:focus-visible,
-  .filters input:focus-visible {
-    outline: 3px solid #f5b800;
+  .chips::-webkit-scrollbar { display: none; }
+  @media (min-width: 720px) {
+    .chips { flex-wrap: wrap; overflow: visible; margin: 0; padding-left: 0; padding-right: 0; }
+  }
+  .chip {
+    flex: 0 0 auto;
+    padding: 8px 16px;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text);
+    font-family: inherit;
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background 0.2s, color 0.2s, border-color 0.2s;
+  }
+  .chip:hover { border-color: #3b82f6; }
+  .chip.active {
+    background: linear-gradient(135deg, #1e3a8a, #3b82f6);
+    color: #fff;
+    border-color: transparent;
+  }
+  .chip:focus-visible, .btn:focus-visible, .viewMore:focus-visible, .nav-link:focus-visible, .brand:focus-visible {
+    outline: 3px solid var(--accent);
     outline-offset: 2px;
   }
 
-  .container {
-    max-width: 900px;
-    margin: 30px auto;
-    padding: 0 15px;
+  .results-bar {
+    margin: 16px 2px 12px;
+    color: var(--muted);
+    font-size: 0.9rem;
+    font-weight: 600;
+    min-height: 1.4em;
   }
 
-  h3 { 
-    margin-bottom: 20px; 
-    color: #1e3a8a; 
-    text-align: center; 
-    font-weight: 600; 
-  }
-
-  .filters {
-    display: flex;
-    gap: 10px;
-    flex-wrap: wrap;
-    margin-bottom: 25px;
-    justify-content: center;
-  }
-
-  .filters select, .filters input, .filters button {
-    padding: 8px 12px;
-    border-radius: 8px;
-    border: 1px solid #ccc;
-    font-size: 0.95rem;
-    font-family: inherit;
-  }
-
-  .filters input[type="text"] { flex: 1 1 220px; max-width: 360px; }
-
-  .notice {
-    background: #fff8e1;
-    border: 1px solid #f5b800;
-    color: #6b5200;
-    border-radius: 10px;
-    padding: 12px 16px;
-    margin: 0 0 20px 0;
-    font-size: 0.95rem;
-  }
-  .notice[hidden] { display: none; }
-
-  #publicJobList {
+  .job-list {
     list-style: none;
+    margin: 0;
     padding: 0;
+    display: grid;
+    gap: 16px;
+    grid-template-columns: 1fr;
+  }
+  @media (min-width: 860px) {
+    .job-list { grid-template-columns: 1fr 1fr; }
   }
 
-  #publicJobList li {
-    background: white;
-    border-radius: 16px;
-    padding: 25px;
-    margin-bottom: 20px;
-    box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+  /* ---------- Job card ---------- */
+  .job-card {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 20px;
+    box-shadow: var(--shadow);
     transition: transform 0.2s, box-shadow 0.2s;
   }
+  .job-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-hover); }
 
-  #publicJobList li:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 10px 25px rgba(0,0,0,0.12);
+  .card-head { display: flex; gap: 14px; align-items: flex-start; }
+  .avatar {
+    flex: 0 0 auto;
+    display: grid;
+    place-items: center;
+    width: 46px;
+    height: 46px;
+    border-radius: 12px;
+    font-weight: 800;
+    font-size: 1.2rem;
   }
-
-  #publicJobList li.loading { color: #555; text-align: center; }
-  #publicJobList li.error { color: #b00020; border-left: 5px solid #b00020; }
-
-  #publicJobList h4 {
-    margin: 0 0 10px 0;
-    color: #1e3a8a;
-    font-weight: 600;
+  .card-title { min-width: 0; }
+  .card-title h4 {
+    margin: 0;
+    font-size: 1.08rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    overflow-wrap: anywhere;
   }
+  .card-title .company { margin: 2px 0 0; color: var(--muted); font-size: 0.9rem; }
 
-  #publicJobList div, #publicJobList p { 
-    color: #555; 
-    margin-bottom: 8px; 
-    font-size: 0.95rem; 
+  .badges { display: flex; flex-wrap: wrap; gap: 8px; }
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    background: var(--chip-bg);
+    color: var(--link);
   }
+  .badge.new { background: var(--new-bg); color: var(--new-fg); }
 
-  #publicJobList .desc { white-space: pre-line; margin: 8px 0 12px 0; line-height: 1.4; }
+  .meta { display: flex; flex-direction: column; gap: 6px; color: var(--muted); font-size: 0.88rem; }
+  .meta-item { display: flex; gap: 8px; align-items: flex-start; }
+  .meta-item .icon { flex: 0 0 auto; margin-top: 2px; display: inline-flex; }
+  .meta-item strong { color: var(--text); font-weight: 600; }
 
-  #publicJobList small { display: block; color: #777; margin: 6px 0 4px 0; }
-
-  .applyBtn { display: inline-block; margin-top: 10px; }
-
-  .viewMore { 
+  .desc {
+    margin: 0;
+    color: var(--muted);
+    font-size: 0.92rem;
+    white-space: pre-line;
+    overflow-wrap: anywhere;
+  }
+  .viewMore {
+    align-self: flex-start;
     background: none;
     border: none;
     padding: 0;
     font: inherit;
     font-size: 0.85rem;
-    color: #1e3a8a; 
-    cursor: pointer; 
-    font-weight: 600; 
-    display: inline-block; 
-    margin: 0 0 6px 0;
+    font-weight: 700;
+    color: var(--link);
+    cursor: pointer;
     text-decoration: underline;
   }
 
-  /* ---- Styles merged from the old stylesheet ----
-     Kept: the rules that don't fight this page's design.
-     (.job-card and form styles aren't used on this page yet, but are
-     here so they're ready for other pages.) */
-  .job-card { 
-    background: white; 
-    padding: 20px; 
-    margin-bottom: 20px; 
-    border-radius: 8px; 
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1); 
-  }
-  .job-card h3 { margin: 0; }
-  .job-card p { margin: 5px 0; }
-
-  form { 
-    display: flex; 
-    flex-direction: column; 
-    gap: 10px; 
-    margin-top: 10px; 
-  }
-  form input, form textarea { 
-    padding: 10px; 
-    border-radius: 5px; 
-    border: 1px solid #ccc; 
-    width: 100%; 
-  }
-
-  @media (max-width: 480px) {
-    header h1 { font-size: 1.5rem; }
-    .blue-btn { padding: 9px 16px; font-size: 0.95rem; }
-    #publicJobList li { padding: 20px 16px; }
-  }
-</style>
-</head>
-<body>
-
-<header>
-  <h1>GraduateInHunt - Jobs</h1>
-  <nav>
-    <ul>
-      <li><a href="homepageRegisteredUser.html" class="blue-btn">Home</a></li>
-      <li><a href="graduate-profile.html" class="blue-btn">My Profile</a></li>
-      <li><a href="alljobs.html" class="blue-btn">All Jobs</a></li>
-    </ul>
-  </nav>
-</header>
-
-<main class="container">
-  <h3>Available Jobs</h3>
-
-  <p id="notice" class="notice" role="status" hidden></p>
-
-  <div class="filters">
-    <select id="jobTypeFilter" aria-label="Filter by job type">
-      <option value="">All Job Types</option>
-      <option value="Internship">Internship</option>
-      <option value="Learnership">Learnership</option>
-      <option value="Training Program">Training Program</option>
-      <option value="Part-time">Part-time</option>
-      <option value="Permanent">Permanent</option>
-      <option value="Contract">Contract</option>
-    </select>
-
-    <input type="text" id="jobTitleSearch" placeholder="Search by job title..." aria-label="Search by job title">
-    <button id="searchBtn" class="blue-btn" type="button">Search</button>
-  </div>
-
-  <ul id="publicJobList" aria-live="polite">
-    <li class="loading">Loading jobs...</li>
-  </ul>
-</main>
-
-<script type="module" src="browse-jobs.js"></script>
-</body>
-</html>
+  .card-foot {
+    margin-top: auto;
+    padding-top: 14px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
