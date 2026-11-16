@@ -1,118 +1,246 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Reply to Recruiter - Graduateinhunt</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
-<style>
-  body { font-family: 'Inter', sans-serif; background:#f4f7fb; margin:0; padding:0; }
-  header { background: linear-gradient(90deg,#1e3a8a,#3b82f6); color:white; padding:20px; text-align:center; border-radius:0 0 20px 20px; }
-  header h1 { margin:0; font-size:1.6rem; }
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
 
-  .container { max-width:700px; margin:30px auto; background:white; padding:20px; border-radius:12px; box-shadow:0 6px 12px rgba(0,0,0,0.1); }
+const SUPABASE_URL = 'https://euclknvsppptbfclwxqq.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_90JbyFsa4BuuyeuLCIActg_yXfbHQ30';
+const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
-  .btn-home { display:inline-block; margin-bottom:15px; padding:10px 20px; background:#1e3a8a; color:white; border:none; border-radius:8px; cursor:pointer; font-weight:600; transition:0.3s; text-decoration:none; }
-  .btn-home:hover { background:#3b82f6; }
+const $ = id => document.getElementById(id);
+const recruiterNameEl = $('recruiterName');
+const jobTitleEl = $('jobTitle');
+const replyText = $('replyText');
+const sendReplyBtn = $('sendReplyBtn');
+const fileInput = $('fileInput');
+const chatMessages = $('chatMessages');
+const feedback = $('feedback');
 
-  .info { margin-bottom:15px; font-weight:500; }
-  .info span { font-weight:600; }
+const POLL_MS = 15000; // safety net in case realtime is not connected
 
-  /* Chat Area */
-  .chat-container { border:1px solid #ccc; border-radius:12px; height:400px; display:flex; flex-direction:column; overflow:hidden; }
-  .chat-messages { flex:1; padding:15px; overflow-y:auto; display:flex; flex-direction:column; gap:10px; background:#f9faff; }
-  .message { max-width:70%; padding:10px 15px; border-radius:20px; word-wrap:break-word; }
-  .message.student { align-self:flex-end; background: linear-gradient(90deg,#1e3a8a,#3b82f6); color:white; }
-  .message.recruiter { align-self:flex-start; background:#e0e6f8; color:#000; }
-  .message a.file-link { display:block; color:#1e3a8a; text-decoration:underline; margin-top:5px; }
+// Conversation details come from the link on the messages page
+const urlParams = new URLSearchParams(window.location.search);
+const recruiterId = urlParams.get('recruiterId') || null; // '' becomes null, which a uuid column needs
+const jobId = urlParams.get('jobId') || null;
+const jobTitleFromURL = urlParams.get('jobTitle');
+const companyNameFromURL = urlParams.get('companyName');
 
-  .chat-input { display:flex; flex-direction:column; padding:10px; gap:5px; border-top:1px solid #ddd; background:white; }
-  .chat-input textarea { flex:1; min-height:80px; max-height:150px; padding:12px; border-radius:15px; border:1px solid #ccc; font-size:14px; resize:none; overflow-y:auto; font-family:'Inter',sans-serif; }
+recruiterNameEl.textContent = companyNameFromURL || 'Recruiter';
+jobTitleEl.textContent = jobTitleFromURL || 'Job Post';
 
-  .chat-input .actions { display:flex; gap:10px; }
+let user = null;
+let sending = false;
+const shown = new Set(); // ids of messages already on screen: this is what prevents duplicates
 
-  /* Styled file input */
-  .chat-input input[type=file] {
-    flex:1;
-    padding:8px;
-    border-radius:8px;
-    border:none;
-    background:#1e3a8a;
-    color:white;
-    cursor:pointer;
-    font-weight:600;
-    transition:0.3s;
+// ---------- helpers ----------
+function esc(value) {
+  const div = document.createElement('div');
+  div.textContent = value ?? '';
+  return div.innerHTML;
+}
+const fmtTime = d => new Date(d || Date.now()).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' });
+const safeUrl = u => (typeof u === 'string' && /^https?:\/\//i.test(u)) ? u : '';
+
+$('logoutBtn').addEventListener('click', async () => {
+  await supabase.auth.signOut();
+  window.location.href = 'homepage.html';
+});
+
+fileInput.addEventListener('change', () => {
+  $('fileName').textContent = fileInput.files[0] ? fileInput.files[0].name : '';
+});
+
+function setLive(ok) {
+  $('liveState').classList.toggle('live', ok);
+  $('liveText').textContent = ok ? 'Live' : 'Checking every 15 seconds';
+}
+
+// Does this row belong to the conversation open on this page?
+function inConversation(m) {
+  return m.student_id === user.id
+    && (m.recruiter_id || null) === recruiterId
+    && (m.job_id || null) === jobId;
+}
+
+// ---------- rendering ----------
+function clearEmptyNote() {
+  const note = chatMessages.querySelector('.chat-empty');
+  if (note) note.remove();
+}
+
+function addMessage(msg) {
+  if (!msg || (msg.id != null && shown.has(msg.id))) return false;
+  if (msg.id != null) shown.add(msg.id);
+
+  clearEmptyNote();
+  const fromStudent = msg.sender === 'student';
+  const fileUrl = safeUrl(msg.file_url);
+
+  const div = document.createElement('div');
+  div.className = `message ${fromStudent ? 'student' : 'recruiter'}`;
+  div.innerHTML = `
+    ${msg.message ? `<div class="text">${esc(msg.message)}</div>` : ''}
+    ${fileUrl ? `<a href="${esc(fileUrl)}" target="_blank" rel="noopener" class="file-link">${esc(msg.file_name || 'Attachment')}</a>` : ''}
+    <div class="time">${esc(fmtTime(msg.created_at))}</div>
+  `;
+  chatMessages.appendChild(div);
+  chatMessages.scrollTop = chatMessages.scrollHeight;
+  return true;
+}
+
+function showEmptyNote() {
+  if (!chatMessages.children.length) {
+    chatMessages.innerHTML = '<div class="chat-empty">No messages yet. Write your first reply below.</div>';
   }
-  .chat-input input[type=file]:hover {
-    background:#3b82f6;
+}
+
+// ---------- data ----------
+function scoped(query) {
+  query = query.eq('student_id', user.id);
+  query = recruiterId ? query.eq('recruiter_id', recruiterId) : query.is('recruiter_id', null);
+  query = jobId ? query.eq('job_id', jobId) : query.is('job_id', null);
+  return query;
+}
+
+async function fetchConversation() {
+  const { data, error } = await scoped(supabase.from('messages').select('*'))
+    .order('created_at', { ascending: true });
+  if (error) throw error;
+  return data || [];
+}
+
+// Recruiter messages you have now read: mark them viewed (your own replies are left alone)
+async function markViewed(messages) {
+  const ids = messages
+    .filter(m => m.sender !== 'student' && (m.status || '').toLowerCase() === 'unread')
+    .map(m => m.id);
+  if (!ids.length) return;
+  const { error } = await supabase.from('messages').update({ status: 'viewed' }).in('id', ids);
+  if (error) console.warn('Could not mark messages as viewed:', error);
+}
+
+async function loadChat() {
+  chatMessages.innerHTML = '';
+  const messages = await fetchConversation();
+  messages.forEach(addMessage);
+  showEmptyNote();
+  markViewed(messages);
+}
+
+async function refresh() {
+  try {
+    const messages = await fetchConversation();
+    const fresh = messages.filter(m => !shown.has(m.id));
+    fresh.forEach(addMessage);
+    markViewed(fresh);
+  } catch (err) {
+    console.warn('Chat refresh failed:', err);
+  }
+}
+
+// ---------- upload ----------
+async function uploadFile(file) {
+  if (file.type !== 'application/pdf') throw new Error('Only PDF files are allowed.');
+  if (file.size > 10 * 1024 * 1024) throw new Error('File is too large (max 10 MB).');
+
+  const safeName = file.name.replace(/[^\w.\-]+/g, '_');
+  const filePath = `graduates/${user.id}/${Date.now()}_${safeName}`;
+  const { error: storageError } = await supabase.storage
+    .from('attachments')
+    .upload(filePath, file, { upsert: false });
+  if (storageError) throw storageError;
+
+  const { data: { publicUrl } } = supabase.storage.from('attachments').getPublicUrl(filePath);
+  return { file_url: publicUrl, file_name: file.name };
+}
+
+// ---------- send ----------
+async function sendReply() {
+  if (sending) return; // blocks double clicks / double Enter, the main cause of duplicate rows
+
+  const message = replyText.value.trim();
+  const file = fileInput.files[0];
+  if (!message && !file) {
+    feedback.innerHTML = '<p class="error">Please enter a message or choose a file.</p>';
+    return;
   }
 
-  .chat-input input[type=file]::-webkit-file-upload-button {
-    background:#1e3a8a;
-    color:white;
-    border:none;
-    padding:6px 12px;
-    border-radius:8px;
-    cursor:pointer;
-    font-weight:600;
-    transition:0.3s;
+  sending = true;
+  sendReplyBtn.disabled = true;
+  sendReplyBtn.textContent = 'Sending...';
+  feedback.innerHTML = '';
+
+  try {
+    const fileData = file ? await uploadFile(file) : {};
+
+    const { data: row, error } = await supabase.from('messages').insert([{
+      student_id: user.id,
+      recruiter_id: recruiterId,
+      company_name: companyNameFromURL || 'Recruiter',
+      job_id: jobId,
+      job_title: jobTitleFromURL || 'Job Post',
+      message: message || null,
+      file_url: fileData.file_url || null,
+      file_name: fileData.file_name || null,
+      status: 'unread',
+      sender: 'student',
+      created_at: new Date().toISOString()
+    }]).select().maybeSingle();
+
+    if (error) throw error;
+
+    // Draw the saved row once. If realtime delivers the same row, its id is already in `shown`, so it is skipped.
+    if (row) addMessage(row); else await refresh();
+
+    replyText.value = '';
+    fileInput.value = '';
+    $('fileName').textContent = '';
+    feedback.innerHTML = '<p class="success">Message sent!</p>';
+    setTimeout(() => { if (!sending) feedback.innerHTML = ''; }, 3000);
+  } catch (err) {
+    console.error(err);
+    feedback.innerHTML = `<p class="error">Failed to send: ${esc(err.message)}</p>`;
+  } finally {
+    sending = false;
+    sendReplyBtn.disabled = false;
+    sendReplyBtn.textContent = 'Send';
   }
-  .chat-input input[type=file]::-webkit-file-upload-button:hover {
-    background:#3b82f6;
+}
+
+sendReplyBtn.addEventListener('click', sendReply);
+replyText.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); sendReply(); }
+});
+
+// ---------- live updates ----------
+function subscribeRealtime() {
+  supabase
+    .channel(`student-chat-${recruiterId || 'none'}-${jobId || 'none'}`)
+    .on('postgres_changes', {
+      event: 'INSERT',
+      schema: 'public',
+      table: 'messages',
+      // Realtime accepts ONE filter only, so the rest is checked in code
+      filter: `student_id=eq.${user.id}`
+    }, payload => {
+      const m = payload.new;
+      if (!inConversation(m)) return;
+      if (addMessage(m)) markViewed([m]);
+    })
+    .subscribe(status => setLive(status === 'SUBSCRIBED'));
+}
+
+// ---------- start ----------
+async function init() {
+  setLive(false);
+  try {
+    const { data: { user: u }, error } = await supabase.auth.getUser();
+    if (error || !u) throw new Error('Please log in to view this chat.');
+    user = u;
+
+    await loadChat();
+    subscribeRealtime();
+    setInterval(refresh, POLL_MS);
+  } catch (err) {
+    feedback.innerHTML = `<p class="error">Failed to load chat: ${esc(err.message)}</p>`;
   }
-  .chat-input input[type=file]::-moz-file-upload-button {
-    background:#1e3a8a;
-    color:white;
-    border:none;
-    padding:6px 12px;
-    border-radius:8px;
-    cursor:pointer;
-    font-weight:600;
-    transition:0.3s;
-  }
-  .chat-input input[type=file]::-moz-file-upload-button:hover {
-    background:#3b82f6;
-  }
+}
 
-  .chat-input button { padding:10px 20px; background:#1e3a8a; color:white; border:none; border-radius:12px; cursor:pointer; font-weight:600; transition:0.3s; }
-  .chat-input button:hover { background:#3b82f6; }
-
-  #feedback { margin-top:10px; }
-  #feedback p.success { color:green; }
-  #feedback p.error { color:red; }
-</style>
-</head>
-<body>
-
-<header>
-  <h1>Reply to Recruiter</h1>
-</header>
-
-<div class="container">
-  <a href="graduate-message.html" class="btn-home">← Back to Messages</a>
-
-  <div class="info">
-    <p>Recruiter: <span id="recruiterName">Loading...</span></p>
-    <p>Job Applied For: <span id="jobTitle">Loading...</span></p>
-  </div>
-
-  <!-- Chat Box -->
-  <div class="chat-container">
-    <div class="chat-messages" id="chatMessages">
-      <!-- Messages will appear here -->
-    </div>
-    <div class="chat-input">
-      <textarea id="replyText" placeholder="Write your reply..."></textarea>
-      <div class="actions">
-        <input type="file" id="fileInput">
-        <button id="sendReplyBtn">Send</button>
-      </div>
-    </div>
-  </div>
-
-  <div id="feedback"></div>
-</div>
-
-<script type="module" src="graduate-reply.js"></script>
-</body>
-</html>
+init();
