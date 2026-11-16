@@ -5,24 +5,73 @@ const SUPABASE_KEY = 'sb_publishable_90JbyFsa4BuuyeuLCIActg_yXfbHQ30';
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 const publicJobList = document.getElementById('publicJobList');
-const jobTypeFilter = document.getElementById('jobTypeFilter');
 const jobTitleSearch = document.getElementById('jobTitleSearch');
+const typeChips = document.getElementById('typeChips');
 const notice = document.getElementById('notice');
+const resultCount = document.getElementById('resultCount');
 
 let allJobs = [];
+let activeType = '';
+
+/* ---------- icons (fixed strings only, never job data) ---------- */
+const svg = inner =>
+    `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${inner}</svg>`;
+
+const ICONS = {
+    pin: svg('<path d="M20 10c0 6-8 12-8 12S4 16 4 10a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/>'),
+    cap: svg('<path d="M22 10 12 5 2 10l10 5 10-5z"/><path d="M6 12v5c3 2 9 2 12 0v-5"/>'),
+    clock: svg('<circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>'),
+    search: svg('<circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>'),
+    alert: svg('<circle cx="12" cy="12" r="10"/><path d="M12 8v4"/><path d="M12 16h.01"/>')
+};
+
+function icon(name) {
+    const span = document.createElement('span');
+    span.className = 'icon';
+    span.innerHTML = ICONS[name];
+    return span;
+}
 
 /* ---------- small DOM helpers (textContent only, so job data can never inject HTML) ---------- */
-function showMessage(text, className = '', linkText = '', linkHref = '') {
+function showSkeletons(count = 4) {
     publicJobList.innerHTML = '';
+    resultCount.textContent = '';
+    for (let i = 0; i < count; i++) {
+        const li = document.createElement('li');
+        li.className = 'job-card skeleton';
+        li.setAttribute('aria-hidden', 'true');
+        li.innerHTML =
+            '<div class="sk sk-title"></div><div class="sk sk-line"></div>' +
+            '<div class="sk sk-line short"></div><div class="sk sk-btn"></div>';
+        publicJobList.appendChild(li);
+    }
+}
+
+function showState(title, text = '', options = {}) {
+    const { iconName = 'search', isError = false, linkText = '', linkHref = '' } = options;
+
+    publicJobList.innerHTML = '';
+    resultCount.textContent = '';
+
     const li = document.createElement('li');
-    if (className) li.className = className;
-    li.append(document.createTextNode(text));
-    if (linkHref) {
-        li.append(document.createTextNode(' '));
-        const a = document.createElement('a');
-        a.href = linkHref;
-        a.textContent = linkText;
-        li.append(a);
+    li.className = 'state' + (isError ? ' error' : '');
+    li.appendChild(icon(isError ? 'alert' : iconName));
+
+    const h = document.createElement('h4');
+    h.textContent = title;
+    li.appendChild(h);
+
+    if (text || linkHref) {
+        const p = document.createElement('p');
+        if (text) p.append(document.createTextNode(text));
+        if (linkHref) {
+            if (text) p.append(document.createTextNode(' '));
+            const a = document.createElement('a');
+            a.href = linkHref;
+            a.textContent = linkText;
+            p.append(a);
+        }
+        li.appendChild(p);
     }
     publicJobList.appendChild(li);
 }
@@ -32,12 +81,52 @@ function showNotice(text) {
     notice.hidden = !text;
 }
 
-function field(label, value) {
+function metaItem(iconName, label, value) {
     const div = document.createElement('div');
-    const strong = document.createElement('strong');
-    strong.textContent = label + ' ';
-    div.append(strong, document.createTextNode(value));
+    div.className = 'meta-item';
+    div.appendChild(icon(iconName));
+
+    const span = document.createElement('span');
+    if (label) {
+        const strong = document.createElement('strong');
+        strong.textContent = label + ' ';
+        span.append(strong);
+    }
+    span.append(document.createTextNode(value));
+    div.appendChild(span);
     return div;
+}
+
+function badge(text, extraClass = '') {
+    const span = document.createElement('span');
+    span.className = 'badge' + (extraClass ? ' ' + extraClass : '');
+    span.textContent = text;
+    return span;
+}
+
+function avatarColors(name) {
+    let hue = 0;
+    for (const ch of name) hue = (hue * 31 + ch.charCodeAt(0)) % 360;
+    return { bg: `hsl(${hue} 80% 92%)`, fg: `hsl(${hue} 55% 32%)` };
+}
+
+function daysSince(dateStr) {
+    const d = new Date(dateStr);
+    if (isNaN(d)) return null;
+    return Math.floor((Date.now() - d.getTime()) / 86400000);
+}
+
+function postedText(dateStr) {
+    const days = daysSince(dateStr);
+    if (days === null) return 'Posted date unknown';
+    if (days <= 0) return 'Posted today';
+    if (days === 1) return 'Posted yesterday';
+    if (days < 7) return `Posted ${days} days ago`;
+    if (days < 30) {
+        const weeks = Math.floor(days / 7);
+        return `Posted ${weeks} ${weeks === 1 ? 'week' : 'weeks'} ago`;
+    }
+    return 'Posted on ' + new Date(dateStr).toLocaleDateString();
 }
 
 /* ---------- qualification matching ---------- */
@@ -48,7 +137,7 @@ const STOP_WORDS = new Set([
     'degree', 'degrees', 'diploma', 'diplomas', 'bachelor', 'bachelors', 'certificate',
     'national', 'higher', 'advanced', 'honours', 'hons', 'bsc', 'btech', 'beng',
     'sc', 'eng', 'hon', 'nqf', 'level', 'qualification', 'qualifications', 'related', 'field', 'equivalent',
-    'relevant', 'matric', 'grade', 'plus'
+    'relevant', 'matric', 'grade', 'plus', 'incl', 'science', 'sciences'
 ]);
 
 function keywords(text) {
@@ -64,176 +153,4 @@ function wordsMatch(a, b) {
     return Math.min(a.length, b.length) >= 5 && (a.startsWith(b) || b.startsWith(a));
 }
 
-function qualificationMatches(gradQualification, jobQualification) {
-    // A job that asks for nothing specific is open to every graduate
-    if (!jobQualification || !jobQualification.trim()) return true;
-
-    const jobWords = keywords(jobQualification);
-    if (jobWords.length === 0) return true;      // e.g. only says "Matric"
-
-    const gradWords = keywords(gradQualification);
-    return gradWords.some(g => jobWords.some(j => wordsMatch(g, j)));
-}
-
-/* ---------- load data ---------- */
-async function loadJobs() {
-    showMessage('Loading jobs...', 'loading');
-    showNotice('');
-
-    try {
-        const { data: { session } } = await supabase.auth.getSession();
-        if (!session?.user) {
-            showMessage('Please log in to view jobs.', '', 'Log in', 'login-type.html');
-            return;
-        }
-        const studentId = session.user.id;
-
-        const { data: graduate, error: gradError } = await supabase
-            .from('graduates')
-            .select('qualification')
-            .eq('id', studentId)
-            .maybeSingle();
-
-        if (gradError) {
-            showMessage('Error fetching graduate profile: ' + gradError.message, 'error');
-            return;
-        }
-        if (!graduate) {
-            showMessage('We could not find your graduate profile.', '', 'Complete your profile', 'graduate-profile.html');
-            return;
-        }
-
-        const gradQualification = (graduate.qualification || '').trim();
-
-        const { data: jobs, error: jobsError } = await supabase
-            .from('jobs')
-            .select('*')
-            .eq('visible', true)
-            .order('created_at', { ascending: false });
-
-        if (jobsError) {
-            showMessage('Error fetching jobs: ' + jobsError.message, 'error');
-            return;
-        }
-
-        const { data: applications, error: appError } = await supabase
-            .from('applications')
-            .select('job_id')
-            .eq('student_id', studentId);
-        if (appError) console.warn('Could not load your applications:', appError.message);
-
-        const appliedJobIds = new Set((applications || []).map(a => a.job_id));
-
-        // No qualification on the profile: show everything instead of an empty page
-        const filterByQualification = gradQualification.length > 0;
-        if (!filterByQualification) {
-            showNotice('Add your qualification to your profile to see jobs that match it. Showing all jobs for now.');
-        }
-
-        allJobs = (jobs || [])
-            .filter(job => !filterByQualification || qualificationMatches(gradQualification, job.required_qualifications))
-            .map(job => ({ ...job, applied: appliedJobIds.has(job.id) }));
-
-        filterJobs();
-    } catch (err) {
-        console.error(err);
-        showMessage('Something went wrong while loading jobs. Please refresh the page.', 'error');
-    }
-}
-
-/* ---------- display ---------- */
-function displayJobs(jobs) {
-    publicJobList.innerHTML = '';
-
-    if (!jobs || jobs.length === 0) {
-        const searching = jobTypeFilter.value || jobTitleSearch.value.trim();
-        showMessage(allJobs.length === 0
-            ? 'No jobs match your qualification yet. Please check back soon.'
-            : (searching ? 'No jobs match your search.' : 'No jobs available.'));
-        return;
-    }
-
-    jobs.forEach(job => {
-        const li = document.createElement('li');
-        const description = job.description || 'No description provided.';
-        const maxLength = 150;
-        const isLong = description.length > maxLength;
-        const shortDesc = isLong ? description.slice(0, maxLength) + '...' : description;
-
-        const title = document.createElement('h4');
-        title.textContent = job.title || 'Untitled job';
-        li.appendChild(title);
-
-        li.appendChild(field('Company:', job.company_name || 'Not specified'));
-        li.appendChild(field('Location:', job.location || 'Not specified'));
-        li.appendChild(field('Position Type:', job.job_type || 'Not specified'));
-        li.appendChild(field('Qualifications Required:', job.required_qualifications || 'None'));
-
-        const descLabel = document.createElement('div');
-        const descStrong = document.createElement('strong');
-        descStrong.textContent = 'Job Description:';
-        descLabel.appendChild(descStrong);
-        li.appendChild(descLabel);
-
-        const descEl = document.createElement('p');
-        descEl.className = 'desc';
-        descEl.textContent = shortDesc;
-        li.appendChild(descEl);
-
-        if (isLong) {
-            const viewMore = document.createElement('button');
-            viewMore.type = 'button';
-            viewMore.className = 'viewMore';
-            viewMore.textContent = 'Show More';
-            viewMore.addEventListener('click', () => {
-                const expanded = viewMore.textContent === 'Show Less';
-                descEl.textContent = expanded ? shortDesc : description;
-                viewMore.textContent = expanded ? 'Show More' : 'Show Less';
-            });
-            li.appendChild(viewMore);
-        }
-
-        const posted = document.createElement('small');
-        posted.textContent = 'Posted on: ' + (job.created_at ? new Date(job.created_at).toLocaleDateString() : 'Unknown');
-        li.appendChild(posted);
-
-        const applyBtn = document.createElement('button');
-        applyBtn.type = 'button';
-        applyBtn.className = 'blue-btn applyBtn';
-        if (job.applied) {
-            applyBtn.textContent = 'Already Applied';
-            applyBtn.disabled = true;               // grey look comes from .blue-btn:disabled in the CSS
-        } else {
-            applyBtn.textContent = 'Apply';
-            applyBtn.addEventListener('click', () => {
-                const url = new URL('applicationform.html', window.location.href);
-                url.searchParams.set('job_id', job.id);
-                url.searchParams.set('job_title', job.title || '');
-                window.location.href = url.toString();
-            });
-        }
-        li.appendChild(applyBtn);
-
-        publicJobList.appendChild(li);
-    });
-}
-
-/* ---------- filter / search ---------- */
-function filterJobs() {
-    const type = jobTypeFilter.value.toLowerCase();
-    const title = jobTitleSearch.value.trim().toLowerCase();
-
-    const filtered = allJobs.filter(job => {
-        const matchType = !type || (job.job_type || '').toLowerCase() === type;
-        const matchTitle = !title || (job.title || '').toLowerCase().includes(title);
-        return matchType && matchTitle;
-    });
-
-    displayJobs(filtered);
-}
-
-jobTypeFilter.addEventListener('change', filterJobs);
-jobTitleSearch.addEventListener('input', filterJobs);
-document.getElementById('searchBtn').addEventListener('click', filterJobs);
-
-loadJobs();
+// What we compare against the
