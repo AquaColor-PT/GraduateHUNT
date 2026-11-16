@@ -3,145 +3,138 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>My Applications</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<title>GraduateInHunt - My Applications</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
-  /* Body and fonts */
+  :root {
+    --navy: #1e3a8a;
+    --blue: #3b82f6;
+    --ink: #0f172a;
+    --muted: #64748b;
+    --page: #f4f6fb;
+    --line: #e5e9f2;
+  }
+  * { box-sizing: border-box; }
   body {
-    font-family: 'Inter', sans-serif;
-    margin: 0;
-    background: #f5f7fa; /* light neutral background matching portal */
-    color: #1e3a8a;
+    margin: 0; font-family: 'Inter', system-ui, sans-serif; background: var(--page); color: var(--ink);
+    min-height: 100vh; -webkit-font-smoothing: antialiased;
   }
+  a { color: inherit; text-decoration: none; }
+  svg.i { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; flex: none; }
 
-  /* Header */
-  header {
-    background: linear-gradient(135deg, #1e3a8a, #3b82f6);
-    color: white;
-    padding: 25px 20px;
-    text-align: center;
-    font-weight: 700;
-    font-size: 1.8rem;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  /* ===== Top bar (same on every page) ===== */
+  .topbar { background: #fff; }
+  .topbar-inner {
+    max-width: 1100px; margin: 0 auto; padding: 0 24px; height: 64px;
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
   }
-
-  /* Container */
-  .container {
-    max-width: 1000px;
-    margin: 30px auto;
-    padding: 0 20px;
+  .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 1.15rem; letter-spacing: -0.02em; }
+  .brand-mark {
+    width: 36px; height: 36px; border-radius: 10px; color: #fff; font-weight: 700; font-size: 1.05rem;
+    background: linear-gradient(145deg, var(--navy), var(--blue)); display: grid; place-items: center;
   }
-
-  h2 {
-    color: #1e3a8a;
-    margin-bottom: 20px;
-    font-weight: 600;
+  .nav { display: flex; align-items: center; gap: 26px; }
+  .nav a, .nav button {
+    display: inline-flex; align-items: center; gap: 7px; font: inherit; font-weight: 600; font-size: 0.92rem;
+    color: var(--muted); background: none; border: 0; padding: 6px 0; cursor: pointer; transition: color .2s;
   }
+  .nav a:hover, .nav button:hover, .nav a.active { color: var(--navy); }
 
-  /* Table styling */
-  table {
-    width: 100%;
-    border-collapse: collapse;
-    background: white;
-    border-radius: 12px;
-    overflow: hidden;
-    box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+  /* ===== Banner ===== */
+  .hero {
+    background: linear-gradient(100deg, #1e3a8a 0%, #2d5bc4 55%, #3b82f6 100%);
+    color: #fff; padding: 40px 24px 48px; border-radius: 0 0 0 28px;
   }
-
-  th, td {
-    padding: 15px 20px;
-    text-align: left;
+  .hero-inner { max-width: 1100px; margin: 0 auto; display: grid; grid-template-columns: 1fr auto; gap: 32px; align-items: center; }
+  .hero h1 { margin: 0 0 8px; font-size: clamp(1.8rem, 4vw, 2.4rem); font-weight: 800; letter-spacing: -0.035em; line-height: 1.1; }
+  .hero p { margin: 0; max-width: 440px; font-size: 1rem; line-height: 1.5; color: rgba(255,255,255,.9); }
+  .glass {
+    display: grid; grid-template-columns: repeat(4, auto); gap: 8px 28px; padding: 18px 26px; border-radius: 20px;
+    background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.28); backdrop-filter: blur(6px);
   }
+  .stat { text-align: center; }
+  .stat b { display: block; font-size: 1.8rem; font-weight: 800; letter-spacing: -0.03em; line-height: 1.1; }
+  .stat span { font-size: .82rem; font-weight: 500; color: rgba(255,255,255,.85); }
 
-  th {
-    background: linear-gradient(135deg, #1e3a8a, #3b82f6);
-    color: white;
-    font-weight: 600;
-  }
+  /* ===== Content ===== */
+  .wrap { max-width: 1100px; margin: 0 auto; padding: 28px 24px 56px; }
+  .table-card { background: #fff; border: 1px solid var(--line); border-radius: 16px; overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; min-width: 640px; }
+  th, td { padding: 15px 20px; text-align: left; font-size: .93rem; }
+  th { font-weight: 600; font-size: .85rem; color: var(--muted); background: #f8faff; border-bottom: 1px solid var(--line); }
+  td { border-bottom: 1px solid var(--line); }
+  tbody tr:last-child td { border-bottom: 0; }
+  tbody tr:hover { background: #f8faff; }
+  td.title { font-weight: 600; }
 
-  tr:nth-child(even) {
-    background: #e0efff; /* light blue alternate rows */
-  }
+  .status { display: inline-block; font-weight: 600; font-size: .82rem; padding: 4px 12px; border-radius: 999px; text-transform: capitalize; }
+  .pending { background: #fef3c7; color: #92400e; }
+  .accepted { background: #d1fae5; color: #065f46; }
+  .rejected { background: #fee2e2; color: #991b1b; }
 
-  tr:hover {
-    background: #dbeafe;
-    transition: 0.3s;
-  }
+  a.cv-link { color: var(--navy); font-weight: 600; }
+  a.cv-link:hover { text-decoration: underline; }
 
-  /* Status badges */
-  .status {
-    font-weight: 600;
-    padding: 5px 10px;
-    border-radius: 12px;
-    color: white;
-    font-size: 0.9rem;
-  }
-  .pending { background: #f59e0b; }
-  .accepted { background: #10b981; }
-  .rejected { background: #ef4444; }
+  .no-apps { text-align: center; padding: 48px 20px; color: var(--muted); font-size: 1rem; background: #fff; border: 1px solid var(--line); border-radius: 16px; }
+  .no-apps a { display: inline-block; margin-top: 14px; padding: 10px 20px; border-radius: 12px; font-weight: 600; color: #fff; background: linear-gradient(145deg, var(--navy), var(--blue)); }
+  .loading { text-align: center; color: var(--muted); padding: 40px 0; }
 
-  /* No applications message */
-  .no-apps {
-    text-align: center;
-    padding: 50px;
-    background: white;
-    border-radius: 12px;
-    box-shadow: 0 8px 20px rgba(0,0,0,0.08);
-    color: #334155;
-    font-size: 1.2rem;
-    font-weight: 500;
-  }
-
-  /* Buttons */
   #goBackBtn {
-    display: inline-block;
-    margin-top: 25px;
-    padding: 12px 30px;
-    background: #1e3a8a; /* portal blue */
-    color: white;
-    border: none;
-    border-radius: 12px;
-    cursor: pointer;
-    font-weight: 600;
-    font-size: 1rem;
-    box-shadow: 0 4px 12px rgba(30,58,138,0.3);
-    transition: all 0.3s ease;
+    margin-top: 22px; padding: 10px 22px; border-radius: 999px; cursor: pointer; font: inherit; font-weight: 600; font-size: .92rem;
+    background: #fff; color: var(--ink); border: 1px solid var(--line); transition: box-shadow .15s;
   }
-  #goBackBtn:hover {
-    background: #16275f;
-    box-shadow: 0 6px 16px rgba(22,39,95,0.4);
-  }
+  #goBackBtn:hover { box-shadow: 0 4px 12px rgba(30,58,138,.12); }
+  :focus-visible { outline: 3px solid var(--blue); outline-offset: 2px; }
 
-  /* CV link */
-  a.cv-link {
-    color: #1e3a8a;
-    text-decoration: underline;
-    font-weight: 500;
-    transition: 0.2s;
+  @media (max-width: 760px) {
+    .nav .label { display: none; }
+    .nav { gap: 18px; }
+    .nav svg.i { width: 22px; height: 22px; }
+    .topbar-inner, .wrap { padding-left: 16px; padding-right: 16px; }
+    .hero { padding: 32px 16px 40px; }
+    .hero-inner { grid-template-columns: 1fr; gap: 22px; }
+    .glass { gap: 8px 18px; padding: 16px 18px; justify-content: space-between; }
   }
-  a.cv-link:hover {
-    color: #3b82f6;
-  }
-
-  /* Loading text */
-  .loading {
-    text-align: center;
-    font-size: 1.1rem;
-    color: #334155;
-    padding: 40px 0;
-  }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
 </style>
 </head>
 <body>
 
-<header>My Job Applications</header>
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="brand" href="homepageRegisteredUser.html"><span class="brand-mark">G</span>GraduateInHunt</a>
+    <nav class="nav" aria-label="Main">
+      <a href="homepageRegisteredUser.html">
+        <svg class="i" viewBox="0 0 24 24"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg><span class="label">Home</span></a>
+      <a href="graduate-profile.html">
+        <svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-7 8-7s8 3 8 7"/></svg><span class="label">My Profile</span></a>
+      <a href="browse-jobs.html">
+        <svg class="i" viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"/></svg><span class="label">All Jobs</span></a>
+      <button id="logoutBtn" type="button">
+        <svg class="i" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg><span class="label">Logout</span></button>
+    </nav>
+  </div>
+</header>
 
-<div class="container">
-  <h2>Applications</h2>
+<section class="hero">
+  <div class="hero-inner">
+    <div>
+      <h1>My applications</h1>
+      <p>Every role you've applied for, with its latest status.</p>
+    </div>
+    <div class="glass" aria-label="Application summary">
+      <div class="stat"><b id="statTotal">&ndash;</b><span>Total</span></div>
+      <div class="stat"><b id="statPending">&ndash;</b><span>Pending</span></div>
+      <div class="stat"><b id="statAccepted">&ndash;</b><span>Accepted</span></div>
+      <div class="stat"><b id="statRejected">&ndash;</b><span>Rejected</span></div>
+    </div>
+  </div>
+</section>
+
+<main class="wrap">
   <div id="applicationsContainer"></div>
-  <button id="goBackBtn" onclick="window.location.href='homepageRegisteredUser.html'">Go Back</button>
-</div>
-
+  <button id="goBackBtn" type="button">Back to home</button>
+</main>
 
 <script type="module" src="graduate-applications.js"></script>
 </body>
