@@ -1,184 +1,368 @@
-import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
 
 const SUPABASE_URL = 'https://euclknvsppptbfclwxqq.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_90JbyFsa4BuuyeuLCIActg_yXfbHQ30';
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
-document.addEventListener('DOMContentLoaded', async () => {
-  const form = document.getElementById("applicationForm");
-  const newCVInput = document.getElementById("newCV");
-  const previewCVBtn = document.getElementById("previewCV");
-  const cvDefaultRadio = document.getElementById("cvDefault");
-  const cvNewRadio = document.getElementById("cvNew");
-  const jobTitleEl = document.getElementById("jobTitle");
-  const coverLetterInput = document.getElementById("coverLetter");
-  const nameInput = document.getElementById("name");
+const BUCKET = 'cv_bucket';
+const MAX_FILE_MB = 5;
+const MAX_FILE_BYTES = MAX_FILE_MB * 1024 * 1024;
 
-  let defaultCVFileName = null;
-  let defaultCVSignedUrl = null; // cached signed url
+const $ = id => document.getElementById(id);
 
-  // Disable upload if default selected
-  function setNewCVState() {
-    if (cvDefaultRadio.checked) {
-      newCVInput.disabled = true;
-      newCVInput.value = "";
-    } else {
-      newCVInput.disabled = false;
-    }
-  }
-  setNewCVState();
-  cvDefaultRadio.addEventListener('change', setNewCVState);
-  cvNewRadio.addEventListener('change', setNewCVState);
+const form = $('applicationForm');
+const fields = $('formFields');
+const messageEl = $('formMessage');
+const jobTitleEl = $('jobTitle');
+const jobCompanyEl = $('jobCompany');
+const nameInput = $('name');
+const emailInput = $('email');
+const cellInput = $('cellnumber');
+const cvDefaultRadio = $('cvDefault');
+const cvNewRadio = $('cvNew');
+const optionDefault = $('optionDefault');
+const optionNew = $('optionNew');
+const defaultCvText = $('defaultCvText');
+const newCvWrap = $('newCvWrap');
+const newCVInput = $('newCV');
+const fileInfo = $('fileInfo');
+const coverLetterInput = $('coverLetter');
+const coverCount = $('coverCount');
+const previewBtn = $('previewCV');
+const submitBtn = $('submitBtn');
 
-  // Get job info from URL (if present)
-  const urlParams = new URLSearchParams(window.location.search);
-  const jobId = urlParams.get("job_id");
-  const jobTitle = urlParams.get("job_title");
-  if (jobTitle) jobTitleEl.textContent = `Applying for: ${jobTitle}`;
+let userId = null;
+let jobId = null;
+let recruiterId = null;
+let defaultCVFileName = null;
 
-  // Load graduate profile and autofill
-  async function loadGraduateProfile() {
-    try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session?.user) return;
-
-      const { data, error } = await supabase
-        .from("graduates")
-        .select("full_name, email, phone, cv_url")
-        .eq("id", session.user.id)
-        .single();
-
-      if (error) return console.error("Failed to load profile:", error);
-
-      // Autofill inputs
-      nameInput.value = data.full_name || "";
-      nameInput.disabled = true; // lock name
-      document.getElementById("email").value = data.email || "";
-      document.getElementById("cellnumber").value = data.phone || ""; // <- fix here
-
-      // Store default CV
-      defaultCVFileName = data.cv_url || null;
-
-      if (data.cv_url) {
-        const filePath = `graduates/${session.user.id}/${data.cv_url}`;
-        try {
-          const { data: signedData, error: signedError } = await supabase.storage
-            .from("cv_bucket")
-            .createSignedUrl(filePath, 300);
-          if (!signedError) defaultCVSignedUrl = signedData.signedUrl;
-        } catch (err) {
-          console.warn("Failed to create signed url for default CV:", err);
+/* ---------- small helpers ---------- */
+function showMessage(text, type = 'info', linkText = '', linkHref = '') {
+    messageEl.className = 'message ' + type;
+    messageEl.textContent = text;
+    if (linkHref) {
+        messageEl.append(document.createTextNode(' '));
+        const a = document.createElement('a');
+        a.href = linkHref;
+        a.textContent = linkText;
+        if (/^https?:/i.test(linkHref)) {
+            a.target = '_blank';
+            a.rel = 'noopener';
         }
-      }
-    } catch (err) {
-      console.error("loadGraduateProfile error:", err);
+        messageEl.append(a);
     }
-  }
-
-  // Preview CV
-  previewCVBtn.addEventListener('click', async (e) => {
-    e.preventDefault();
-    const cvOption = document.querySelector("input[name='cvOption']:checked")?.value;
-    if (!cvOption) return alert("Please choose a CV option.");
-
-    try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session?.user) throw new Error("User not logged in.");
-
-      let filePath;
-      if (cvOption === "default") {
-        const { data, error } = await supabase
-          .from('graduates')
-          .select('cv_url')
-          .eq('id', session.user.id)
-          .single();
-        if (error || !data?.cv_url) return alert("No default CV available.");
-        filePath = `graduates/${session.user.id}/${data.cv_url}`;
-      } else {
-        const file = newCVInput.files[0];
-        if (!file) return alert("Please upload a CV.");
-        return window.open(URL.createObjectURL(file), '_blank');
-      }
-
-      const { data: signedData, error: signedError } = await supabase.storage
-        .from('cv_bucket')
-        .createSignedUrl(filePath, 60);
-      if (signedError) throw signedError;
-
-      window.open(signedData.signedUrl, '_blank');
-    } catch (err) {
-      console.error(err);
-      alert("Failed to preview CV: " + err.message);
-    }
-  });
-
-  // Submit application
-  form.addEventListener("submit", async (e) => {
-    e.preventDefault();
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session?.user) return alert("You must be logged in.");
-
-    const name = nameInput.value;
-    const email = document.getElementById("email").value;
-    const cellnumber = document.getElementById("cellnumber").value;
-    const coverLetter = coverLetterInput.value || null;
-    const cvOption = document.querySelector("input[name='cvOption']:checked").value;
-
-    let finalCVPath = null;
-
-    if (cvOption === "default") {
-      if (!defaultCVFileName) {
-        const { data, error } = await supabase
-          .from('graduates')
-          .select('cv_url')
-          .eq('id', session.user.id)
-          .single();
-        if (error || !data?.cv_url) return alert("No default CV available.");
-        defaultCVFileName = data.cv_url;
-      }
-      finalCVPath = `graduates/${session.user.id}/${defaultCVFileName}`;
-    } else {
-      const file = newCVInput.files[0];
-      if (!file) return alert("Please upload a CV.");
-
-      const filePath = `graduates/${session.user.id}/${file.name}`;
-      const { error: uploadError } = await supabase.storage
-        .from("cv_bucket")
-        .upload(filePath, file, { upsert: true });
-
-      if (uploadError) return alert("CV upload failed: " + uploadError.message);
-      finalCVPath = filePath;
-    }
-
-    const { data: jobData, error: jobError } = await supabase
-      .from("jobs")
-      .select("recruiter_id")
-      .eq("id", jobId)
-      .single();
-    if (jobError) return alert("Failed to find job: " + jobError.message);
-
-    const { error: insertError } = await supabase
-      .from("applications")
-      .insert([{
-        job_id: jobId,
-        student_id: session.user.id,
-        recruiter_id: jobData.recruiter_id,
-        cv_url: finalCVPath,
-        cover_letter: coverLetter,
-        status: "pending",
-        created_at: new Date()
-      }]);
-
-  if (insertError) {
-    alert("Application failed: " + insertError.message);
-} else {
-    alert("Application submitted successfully!");
-    // Redirect to browse jobs
-    window.location.href = 'browse-jobs.html';
+    messageEl.hidden = false;
 }
 
-  });
+function clearMessage() {
+    messageEl.hidden = true;
+    messageEl.textContent = '';
+    messageEl.className = 'message';
+}
 
-  // Initial load
-  loadGraduateProfile();
+// Locks the whole form and explains why
+function blockForm(text, linkText = '', linkHref = '', type = 'error') {
+    fields.disabled = true;
+    showMessage(text, type, linkText, linkHref);
+}
+
+function setBusy(busy) {
+    submitBtn.disabled = busy;
+    previewBtn.disabled = busy;
+    submitBtn.textContent = busy ? 'Submitting...' : 'Submit Application';
+}
+
+function getCvOption() {
+    return form.querySelector("input[name='cvOption']:checked")?.value || 'default';
+}
+
+function formatSize(bytes) {
+    return bytes < 1024 * 1024
+        ? Math.max(1, Math.round(bytes / 1024)) + ' KB'
+        : (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+}
+
+// Keeps the stored file name free of spaces and odd characters that storage can reject
+function safeFileName(name) {
+    const dot = name.lastIndexOf('.');
+    const base = (dot > 0 ? name.slice(0, dot) : name)
+        .replace(/[^a-zA-Z0-9_-]+/g, '-')
+        .replace(/^-+|-+$/g, '')
+        .slice(0, 60) || 'cv';
+    return base + '.pdf';
+}
+
+function validateFile(file) {
+    const isPdf = file.type === 'application/pdf' || /\.pdf$/i.test(file.name);
+    if (!isPdf) return 'Please choose a PDF file.';
+    if (file.size > MAX_FILE_BYTES) {
+        return `That file is ${formatSize(file.size)}. Please choose a PDF under ${MAX_FILE_MB} MB.`;
+    }
+    return '';
+}
+
+/* ---------- CV choice ---------- */
+function updateCvUi() {
+    const useDefault = getCvOption() === 'default';
+    newCvWrap.hidden = useDefault;
+    newCVInput.disabled = useDefault;
+    if (useDefault) {
+        newCVInput.value = '';
+        fileInfo.textContent = '';
+    }
+    optionDefault.classList.toggle('selected', useDefault);
+    optionNew.classList.toggle('selected', !useDefault);
+}
+
+cvDefaultRadio.addEventListener('change', updateCvUi);
+cvNewRadio.addEventListener('change', updateCvUi);
+
+newCVInput.addEventListener('change', () => {
+    const file = newCVInput.files[0];
+    if (!file) {
+        fileInfo.textContent = '';
+        return;
+    }
+    const problem = validateFile(file);
+    if (problem) {
+        showMessage(problem, 'error');
+        newCVInput.value = '';
+        fileInfo.textContent = '';
+        return;
+    }
+    clearMessage();
+    fileInfo.textContent = `${file.name} (${formatSize(file.size)})`;
 });
+
+/* ---------- cover letter counter ---------- */
+function updateCoverCount() {
+    coverCount.textContent = `${coverLetterInput.value.length} / ${coverLetterInput.maxLength}`;
+}
+coverLetterInput.addEventListener('input', updateCoverCount);
+updateCoverCount();
+
+/* ---------- load everything the page needs ---------- */
+async function init() {
+    const params = new URLSearchParams(window.location.search);
+    jobId = params.get('job_id');
+    const urlTitle = params.get('job_title');
+
+    if (urlTitle) jobTitleEl.textContent = `Applying for: ${urlTitle}`;
+
+    if (!jobId) {
+        jobTitleEl.textContent = 'No job selected';
+        blockForm('Choose a job first, then press Apply.', 'Browse jobs', 'browse-jobs.html');
+        return;
+    }
+
+    try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session?.user) {
+            jobTitleEl.textContent = 'Please log in';
+            blockForm('You need to be logged in to apply.', 'Log in', 'login-type.html');
+            return;
+        }
+        userId = session.user.id;
+
+        // The job (also gives us the recruiter, so we don't need a second lookup when submitting)
+        const { data: job, error: jobError } = await supabase
+            .from('jobs')
+            .select('title, company_name, recruiter_id')
+            .eq('id', jobId)
+            .maybeSingle();
+
+        if (jobError || !job) {
+            jobTitleEl.textContent = 'Job not found';
+            blockForm('We could not find this job. It may have been removed.', 'Browse jobs', 'browse-jobs.html');
+            return;
+        }
+
+        recruiterId = job.recruiter_id;
+        jobTitleEl.textContent = `Applying for: ${job.title || urlTitle || 'this job'}`;
+        if (job.company_name) {
+            jobCompanyEl.textContent = job.company_name;
+            jobCompanyEl.hidden = false;
+        }
+
+        // Your profile
+        const { data: graduate, error: gradError } = await supabase
+            .from('graduates')
+            .select('full_name, email, phone, cv_url')
+            .eq('id', userId)
+            .maybeSingle();
+
+        if (gradError || !graduate) {
+            blockForm('We could not load your profile. Please complete it before applying.', 'My profile', 'graduate-profile.html');
+            return;
+        }
+
+        nameInput.value = graduate.full_name || '';
+        emailInput.value = graduate.email || session.user.email || '';
+        cellInput.value = graduate.phone || '';
+
+        defaultCVFileName = graduate.cv_url || null;
+        if (defaultCVFileName) {
+            defaultCvText.textContent = 'Saved on your profile: ' + defaultCVFileName;
+        } else {
+            defaultCvText.textContent = 'No default CV saved on your profile yet.';
+            cvDefaultRadio.disabled = true;
+            optionDefault.classList.add('is-disabled');
+            cvNewRadio.checked = true;
+        }
+        updateCvUi();
+
+        // Already applied?
+        const { data: existing, error: existingError } = await supabase
+            .from('applications')
+            .select('job_id')
+            .eq('job_id', jobId)
+            .eq('student_id', userId)
+            .limit(1);
+
+        if (!existingError && existing && existing.length > 0) {
+            blockForm('You have already applied for this job.', 'Back to jobs', 'browse-jobs.html', 'info');
+            return;
+        }
+
+        fields.disabled = false;
+    } catch (err) {
+        console.error('init error:', err);
+        blockForm('Something went wrong while loading this page: ' + (err.message || 'unknown error'));
+    }
+}
+
+/* ---------- preview CV ---------- */
+previewBtn.addEventListener('click', async () => {
+    clearMessage();
+
+    if (getCvOption() === 'new') {
+        const file = newCVInput.files[0];
+        if (!file) {
+            showMessage('Choose a PDF to upload first.', 'error');
+            return;
+        }
+        const problem = validateFile(file);
+        if (problem) {
+            showMessage(problem, 'error');
+            return;
+        }
+        const url = URL.createObjectURL(file);
+        window.open(url, '_blank');
+        setTimeout(() => URL.revokeObjectURL(url), 60000);
+        return;
+    }
+
+    if (!defaultCVFileName) {
+        showMessage('You have no default CV saved on your profile.', 'error');
+        return;
+    }
+
+    // Open the tab straight away (inside the click), so pop-up blockers allow it
+    const win = window.open('', '_blank');
+    try {
+        const { data, error } = await supabase.storage
+            .from(BUCKET)
+            .createSignedUrl(`graduates/${userId}/${defaultCVFileName}`, 120);
+        if (error) throw error;
+
+        if (win) {
+            win.location.href = data.signedUrl;
+        } else {
+            showMessage('Your browser blocked the pop-up.', 'info', 'Open your CV', data.signedUrl);
+        }
+    } catch (err) {
+        if (win) win.close();
+        console.error('Preview error:', err);
+        showMessage('Could not open your CV: ' + (err.message || 'unknown error'), 'error');
+    }
+});
+
+/* ---------- submit ---------- */
+form.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    clearMessage();
+
+    const option = getCvOption();
+    let file = null;
+
+    if (option === 'default') {
+        if (!defaultCVFileName) {
+            showMessage('You have no default CV. Please upload a new one.', 'error');
+            return;
+        }
+    } else {
+        file = newCVInput.files[0];
+        if (!file) {
+            showMessage('Please choose a PDF to upload.', 'error');
+            return;
+        }
+        const problem = validateFile(file);
+        if (problem) {
+            showMessage(problem, 'error');
+            return;
+        }
+    }
+
+    setBusy(true);
+    let uploadedPath = null;
+    let finished = false;
+
+    try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session?.user) {
+            showMessage('Your session has expired. Please log in again.', 'error', 'Log in', 'login-type.html');
+            return;
+        }
+
+        let finalCVPath;
+        if (option === 'default') {
+            finalCVPath = `graduates/${userId}/${defaultCVFileName}`;
+        } else {
+            // Unique name, so a new upload can never overwrite your default CV or an earlier application
+            const path = `graduates/${userId}/${Date.now()}-${safeFileName(file.name)}`;
+            const { error: uploadError } = await supabase.storage
+                .from(BUCKET)
+                .upload(path, file, { upsert: false, contentType: 'application/pdf' });
+            if (uploadError) throw new Error('CV upload failed: ' + uploadError.message);
+            uploadedPath = path;
+            finalCVPath = path;
+        }
+
+        const { error: insertError } = await supabase
+            .from('applications')
+            .insert([{
+                job_id: jobId,
+                student_id: userId,
+                recruiter_id: recruiterId,
+                cv_url: finalCVPath,
+                cover_letter: coverLetterInput.value.trim() || null,
+                status: 'pending',
+                created_at: new Date().toISOString()
+            }]);
+
+        if (insertError) {
+            // Tidy up the file we just uploaded, since the application did not go through
+            if (uploadedPath) await supabase.storage.from(BUCKET).remove([uploadedPath]);
+
+            if (insertError.code === '23505') {
+                blockForm('You have already applied for this job.', 'Back to jobs', 'browse-jobs.html', 'info');
+                finished = true;
+                return;
+            }
+            throw new Error('Application failed: ' + insertError.message);
+        }
+
+        finished = true;
+        fields.disabled = true;
+        showMessage('Application submitted! Taking you back to the jobs...', 'success');
+        setTimeout(() => { window.location.href = 'browse-jobs.html'; }, 1800);
+
+    } catch (err) {
+        console.error('Submit error:', err);
+        showMessage(err.message || 'Something went wrong. Please try again.', 'error');
+    } finally {
+        if (!finished) setBusy(false);
+    }
+});
+
+init();
