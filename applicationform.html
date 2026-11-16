@@ -1,369 +1,381 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<meta name="theme-color" content="#1e3a8a">
-<title>Apply for Job - GraduateInHunt</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<style>
-  * { box-sizing: border-box; }
-  [hidden] { display: none !important; }
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
 
-  body {
-    font-family: 'Inter', Arial, sans-serif;
-    background: #f4f6fb;
-    color: #0f172a;
-    margin: 0;
-    padding: 0;
-    line-height: 1.5;
-    -webkit-font-smoothing: antialiased;
-  }
+const SUPABASE_URL = 'https://euclknvsppptbfclwxqq.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_90JbyFsa4BuuyeuLCIActg_yXfbHQ30';
+const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
-  /* ============ TOP PANEL (same on every page) ============ */
-  .topbar {
-    position: sticky;
-    top: 0;
-    z-index: 100;
-    background: rgba(255, 255, 255, 0.9);
-    -webkit-backdrop-filter: blur(12px);
-    backdrop-filter: blur(12px);
-    border-bottom: 1px solid #e2e8f0;
-    padding-top: env(safe-area-inset-top, 0px);
-  }
-  .topbar-inner {
-    max-width: 1000px;
-    margin: 0 auto;
-    padding: 10px 16px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    gap: 8px 16px;
-  }
-  .brand {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    text-decoration: none;
-    color: #0f172a;
-    font-weight: 800;
-    font-size: 1.1rem;
-    letter-spacing: -0.02em;
-  }
-  .brand-mark {
-    display: grid;
-    place-items: center;
-    width: 34px;
-    height: 34px;
-    border-radius: 10px;
-    background: linear-gradient(135deg, #1e3a8a, #3b82f6);
-    color: #fff;
-    font-weight: 800;
-  }
-  .main-nav { display: flex; gap: 4px; }
-  .nav-link {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 8px 14px;
-    border-radius: 999px;
-    color: #64748b;
-    font-weight: 600;
-    font-size: 0.95rem;
-    text-decoration: none;
-    transition: background 0.2s, color 0.2s;
-  }
-  .nav-link svg { width: 18px; height: 18px; flex: 0 0 auto; }
-  .nav-link:hover, .nav-link[aria-current="page"] { background: #eef2ff; color: #1e3a8a; }
-  .nav-link:focus-visible, .brand:focus-visible { outline: 3px solid #f5b800; outline-offset: 2px; }
+const BUCKET = 'cv_bucket';
+const MAX_FILE_MB = 5;
+const MAX_FILE_BYTES = MAX_FILE_MB * 1024 * 1024;
 
-  @media (max-width: 640px) {
-    .main-nav { width: 100%; justify-content: space-between; }
-    .nav-link { flex: 1; justify-content: center; padding: 8px 6px; font-size: 0.88rem; gap: 6px; }
-    .nav-link svg { width: 16px; height: 16px; }
-  }
-  /* ============ END TOP PANEL ============ */
+const $ = id => document.getElementById(id);
 
-  /* ---------- Page ---------- */
-  .container { max-width: 720px; margin: 0 auto; padding: 22px 16px 56px; }
+const form = $('applicationForm');
+const fields = $('formFields');
+const messageEl = $('formMessage');
+const jobTitleEl = $('jobTitle');
+const jobCompanyEl = $('jobCompany');
+const nameInput = $('name');
+const emailInput = $('email');
+const cellInput = $('cellnumber');
+const cvDefaultRadio = $('cvDefault');
+const cvNewRadio = $('cvNew');
+const optionDefault = $('optionDefault');
+const optionNew = $('optionNew');
+const defaultCvText = $('defaultCvText');
+const newCvWrap = $('newCvWrap');
+const newCVInput = $('newCV');
+const fileInfo = $('fileInfo');
+const coverLetterInput = $('coverLetter');
+const coverCount = $('coverCount');
+const previewBtn = $('previewCV');
+const submitBtn = $('submitBtn');
 
-  .back-link {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    margin-bottom: 14px;
-    color: #1e3a8a;
-    font-weight: 600;
-    font-size: 0.92rem;
-    text-decoration: none;
-  }
-  .back-link:hover { text-decoration: underline; }
+let userId = null;
+let jobId = null;
+let recruiterId = null;
+let defaultCVFileName = null;
+let ready = false;   // becomes true once the job and your profile have loaded
 
-  .card {
-    background: #fff;
-    border: 1px solid #e2e8f0;
-    border-radius: 20px;
-    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06), 0 8px 24px rgba(15, 23, 42, 0.06);
-    overflow: hidden;
-  }
+/* ---------- small helpers ---------- */
+function showMessage(text, type = 'info', linkText = '', linkHref = '') {
+    messageEl.className = 'message ' + type;
+    messageEl.textContent = text;
+    if (linkHref) {
+        messageEl.append(document.createTextNode(' '));
+        const a = document.createElement('a');
+        a.href = linkHref;
+        a.textContent = linkText;
+        if (/^https?:/i.test(linkHref)) {
+            a.target = '_blank';
+            a.rel = 'noopener';
+        }
+        messageEl.append(a);
+    }
+    messageEl.hidden = false;
+}
 
-  .card-hero {
-    background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
-    color: #fff;
-    padding: 26px 24px;
-  }
-  .card-hero h1 {
-    margin: 0 0 6px;
-    font-size: 1.5rem;
-    font-weight: 800;
-    letter-spacing: -0.02em;
-  }
-  .card-hero .job-title { margin: 0; font-weight: 600; font-size: 1.05rem; overflow-wrap: anywhere; }
-  .card-hero .job-company { margin: 2px 0 0; opacity: 0.85; font-size: 0.92rem; }
+function clearMessage() {
+    messageEl.hidden = true;
+    messageEl.textContent = '';
+    messageEl.className = 'message';
+}
 
-  .card-body { padding: 24px; }
+// Locks the whole form and explains why
+function blockForm(text, linkText = '', linkHref = '', type = 'error') {
+    ready = false;
+    fields.disabled = true;
+    showMessage(text, type, linkText, linkHref);
+}
 
-  .message {
-    border-radius: 12px;
-    padding: 12px 16px;
-    margin: 0 0 18px;
-    font-size: 0.93rem;
-    font-weight: 500;
-    border: 1px solid transparent;
-  }
-  .message a { font-weight: 700; color: inherit; }
-  .message.error { background: #fef2f2; border-color: #fecaca; color: #b91c1c; }
-  .message.success { background: #f0fdf4; border-color: #bbf7d0; color: #166534; }
-  .message.info { background: #eff6ff; border-color: #bfdbfe; color: #1e3a8a; }
+function setBusy(busy) {
+    submitBtn.disabled = busy;
+    previewBtn.disabled = busy;
+    submitBtn.textContent = busy ? 'Submitting...' : 'Submit Application';
+}
 
-  fieldset { border: none; margin: 0; padding: 0; min-width: 0; }
-  fieldset:disabled { opacity: 0.6; }
+function getCvOption() {
+    return form.querySelector("input[name='cvOption']:checked")?.value || 'default';
+}
 
-  .section { margin-bottom: 26px; }
-  .section h2 {
-    margin: 0 0 4px;
-    font-size: 1.02rem;
-    font-weight: 700;
-    color: #1e3a8a;
-  }
-  .section .section-hint { margin: 0 0 12px; color: #64748b; font-size: 0.88rem; }
-  .section .section-hint a { color: #1e3a8a; font-weight: 600; }
+function formatSize(bytes) {
+    return bytes < 1024 * 1024
+        ? Math.max(1, Math.round(bytes / 1024)) + ' KB'
+        : (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+}
 
-  .grid { display: grid; gap: 14px; grid-template-columns: 1fr 1fr; }
-  .grid .full { grid-column: 1 / -1; }
-  @media (max-width: 560px) { .grid { grid-template-columns: 1fr; } }
+// Keeps the stored file name free of spaces and odd characters that storage can reject
+function safeFileName(name) {
+    const dot = name.lastIndexOf('.');
+    const base = (dot > 0 ? name.slice(0, dot) : name)
+        .replace(/[^a-zA-Z0-9_-]+/g, '-')
+        .replace(/^-+|-+$/g, '')
+        .slice(0, 60) || 'cv';
+    return base + '.pdf';
+}
 
-  label.field-label { display: block; margin-bottom: 5px; font-weight: 600; font-size: 0.9rem; }
+function validateFile(file) {
+    const isPdf = file.type === 'application/pdf' || /\.pdf$/i.test(file.name);
+    if (!isPdf) return 'Please choose a PDF file.';
+    if (file.size > MAX_FILE_BYTES) {
+        return `That file is ${formatSize(file.size)}. Please choose a PDF under ${MAX_FILE_MB} MB.`;
+    }
+    return '';
+}
 
-  input[type="text"], input[type="email"], input[type="tel"], textarea {
-    width: 100%;
-    padding: 12px 14px;
-    border: 1px solid #cbd5e1;
-    border-radius: 12px;
-    font-family: inherit;
-    font-size: 1rem;
-    color: #0f172a;
-    background: #fff;
-  }
-  input[readonly] { background: #f1f5f9; color: #475569; cursor: default; }
-  textarea { resize: vertical; min-height: 140px; line-height: 1.5; }
-  input:focus-visible, textarea:focus-visible, .btn:focus-visible, .cv-option:focus-within {
-    outline: 3px solid #f5b800;
-    outline-offset: 2px;
-  }
+/* ---------- CV choice (works straight away, before anything has loaded) ---------- */
+function updateCvUi() {
+    const useDefault = getCvOption() === 'default';
+    newCvWrap.hidden = useDefault;
+    newCVInput.disabled = useDefault;
+    if (useDefault) {
+        newCVInput.value = '';
+        fileInfo.textContent = '';
+    }
+    optionDefault.classList.toggle('selected', useDefault);
+    optionNew.classList.toggle('selected', !useDefault);
+}
 
-  .counter { margin-top: 6px; text-align: right; color: #64748b; font-size: 0.8rem; }
+cvDefaultRadio.addEventListener('change', updateCvUi);
+cvNewRadio.addEventListener('change', updateCvUi);
+updateCvUi();
 
-  /* ---------- CV choice ---------- */
-  .cv-options { display: grid; gap: 10px; }
-  .cv-option {
-    display: flex;
-    align-items: flex-start;
-    gap: 12px;
-    padding: 14px 16px;
-    border: 1px solid #e2e8f0;
-    border-radius: 14px;
-    background: #fff;
-    cursor: pointer;
-    transition: border-color 0.2s, background 0.2s;
-  }
-  .cv-option:hover { border-color: #3b82f6; }
-  .cv-option.selected { border-color: #1e3a8a; background: #eef2ff; }
-  .cv-option.is-disabled { opacity: 0.55; cursor: not-allowed; }
-  .cv-option input { margin-top: 4px; accent-color: #1e3a8a; }
-  .cv-option strong { display: block; font-size: 0.97rem; }
-  .cv-option small { display: block; color: #64748b; font-size: 0.85rem; overflow-wrap: anywhere; }
+newCVInput.addEventListener('change', () => {
+    const file = newCVInput.files[0];
+    if (!file) {
+        fileInfo.textContent = '';
+        return;
+    }
+    const problem = validateFile(file);
+    if (problem) {
+        showMessage(problem, 'error');
+        newCVInput.value = '';
+        fileInfo.textContent = '';
+        return;
+    }
+    clearMessage();
+    fileInfo.textContent = `${file.name} (${formatSize(file.size)})`;
+});
 
-  .file-wrap { margin-top: 12px; }
-  input[type="file"] {
-    width: 100%;
-    padding: 12px;
-    border: 2px dashed #cbd5e1;
-    border-radius: 14px;
-    background: #f8fafc;
-    font-family: inherit;
-    font-size: 0.95rem;
-  }
-  input[type="file"]::file-selector-button {
-    margin-right: 12px;
-    padding: 8px 14px;
-    border: none;
-    border-radius: 10px;
-    background: linear-gradient(135deg, #1e3a8a, #3b82f6);
-    color: #fff;
-    font-family: inherit;
-    font-weight: 600;
-    cursor: pointer;
-  }
-  .file-info { margin: 8px 2px 0; color: #166534; font-size: 0.88rem; font-weight: 600; overflow-wrap: anywhere; }
+/* ---------- cover letter counter ---------- */
+function updateCoverCount() {
+    coverCount.textContent = `${coverLetterInput.value.length} / ${coverLetterInput.maxLength}`;
+}
+coverLetterInput.addEventListener('input', updateCoverCount);
+updateCoverCount();
 
-  /* ---------- Buttons ---------- */
-  .actions { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 8px; }
-  .btn {
-    padding: 13px 24px;
-    border: none;
-    border-radius: 12px;
-    font-family: inherit;
-    font-weight: 700;
-    font-size: 1rem;
-    cursor: pointer;
-    transition: transform 0.2s, box-shadow 0.2s, background 0.2s;
-  }
-  .btn-primary { flex: 1 1 220px; background: linear-gradient(135deg, #1e3a8a, #3b82f6); color: #fff; }
-  .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 8px 18px rgba(30, 58, 138, 0.3); }
-  .btn-secondary { flex: 0 1 auto; background: #fff; color: #1e3a8a; border: 1px solid #cbd5e1; }
-  .btn-secondary:hover { border-color: #3b82f6; background: #eef2ff; }
-  .btn:disabled, .btn:disabled:hover {
-    background: #e2e8f0;
-    color: #64748b;
-    border-color: transparent;
-    cursor: not-allowed;
-    transform: none;
-    box-shadow: none;
-  }
+/* ---------- load everything the page needs ---------- */
+async function init() {
+    const params = new URLSearchParams(window.location.search);
+    jobId = params.get('job_id');
+    const urlTitle = params.get('job_title');
 
-  @media (prefers-reduced-motion: reduce) {
-    .btn, .nav-link, .cv-option { transition: none; }
-    .btn:hover { transform: none; }
-  }
-  @media (max-width: 480px) {
-    .card-body { padding: 20px 16px; }
-    .card-hero { padding: 22px 16px; }
-    .btn-secondary { flex: 1 1 100%; }
-  }
-</style>
-</head>
-<body>
+    if (urlTitle) jobTitleEl.textContent = `Applying for: ${urlTitle}`;
 
-<!-- ============ TOP PANEL (same on every page) ============ -->
-<header class="topbar">
-  <div class="topbar-inner">
-    <a class="brand" href="homepageRegisteredUser.html">
-      <span class="brand-mark" aria-hidden="true">G</span>
-      <span>GraduateInHunt</span>
-    </a>
+    if (!jobId) {
+        jobTitleEl.textContent = 'No job selected';
+        blockForm('Choose a job first, then press Apply.', 'Browse jobs', 'browse-jobs.html');
+        return;
+    }
 
-    <nav class="main-nav" aria-label="Main">
-      <a class="nav-link" href="homepageRegisteredUser.html">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1z"/></svg>
-        <span>Home</span>
-      </a>
-      <a class="nav-link" href="graduate-profile.html">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>
-        <span>My Profile</span>
-      </a>
-      <a class="nav-link" href="alljobs.html">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"/></svg>
-        <span>All Jobs</span>
-      </a>
-    </nav>
-  </div>
-</header>
-<!-- ============ END TOP PANEL ============ -->
+    try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session?.user) {
+            jobTitleEl.textContent = 'Please log in';
+            blockForm('You need to be logged in to apply.', 'Log in', 'login-type.html');
+            return;
+        }
+        userId = session.user.id;
 
-<main class="container">
-  <a class="back-link" href="browse-jobs.html">&larr; Back to jobs</a>
+        // The job (also gives us the recruiter, so we don't need a second lookup when submitting)
+        const { data: job, error: jobError } = await supabase
+            .from('jobs')
+            .select('title, company_name, recruiter_id')
+            .eq('id', jobId)
+            .maybeSingle();
 
-  <section class="card">
-    <div class="card-hero">
-      <h1>Job Application</h1>
-      <p class="job-title" id="jobTitle">Loading job...</p>
-      <p class="job-company" id="jobCompany" hidden></p>
-    </div>
+        if (jobError || !job) {
+            jobTitleEl.textContent = 'Job not found';
+            blockForm('We could not find this job. It may have been removed.', 'Browse jobs', 'browse-jobs.html');
+            return;
+        }
 
-    <div class="card-body">
-      <p id="formMessage" class="message" role="status" aria-live="polite" hidden></p>
+        recruiterId = job.recruiter_id;
+        jobTitleEl.textContent = `Applying for: ${job.title || urlTitle || 'this job'}`;
+        if (job.company_name) {
+            jobCompanyEl.textContent = job.company_name;
+            jobCompanyEl.hidden = false;
+        }
 
-      <form id="applicationForm">
-        <!-- Stays locked until the page has loaded everything it needs -->
-        <fieldset id="formFields" disabled>
+        // Your profile
+        const { data: graduate, error: gradError } = await supabase
+            .from('graduates')
+            .select('full_name, email, phone, cv_url')
+            .eq('id', userId)
+            .maybeSingle();
 
-          <div class="section">
-            <h2>Your details</h2>
-            <p class="section-hint">These come from your profile. To change them, <a href="graduate-profile.html">update your profile</a>.</p>
-            <div class="grid">
-              <div class="full">
-                <label class="field-label" for="name">Full name</label>
-                <input type="text" id="name" readonly>
-              </div>
-              <div>
-                <label class="field-label" for="email">Email</label>
-                <input type="email" id="email" readonly>
-              </div>
-              <div>
-                <label class="field-label" for="cellnumber">Cell number</label>
-                <input type="tel" id="cellnumber" readonly>
-              </div>
-            </div>
-          </div>
+        if (gradError || !graduate) {
+            blockForm('We could not load your profile. Please complete it before applying.', 'My profile', 'graduate-profile.html');
+            return;
+        }
 
-          <div class="section">
-            <h2>Your CV</h2>
-            <p class="section-hint">Choose the CV the recruiter will receive.</p>
+        nameInput.value = graduate.full_name || '';
+        emailInput.value = graduate.email || session.user.email || '';
+        cellInput.value = graduate.phone || '';
 
-            <div class="cv-options" role="radiogroup" aria-label="Choose CV">
-              <label class="cv-option selected" id="optionDefault" for="cvDefault">
-                <input type="radio" name="cvOption" id="cvDefault" value="default" checked>
-                <span>
-                  <strong>Use my default CV</strong>
-                  <small id="defaultCvText">Checking your profile...</small>
-                </span>
-              </label>
+        defaultCVFileName = graduate.cv_url || null;
+        if (defaultCVFileName) {
+            defaultCvText.textContent = 'Saved on your profile: ' + defaultCVFileName;
+        } else {
+            defaultCvText.textContent = 'No default CV saved on your profile yet.';
+            cvDefaultRadio.disabled = true;
+            optionDefault.classList.add('is-disabled');
+            cvNewRadio.checked = true;
+        }
+        updateCvUi();
 
-              <label class="cv-option" id="optionNew" for="cvNew">
-                <input type="radio" name="cvOption" id="cvNew" value="new">
-                <span>
-                  <strong>Upload a new CV</strong>
-                  <small>PDF only, up to 5 MB. Your default CV stays unchanged.</small>
-                </span>
-              </label>
-            </div>
+        // Already applied?
+        const { data: existing, error: existingError } = await supabase
+            .from('applications')
+            .select('job_id')
+            .eq('job_id', jobId)
+            .eq('student_id', userId)
+            .limit(1);
 
-            <div class="file-wrap" id="newCvWrap" hidden>
-              <input type="file" id="newCV" accept="application/pdf,.pdf" aria-label="Upload a new CV (PDF)" disabled>
-              <p class="file-info" id="fileInfo" aria-live="polite"></p>
-            </div>
-          </div>
+        if (!existingError && existing && existing.length > 0) {
+            blockForm('You have already applied for this job.', 'Back to jobs', 'browse-jobs.html', 'info');
+            return;
+        }
 
-          <div class="section">
-            <h2>Cover letter <span style="font-weight:500;color:#64748b;">(optional)</span></h2>
-            <p class="section-hint">Tell the recruiter why you are a good fit.</p>
-            <textarea id="coverLetter" maxlength="3000" placeholder="Write your cover letter here..." aria-label="Cover letter"></textarea>
-            <div class="counter" id="coverCount">0 / 3000</div>
-          </div>
+        ready = true;
+        fields.disabled = false;
+    } catch (err) {
+        console.error('init error:', err);
+        blockForm('Something went wrong while loading this page: ' + (err.message || 'unknown error'));
+    }
+}
 
-          <div class="actions">
-            <button type="button" class="btn btn-secondary" id="previewCV">Preview CV</button>
-            <button type="submit" class="btn btn-primary" id="submitBtn">Submit Application</button>
-          </div>
+/* ---------- preview CV ---------- */
+previewBtn.addEventListener('click', async () => {
+    clearMessage();
 
-        </fieldset>
-      </form>
-    </div>
-  </section>
-</main>
+    if (getCvOption() === 'new') {
+        const file = newCVInput.files[0];
+        if (!file) {
+            showMessage('Choose a PDF to upload first.', 'error');
+            return;
+        }
+        const problem = validateFile(file);
+        if (problem) {
+            showMessage(problem, 'error');
+            return;
+        }
+        const url = URL.createObjectURL(file);
+        window.open(url, '_blank');
+        setTimeout(() => URL.revokeObjectURL(url), 60000);
+        return;
+    }
 
-<script type="module" src="applicationform.js"></script>
-</body>
-</html>
+    if (!ready) {
+        showMessage('Please wait a moment, your details are still loading.', 'info');
+        return;
+    }
+    if (!defaultCVFileName) {
+        showMessage('You have no default CV saved on your profile.', 'error');
+        return;
+    }
+
+    // Open the tab straight away (inside the click), so pop-up blockers allow it
+    const win = window.open('', '_blank');
+    try {
+        const { data, error } = await supabase.storage
+            .from(BUCKET)
+            .createSignedUrl(`graduates/${userId}/${defaultCVFileName}`, 120);
+        if (error) throw error;
+
+        if (win) {
+            win.location.href = data.signedUrl;
+        } else {
+            showMessage('Your browser blocked the pop-up.', 'info', 'Open your CV', data.signedUrl);
+        }
+    } catch (err) {
+        if (win) win.close();
+        console.error('Preview error:', err);
+        showMessage('Could not open your CV: ' + (err.message || 'unknown error'), 'error');
+    }
+});
+
+/* ---------- submit ---------- */
+form.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    clearMessage();
+
+    if (!ready) {
+        showMessage('Please wait a moment, your details are still loading.', 'info');
+        return;
+    }
+
+    const option = getCvOption();
+    let file = null;
+
+    if (option === 'default') {
+        if (!defaultCVFileName) {
+            showMessage('You have no default CV. Please upload a new one.', 'error');
+            return;
+        }
+    } else {
+        file = newCVInput.files[0];
+        if (!file) {
+            showMessage('Please choose a PDF to upload.', 'error');
+            return;
+        }
+        const problem = validateFile(file);
+        if (problem) {
+            showMessage(problem, 'error');
+            return;
+        }
+    }
+
+    setBusy(true);
+    let uploadedPath = null;
+    let finished = false;
+
+    try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session?.user) {
+            showMessage('Your session has expired. Please log in again.', 'error', 'Log in', 'login-type.html');
+            return;
+        }
+
+        let finalCVPath;
+        if (option === 'default') {
+            finalCVPath = `graduates/${userId}/${defaultCVFileName}`;
+        } else {
+            // Unique name, so a new upload can never overwrite your default CV or an earlier application
+            const path = `graduates/${userId}/${Date.now()}-${safeFileName(file.name)}`;
+            const { error: uploadError } = await supabase.storage
+                .from(BUCKET)
+                .upload(path, file, { upsert: false, contentType: 'application/pdf' });
+            if (uploadError) throw new Error('CV upload failed: ' + uploadError.message);
+            uploadedPath = path;
+            finalCVPath = path;
+        }
+
+        const { error: insertError } = await supabase
+            .from('applications')
+            .insert([{
+                job_id: jobId,
+                student_id: userId,
+                recruiter_id: recruiterId,
+                cv_url: finalCVPath,
+                cover_letter: coverLetterInput.value.trim() || null,
+                status: 'pending',
+                created_at: new Date().toISOString()
+            }]);
+
+        if (insertError) {
+            // Tidy up the file we just uploaded, since the application did not go through
+            if (uploadedPath) await supabase.storage.from(BUCKET).remove([uploadedPath]);
+
+            if (insertError.code === '23505') {
+                blockForm('You have already applied for this job.', 'Back to jobs', 'browse-jobs.html', 'info');
+                finished = true;
+                return;
+            }
+            throw new Error('Application failed: ' + insertError.message);
+        }
+
+        finished = true;
+        fields.disabled = true;
+        showMessage('Application submitted! Taking you back to the jobs...', 'success');
+        setTimeout(() => { window.location.href = 'browse-jobs.html'; }, 1800);
+
+    } catch (err) {
+        console.error('Submit error:', err);
+        showMessage(err.message || 'Something went wrong. Please try again.', 'error');
+    } finally {
+        if (!finished) setBusy(false);
+    }
+});
+
+init();
