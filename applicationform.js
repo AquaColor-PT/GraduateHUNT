@@ -35,6 +35,7 @@ let userId = null;
 let jobId = null;
 let recruiterId = null;
 let defaultCVFileName = null;
+let ready = false;   // becomes true once the job and your profile have loaded
 
 /* ---------- small helpers ---------- */
 function showMessage(text, type = 'info', linkText = '', linkHref = '') {
@@ -62,6 +63,7 @@ function clearMessage() {
 
 // Locks the whole form and explains why
 function blockForm(text, linkText = '', linkHref = '', type = 'error') {
+    ready = false;
     fields.disabled = true;
     showMessage(text, type, linkText, linkHref);
 }
@@ -101,7 +103,7 @@ function validateFile(file) {
     return '';
 }
 
-/* ---------- CV choice ---------- */
+/* ---------- CV choice (works straight away, before anything has loaded) ---------- */
 function updateCvUi() {
     const useDefault = getCvOption() === 'default';
     newCvWrap.hidden = useDefault;
@@ -116,6 +118,7 @@ function updateCvUi() {
 
 cvDefaultRadio.addEventListener('change', updateCvUi);
 cvNewRadio.addEventListener('change', updateCvUi);
+updateCvUi();
 
 newCVInput.addEventListener('change', () => {
     const file = newCVInput.files[0];
@@ -224,6 +227,7 @@ async function init() {
             return;
         }
 
+        ready = true;
         fields.disabled = false;
     } catch (err) {
         console.error('init error:', err);
@@ -252,6 +256,10 @@ previewBtn.addEventListener('click', async () => {
         return;
     }
 
+    if (!ready) {
+        showMessage('Please wait a moment, your details are still loading.', 'info');
+        return;
+    }
     if (!defaultCVFileName) {
         showMessage('You have no default CV saved on your profile.', 'error');
         return;
@@ -281,6 +289,11 @@ previewBtn.addEventListener('click', async () => {
 form.addEventListener('submit', async (event) => {
     event.preventDefault();
     clearMessage();
+
+    if (!ready) {
+        showMessage('Please wait a moment, your details are still loading.', 'info');
+        return;
+    }
 
     const option = getCvOption();
     let file = null;
