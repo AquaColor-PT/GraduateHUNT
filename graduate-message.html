@@ -61,6 +61,8 @@
     background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.4);
   }
   .chip[hidden], .btn-white[hidden] { display: none; }
+  button.chip { cursor: pointer; font: inherit; font-weight: 600; font-size: .84rem; color: #fff; }
+  button.chip:hover { background: rgba(255,255,255,.22); }
   .chip .dot { width: 8px; height: 8px; border-radius: 50%; background: #fbbf24; }
   .chip.live .dot { background: #4ade80; box-shadow: 0 0 0 4px rgba(74,222,128,.25); }
   .glass {
@@ -158,6 +160,7 @@
         <button class="btn-white" id="alertsBtn" type="button" hidden>Turn on alerts</button>
         <span class="chip" id="alertsOn" hidden>Alerts on</span>
         <span class="chip" id="liveState"><span class="dot"></span><span id="liveText">Connecting...</span></span>
+        <button class="chip" id="soundBtn" type="button" aria-pressed="true">Sound on</button>
       </div>
     </div>
     <div class="glass" aria-label="Message summary">
@@ -176,6 +179,6 @@
 
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
-<script type="module" src="graduate-message.js?v=2"></script>
+<script type="module" src="graduate-message.js?v=3"></script>
 </body>
 </html>
