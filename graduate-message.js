@@ -156,6 +156,7 @@ function announce(msg) {
   const preview = (msg.message || '').replace(/\s+/g, ' ').trim().slice(0, 100);
 
   showToast(`New message from ${company}`, msg.job_title ? `About: ${msg.job_title}` : preview);
+  playChime();
 
   if (document.hidden) {
     unseenWhileAway++;
@@ -183,6 +184,58 @@ function setupAlertsButton() {
     else { btn.textContent = 'Turn on alerts'; btn.disabled = false; }
   };
   btn.addEventListener('click', async () => { await Notification.requestPermission(); paint(); });
+  paint();
+}
+
+// ---------- sound ----------
+let audioCtx = null;
+let soundOn = true;
+try { soundOn = localStorage.getItem('gihSound') !== 'off'; } catch (e) { /* storage unavailable */ }
+
+function getCtx() {
+  if (!audioCtx) {
+    const AC = window.AudioContext || window.webkitAudioContext;
+    if (!AC) return null;
+    audioCtx = new AC();
+  }
+  if (audioCtx.state === 'suspended') audioCtx.resume().catch(() => {});
+  return audioCtx;
+}
+
+// Two soft notes, no audio file needed
+function playChime() {
+  if (!soundOn) return;
+  const ctx = getCtx();
+  if (!ctx) return;
+  const now = ctx.currentTime;
+  [[880, 0], [1318.5, 0.14]].forEach(([freq, delay]) => {
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = 'sine';
+    osc.frequency.value = freq;
+    gain.gain.setValueAtTime(0.0001, now + delay);
+    gain.gain.exponentialRampToValueAtTime(0.25, now + delay + 0.02);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + delay + 0.5);
+    osc.connect(gain).connect(ctx.destination);
+    osc.start(now + delay);
+    osc.stop(now + delay + 0.55);
+  });
+}
+
+function setupSound() {
+  const btn = $('soundBtn');
+  const paint = () => {
+    btn.textContent = soundOn ? 'Sound on' : 'Sound off';
+    btn.setAttribute('aria-pressed', String(soundOn));
+  };
+  btn.addEventListener('click', () => {
+    soundOn = !soundOn;
+    try { localStorage.setItem('gihSound', soundOn ? 'on' : 'off'); } catch (e) { /* ignore */ }
+    paint();
+    playChime(); // preview; the click also lets the browser play sounds on this page
+  });
+  // Browsers only allow sound after the person has interacted with the page once
+  ['pointerdown', 'keydown'].forEach(ev => window.addEventListener(ev, getCtx, { once: true }));
   paint();
 }
 
@@ -261,6 +314,7 @@ async function init() {
     await markViewed();
 
     setupAlertsButton();
+    setupSound();
     subscribe();
     setInterval(poll, POLL_MS);
   } catch (err) {
