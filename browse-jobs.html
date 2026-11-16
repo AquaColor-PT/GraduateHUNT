@@ -2,119 +2,24 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#1e3a8a">
 <title>Browse Jobs - GraduateInHunt</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="site-header.js" defer></script>
 <style>
   * { box-sizing: border-box; }
   [hidden] { display: none !important; }
 
-  :root {
-    color-scheme: light dark;
-    --bg: #f4f6fb;
-    --surface: #ffffff;
-    --text: #0f172a;
-    --muted: #64748b;
-    --border: #e2e8f0;
-    --link: #1e3a8a;
-    --accent: #f5b800;
-    --chip-bg: #eef2ff;
-    --topbar: rgba(255, 255, 255, 0.88);
-    --shadow: 0 1px 2px rgba(15, 23, 42, 0.06), 0 8px 24px rgba(15, 23, 42, 0.06);
-    --shadow-hover: 0 2px 4px rgba(15, 23, 42, 0.08), 0 16px 32px rgba(15, 23, 42, 0.12);
-    --new-bg: #dcfce7;
-    --new-fg: #166534;
-    --notice-bg: #fff8e1;
-    --notice-fg: #6b5200;
-    --error: #dc2626;
-  }
-
-  @media (prefers-color-scheme: dark) {
-    :root {
-      --bg: #0b1220;
-      --surface: #121b30;
-      --text: #e6eaf3;
-      --muted: #97a3b9;
-      --border: #223052;
-      --link: #93c5fd;
-      --chip-bg: #1a2745;
-      --topbar: rgba(11, 18, 32, 0.88);
-      --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 8px 24px rgba(0, 0, 0, 0.25);
-      --shadow-hover: 0 2px 4px rgba(0, 0, 0, 0.4), 0 16px 32px rgba(0, 0, 0, 0.4);
-      --new-bg: rgba(34, 197, 94, 0.15);
-      --new-fg: #86efac;
-      --notice-bg: rgba(245, 184, 0, 0.12);
-      --notice-fg: #f5d56a;
-      --error: #f87171;
-    }
-  }
-
   body {
-    margin: 0;
     font-family: 'Inter', Arial, sans-serif;
-    background: var(--bg);
-    color: var(--text);
+    background: #f4f6fb;
+    color: #0f172a;
+    margin: 0;
+    padding: 0;
     line-height: 1.5;
     -webkit-font-smoothing: antialiased;
   }
-
-  /* ---------- Top bar ---------- */
-  .topbar {
-    position: sticky;
-    top: 0;
-    z-index: 50;
-    background: var(--topbar);
-    -webkit-backdrop-filter: blur(12px);
-    backdrop-filter: blur(12px);
-    border-bottom: 1px solid var(--border);
-    padding-top: env(safe-area-inset-top, 0px);
-  }
-  .topbar-inner {
-    max-width: 1000px;
-    margin: 0 auto;
-    padding: 10px 16px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 16px;
-  }
-  .brand {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    text-decoration: none;
-    color: var(--text);
-    font-weight: 800;
-    font-size: 1.1rem;
-    letter-spacing: -0.02em;
-  }
-  .brand-mark {
-    display: grid;
-    place-items: center;
-    width: 34px;
-    height: 34px;
-    border-radius: 10px;
-    background: linear-gradient(135deg, #1e3a8a, #3b82f6);
-    color: #fff;
-    font-weight: 800;
-  }
-
-  .main-nav { display: flex; gap: 4px; }
-  .nav-link {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 8px 14px;
-    border-radius: 999px;
-    color: var(--muted);
-    font-weight: 600;
-    font-size: 0.95rem;
-    text-decoration: none;
-    transition: background 0.2s, color 0.2s;
-  }
-  .nav-link:hover { background: var(--chip-bg); color: var(--link); }
-  .nav-link svg { width: 18px; height: 18px; }
 
   /* ---------- Hero ---------- */
   .hero {
@@ -158,15 +63,15 @@
     appearance: none;
   }
   .search input::placeholder { color: #94a3b8; }
-  .search input:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+  .search input:focus-visible { outline: 3px solid #f5b800; outline-offset: 2px; }
 
   /* ---------- Content ---------- */
   .container { max-width: 1000px; margin: 0 auto; padding: 22px 16px 48px; }
 
   .notice {
-    background: var(--notice-bg);
-    border: 1px solid var(--accent);
-    color: var(--notice-fg);
+    background: #fff8e1;
+    border: 1px solid #f5b800;
+    color: #6b5200;
     border-radius: 12px;
     padding: 12px 16px;
     margin: 0 0 18px;
@@ -177,23 +82,21 @@
     display: flex;
     gap: 8px;
     overflow-x: auto;
-    padding-bottom: 6px;
+    padding: 2px 16px 8px;
     margin: 0 -16px;
-    padding-left: 16px;
-    padding-right: 16px;
     scrollbar-width: none;
   }
   .chips::-webkit-scrollbar { display: none; }
   @media (min-width: 720px) {
-    .chips { flex-wrap: wrap; overflow: visible; margin: 0; padding-left: 0; padding-right: 0; }
+    .chips { flex-wrap: wrap; overflow: visible; margin: 0; padding: 2px 0 8px; }
   }
   .chip {
     flex: 0 0 auto;
     padding: 8px 16px;
     border-radius: 999px;
-    border: 1px solid var(--border);
-    background: var(--surface);
-    color: var(--text);
+    border: 1px solid #e2e8f0;
+    background: #fff;
+    color: #0f172a;
     font-family: inherit;
     font-weight: 600;
     font-size: 0.9rem;
@@ -207,14 +110,24 @@
     color: #fff;
     border-color: transparent;
   }
-  .chip:focus-visible, .btn:focus-visible, .viewMore:focus-visible, .nav-link:focus-visible, .brand:focus-visible {
-    outline: 3px solid var(--accent);
+  .chip-count {
+    margin-left: 8px;
+    padding: 1px 7px;
+    border-radius: 999px;
+    background: #eef2ff;
+    color: #1e3a8a;
+    font-size: 0.78rem;
+    font-weight: 700;
+  }
+  .chip.active .chip-count { background: rgba(255, 255, 255, 0.25); color: #fff; }
+  .chip:focus-visible, .btn:focus-visible, .viewMore:focus-visible {
+    outline: 3px solid #f5b800;
     outline-offset: 2px;
   }
 
   .results-bar {
-    margin: 16px 2px 12px;
-    color: var(--muted);
+    margin: 14px 2px 12px;
+    color: #64748b;
     font-size: 0.9rem;
     font-weight: 600;
     min-height: 1.4em;
@@ -237,14 +150,17 @@
     display: flex;
     flex-direction: column;
     gap: 12px;
-    background: var(--surface);
-    border: 1px solid var(--border);
+    background: #fff;
+    border: 1px solid #e2e8f0;
     border-radius: 18px;
     padding: 20px;
-    box-shadow: var(--shadow);
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06), 0 8px 24px rgba(15, 23, 42, 0.06);
     transition: transform 0.2s, box-shadow 0.2s;
   }
-  .job-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-hover); }
+  .job-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 2px 4px rgba(15, 23, 42, 0.08), 0 16px 32px rgba(15, 23, 42, 0.12);
+  }
 
   .card-head { display: flex; gap: 14px; align-items: flex-start; }
   .avatar {
@@ -262,33 +178,32 @@
     margin: 0;
     font-size: 1.08rem;
     font-weight: 700;
-    letter-spacing: -0.01em;
+    color: #1e3a8a;
     overflow-wrap: anywhere;
   }
-  .card-title .company { margin: 2px 0 0; color: var(--muted); font-size: 0.9rem; }
+  .card-title .company { margin: 2px 0 0; color: #64748b; font-size: 0.9rem; }
 
   .badges { display: flex; flex-wrap: wrap; gap: 8px; }
   .badge {
     display: inline-flex;
     align-items: center;
-    gap: 6px;
     padding: 4px 10px;
     border-radius: 999px;
     font-size: 0.78rem;
     font-weight: 700;
-    background: var(--chip-bg);
-    color: var(--link);
+    background: #eef2ff;
+    color: #1e3a8a;
   }
-  .badge.new { background: var(--new-bg); color: var(--new-fg); }
+  .badge.new { background: #dcfce7; color: #166534; }
 
-  .meta { display: flex; flex-direction: column; gap: 6px; color: var(--muted); font-size: 0.88rem; }
+  .meta { display: flex; flex-direction: column; gap: 6px; color: #64748b; font-size: 0.88rem; }
   .meta-item { display: flex; gap: 8px; align-items: flex-start; }
   .meta-item .icon { flex: 0 0 auto; margin-top: 2px; display: inline-flex; }
-  .meta-item strong { color: var(--text); font-weight: 600; }
+  .meta-item strong { color: #0f172a; font-weight: 600; }
 
   .desc {
     margin: 0;
-    color: var(--muted);
+    color: #64748b;
     font-size: 0.92rem;
     white-space: pre-line;
     overflow-wrap: anywhere;
@@ -301,7 +216,7 @@
     font: inherit;
     font-size: 0.85rem;
     font-weight: 700;
-    color: var(--link);
+    color: #1e3a8a;
     cursor: pointer;
     text-decoration: underline;
   }
@@ -309,13 +224,13 @@
   .card-foot {
     margin-top: auto;
     padding-top: 14px;
-    border-top: 1px solid var(--border);
+    border-top: 1px solid #e2e8f0;
     display: flex;
     justify-content: space-between;
     align-items: center;
     gap: 12px;
   }
-  .card-foot small { color: var(--muted); font-size: 0.8rem; }
+  .card-foot small { color: #64748b; font-size: 0.8rem; }
 
   .btn {
     padding: 10px 22px;
@@ -332,8 +247,8 @@
   }
   .btn:hover { transform: translateY(-1px); box-shadow: 0 6px 14px rgba(30, 58, 138, 0.3); }
   .btn:disabled, .btn:disabled:hover {
-    background: var(--border);
-    color: var(--muted);
+    background: #e2e8f0;
+    color: #64748b;
     cursor: not-allowed;
     transform: none;
     box-shadow: none;
@@ -343,20 +258,21 @@
   .job-list li.state {
     grid-column: 1 / -1;
     text-align: center;
-    padding: 48px 20px;
-    background: var(--surface);
-    border: 1px dashed var(--border);
+    padding: 44px 20px;
+    background: #fff;
+    border: 1px dashed #cbd5e1;
     border-radius: 18px;
-    color: var(--muted);
+    color: #64748b;
   }
-  .state .icon { display: inline-flex; color: var(--link); margin-bottom: 10px; }
+  .state .icon { display: inline-flex; color: #1e3a8a; margin-bottom: 10px; }
   .state .icon svg { width: 40px; height: 40px; }
-  .state h4 { margin: 0 0 6px; color: var(--text); font-size: 1.1rem; }
-  .state p { margin: 0; }
-  .state a { color: var(--link); font-weight: 700; }
-  .state.error .icon, .state.error h4 { color: var(--error); }
+  .state h4 { margin: 0 0 6px; color: #0f172a; font-size: 1.1rem; }
+  .state p { margin: 0; overflow-wrap: anywhere; }
+  .state a { color: #1e3a8a; font-weight: 700; }
+  .state.error { border-color: #fca5a5; }
+  .state.error .icon, .state.error h4 { color: #dc2626; }
 
-  .skeleton .sk { background: var(--border); border-radius: 8px; animation: pulse 1.4s ease-in-out infinite; }
+  .skeleton .sk { background: #e2e8f0; border-radius: 8px; animation: pulse 1.4s ease-in-out infinite; }
   .sk-title { height: 20px; width: 60%; }
   .sk-line { height: 12px; width: 90%; }
   .sk-line.short { width: 55%; }
@@ -368,60 +284,16 @@
     .job-card:hover { transform: none; }
   }
 
-  /* ---------- Phones: bottom navigation ---------- */
-  @media (max-width: 640px) {
-    body { padding-bottom: calc(76px + env(safe-area-inset-bottom, 0px)); }
-    .main-nav {
-      position: fixed;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      z-index: 60;
-      justify-content: space-around;
-      gap: 0;
-      background: var(--topbar);
-      -webkit-backdrop-filter: blur(12px);
-      backdrop-filter: blur(12px);
-      border-top: 1px solid var(--border);
-      padding: 8px 8px calc(8px + env(safe-area-inset-bottom, 0px));
-    }
-    .nav-link {
-      flex: 1;
-      flex-direction: column;
-      gap: 2px;
-      padding: 6px 4px;
-      border-radius: 12px;
-      font-size: 0.72rem;
-    }
+  @media (max-width: 480px) {
     .hero { padding: 26px 16px 32px; }
+    .job-card { padding: 18px 16px; }
   }
 </style>
 </head>
 <body>
 
-<header class="topbar">
-  <div class="topbar-inner">
-    <a class="brand" href="homepageRegisteredUser.html">
-      <span class="brand-mark" aria-hidden="true">G</span>
-      <span>GraduateInHunt</span>
-    </a>
-
-    <nav class="main-nav" aria-label="Main">
-      <a class="nav-link" href="homepageRegisteredUser.html">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1z"/></svg>
-        <span>Home</span>
-      </a>
-      <a class="nav-link" href="graduate-profile.html">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>
-        <span>My Profile</span>
-      </a>
-      <a class="nav-link" href="alljobs.html">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"/></svg>
-        <span>All Jobs</span>
-      </a>
-    </nav>
-  </div>
-</header>
+<!-- Shared top panel (built by site-header.js) -->
+<div id="site-header"></div>
 
 <section class="hero">
   <div class="hero-inner">
@@ -438,21 +310,43 @@
 <main class="container">
   <p id="notice" class="notice" role="status" hidden></p>
 
+  <!-- The pills are built by browse-jobs.js from the job types that exist -->
   <div class="chips" id="typeChips" role="group" aria-label="Filter by job type">
     <button type="button" class="chip active" data-type="" aria-pressed="true">All</button>
-    <button type="button" class="chip" data-type="Internship" aria-pressed="false">Internship</button>
-    <button type="button" class="chip" data-type="Learnership" aria-pressed="false">Learnership</button>
-    <button type="button" class="chip" data-type="Training Program" aria-pressed="false">Training Program</button>
-    <button type="button" class="chip" data-type="Part-time" aria-pressed="false">Part-time</button>
-    <button type="button" class="chip" data-type="Permanent" aria-pressed="false">Permanent</button>
-    <button type="button" class="chip" data-type="Contract" aria-pressed="false">Contract</button>
   </div>
 
   <div class="results-bar" id="resultCount" aria-live="polite"></div>
 
-  <ul id="publicJobList" class="job-list"></ul>
+  <ul id="publicJobList" class="job-list">
+    <li class="state"><h4>Loading jobs...</h4></li>
+  </ul>
+
+  <noscript><p class="notice">This page needs JavaScript to show jobs. Please turn it on in your browser.</p></noscript>
 </main>
 
-<script type="module" src="browse-jobs.js"></script>
+<!-- If anything fails, show the reason on the page instead of leaving it blank -->
+<script>
+  function showFatal(message) {
+    var list = document.getElementById('publicJobList');
+    if (!list) return;
+    list.innerHTML = '';
+    var li = document.createElement('li');
+    li.className = 'state error';
+    var h = document.createElement('h4');
+    h.textContent = 'This page hit a problem';
+    var p = document.createElement('p');
+    p.textContent = message;
+    li.appendChild(h);
+    li.appendChild(p);
+    list.appendChild(li);
+  }
+  window.addEventListener('error', function (e) { showFatal(e.message || 'Unknown error'); });
+  window.addEventListener('unhandledrejection', function (e) {
+    showFatal((e.reason && e.reason.message) || 'Unknown error');
+  });
+</script>
+
+<script type="module" src="browse-jobs.js"
+  onerror="showFatal('browse-jobs.js could not be loaded. Check that it is in the same folder as this page and has been uploaded.')"></script>
 </body>
 </html>
