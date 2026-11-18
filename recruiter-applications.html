@@ -2,201 +2,131 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#1e3a8a">
 <title>Recruiter Applications - GraduateInHunt</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
-  body {
-    font-family: 'Inter', sans-serif;
-    background-color: #f4f7fb;
-    margin: 0;
-    padding: 0;
-    color: #333;
+  :root {
+    --navy:#1e3a8a; --navy-dark:#16275f; --blue:#3b82f6; --blue-600:#2563eb; --tint:#eef2ff;
+    --bg:#f4f6fb; --ink:#0f172a; --muted:#64748b; --line:#e2e8f0; --gold:#f5b800;
   }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body { margin:0; font-family:'Inter',Arial,sans-serif; background:var(--bg); color:var(--ink); line-height:1.5; -webkit-font-smoothing:antialiased; }
 
-  /* Header */
-  header {
-    background: linear-gradient(90deg, #1e3a8a, #3b82f6);
-    color: white;
-    padding: 20px 15px;
-    text-align: center;
-    border-radius: 0 0 20px 20px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-    display: flex;
-    flex-direction: column; /* stack title and nav vertically */
-    align-items: center;    /* center horizontally */
-    gap: 15px;              /* spacing between title and buttons */
+  /* ============ TOP PANEL (same look on every page) ============ */
+  .topbar { position:sticky; top:0; z-index:100; background:rgba(255,255,255,.9); -webkit-backdrop-filter:blur(12px); backdrop-filter:blur(12px); border-bottom:1px solid var(--line); padding-top:env(safe-area-inset-top,0px); }
+  .topbar-inner { max-width:1000px; margin:0 auto; padding:10px 16px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px 16px; }
+  .brand { display:flex; align-items:center; gap:10px; text-decoration:none; color:var(--ink); font-weight:800; font-size:1.1rem; letter-spacing:-.02em; }
+  .brand-mark { display:grid; place-items:center; width:34px; height:34px; border-radius:10px; background:linear-gradient(135deg,var(--navy),var(--blue)); color:#fff; font-weight:800; }
+  .main-nav { display:flex; gap:4px; }
+  .nav-link { display:inline-flex; align-items:center; justify-content:center; padding:8px 14px; border:none; border-radius:999px; background:none; color:var(--muted); font:600 .95rem 'Inter',sans-serif; text-decoration:none; cursor:pointer; transition:background .2s,color .2s; }
+  .nav-link:hover, .nav-link[aria-current="page"] { background:var(--tint); color:var(--navy); }
+  .nav-link.cta { background:linear-gradient(135deg,var(--navy),var(--blue)); color:#fff; }
+  .nav-link.cta:hover { background:linear-gradient(135deg,var(--navy-dark),var(--blue-600)); color:#fff; }
+  .nav-link:focus-visible, .brand:focus-visible { outline:3px solid var(--gold); outline-offset:2px; }
+  @media (max-width:640px) {
+    .main-nav { width:100%; justify-content:space-between; }
+    .nav-link { flex:1; padding:8px 6px; font-size:.88rem; }
   }
+  /* ============ END TOP PANEL ============ */
 
-  header h1 {
-    margin: 0;
-    font-size: 1.6rem;
-    font-weight: 600;
+  /* ---------- Hero ---------- */
+  .hero { background:linear-gradient(135deg,rgba(30,58,138,.95) 0%,rgba(59,130,246,.78) 100%),#1e3a8a; color:#fff; padding:36px 20px 84px; text-align:center; border-radius:0 0 36px 36px; }
+  .hero h1 { margin:0; font-size:clamp(1.7rem,4.5vw,2.3rem); font-weight:800; letter-spacing:-.03em; line-height:1.15; }
+  .hero p { margin:6px 0 0; opacity:.95; }
+
+  /* ---------- Content ---------- */
+  .container { max-width:1000px; margin:-52px auto 0; padding:0 16px 60px; }
+  #jobSearch { display:block; width:100%; padding:14px 18px; margin-bottom:22px; border:1px solid var(--line); border-radius:14px; background:#fff; color:var(--ink); font:400 1rem 'Inter',sans-serif; box-shadow:0 1px 2px rgba(15,23,42,.06),0 8px 24px rgba(15,23,42,.08); }
+  #jobSearch:focus { outline:none; border-color:var(--blue-600); box-shadow:0 0 0 3px rgba(37,99,235,.18); }
+
+  /* The outer container is only a holder; each job group is the card */
+  #applicationsContainer { background:none; border:none; padding:0; box-shadow:none; }
+  .loading, .error { padding:22px; border-radius:20px; background:#fff; border:1px solid var(--line); text-align:center; color:var(--muted); margin:0; }
+  .error { color:#b91c1c; }
+
+  .job-group { margin-bottom:22px; background:#fff; border:1px solid var(--line); border-radius:20px; overflow:hidden; box-shadow:0 1px 2px rgba(15,23,42,.06),0 8px 24px rgba(15,23,42,.06); }
+  .job-title { padding:14px 22px; background:var(--tint); color:var(--navy); font-weight:800; font-size:1.1rem; letter-spacing:-.01em; border-bottom:1px solid var(--line); }
+  .job-group .applicationsList { padding:14px; display:grid; gap:10px; }
+
+  .application-item { display:flex; justify-content:space-between; align-items:center; gap:14px 20px; flex-wrap:wrap; padding:16px; border:1px solid var(--line); border-radius:14px; background:var(--bg); font-size:.93rem; transition:box-shadow .2s,transform .2s; }
+  .application-item:hover { box-shadow:0 8px 20px rgba(30,58,138,.1); transform:translateY(-2px); }
+  .application-item > div:first-child { flex:1 1 320px; min-width:0; word-break:break-word; }
+  .application-item > div:first-child > div { margin-bottom:4px; color:#334155; }
+  .application-item > div:first-child > div:first-child { color:var(--ink); font-size:1.02rem; }
+  .application-item a { color:var(--navy); font-weight:700; text-decoration:none; }
+  .application-item a:hover { text-decoration:underline; }
+  .application-item > div:last-child { display:flex; gap:8px; flex-wrap:wrap; }
+
+  .badge { display:inline-block; padding:3px 12px; border-radius:999px; font-size:.8rem; font-weight:700; }
+  .status-pending { background:#fef3c7; color:#92400e; }
+  .status-accepted { background:#dcfce7; color:#166534; }
+  .status-rejected { background:#fee2e2; color:#991b1b; }
+
+  .application-item button { padding:10px 18px; border:none; border-radius:12px; color:#fff; font:700 .9rem 'Inter',sans-serif; cursor:pointer; transition:transform .2s,box-shadow .2s,background .2s; }
+  .application-item button:hover { transform:translateY(-2px); box-shadow:0 8px 16px rgba(15,23,42,.18); }
+  .application-item button:focus-visible { outline:3px solid var(--gold); outline-offset:2px; }
+  .accept-btn { background:#15803d; }
+  .accept-btn:hover { background:#116530; }
+  .reject-btn { background:#b91c1c; }
+  .reject-btn:hover { background:#991b1b; }
+  .delete-btn { background:#64748b; }
+  .delete-btn:hover { background:#475569; }
+
+  /* ---------- Footer ---------- */
+  footer { padding:26px 16px calc(26px + env(safe-area-inset-bottom,0px)); background:var(--navy); color:#fff; text-align:center; }
+  footer p { margin:0; font-size:.92rem; opacity:.92; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .application-item, .application-item button, .nav-link { transition:none; }
+    .application-item:hover, .application-item button:hover { transform:none; }
   }
-
-  header nav {
-    display: flex;
-    gap: 15px;       /* spacing between buttons */
-    justify-content: center; /* center buttons */
-    flex-wrap: wrap; /* wrap on small screens */
-  }
-
-  header nav a {
-    padding: 8px 20px;
-    border-radius: 10px;
-    font-weight: 500;
-    color: white;
-    text-decoration: none;
-    background: linear-gradient(90deg, #1e3a8a, #3b82f6);
-    transition: 0.3s;
-  }
-
-  header nav a:hover {
-    background: linear-gradient(90deg, #16275f, #2563eb);
-  }
-
-  /* Container */
-  .container {
-    max-width: 1000px;
-    margin: 30px auto;
-    padding: 0 15px;
-  }
-
-  h2 {
-    color: #1e3a8a;
-    text-align: center;
-    margin-bottom: 20px;
-    font-weight: 600;
-  }
-
-  /* Search */
-  #jobSearch {
-    width: 100%;
-    padding: 12px 15px;
-    border-radius: 10px;
-    border: 1px solid #ccc;
-    margin-bottom: 25px;
-    font-size: 1rem;
-    box-shadow: 0 3px 6px rgba(0,0,0,0.05);
-  }
-
-  /* Job Group */
-  .job-group {
-    margin-bottom: 30px;
-  }
-
-  .job-title {
-    background: linear-gradient(90deg, #e0e7ff, #c7d2fe);
-    color: #1e3a8a;
-    font-weight: 600;
-    font-size: 1.2rem;
-    padding: 12px 20px;
-    border-radius: 12px 12px 0 0;
-  }
-
-  .applicationsList {
-    border: 1px solid #e0e7ff;
-    border-top: none;
-    border-radius: 0 0 12px 12px;
-    background: white;
-    padding: 15px;
-    box-shadow: 0 6px 12px rgba(0,0,0,0.05);
-  }
-
-  /* Application Items */
-  .application-item {
-    padding: 15px;
-    border-bottom: 1px solid #eee;
-    margin-bottom: 10px;
-    border-radius: 10px;
-    background: #f9f9f9;
-    transition: transform 0.2s, box-shadow 0.2s;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-
-  .application-item:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 16px rgba(0,0,0,0.08);
-  }
-
-  .application-item div { margin-bottom: 6px; }
-
-  .application-item a {
-    color: #1e3a8a;
-    text-decoration: none;
-    font-weight: 500;
-  }
-
-  .application-item a:hover { text-decoration: underline; }
-
-  /* Status Badges */
-  .badge {
-    display: inline-block;
-    padding: 5px 12px;
-    border-radius: 12px;
-    font-size: 0.85rem;
-    font-weight: 600;
-    color: white;
-  }
-
-  .status-pending { background-color: #ffc107; }
-  .status-accepted { background-color: #28a745; }
-  .status-rejected { background-color: #dc3545; }
-
-  /* Buttons */
-  .application-item button {
-    padding: 10px 18px;
-    border: none;
-    border-radius: 10px;
-    margin-left: 10px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: transform 0.2s, box-shadow 0.2s;
-    color: white;
-    font-size: 0.95rem;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-  }
-
-  .accept-btn { background: linear-gradient(135deg, #28a745, #218838); }
-  .accept-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 10px rgba(0,0,0,0.15); }
-
-  .reject-btn { background: linear-gradient(135deg, #dc3545, #c82333); }
-  .reject-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 10px rgba(0,0,0,0.15); }
-
-  .delete-btn { background: linear-gradient(135deg, #6c757d, #5a6268); }
-  .delete-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 10px rgba(0,0,0,0.15); }
-
-  /* Responsive */
-  @media (max-width: 600px) {
-    header nav {
-      flex-direction: column;
-      gap: 10px;
-    }
+  @media (max-width:600px) {
+    .hero { padding:28px 16px 76px; border-radius:0 0 28px 28px; }
+    .application-item > div:last-child { width:100%; }
+    .application-item button { flex:1; }
   }
 </style>
 </head>
 <body>
 
-<header>
-  <h1>Recruiter Applications</h1>
-  <nav>
-    <a href="recruiter-dashboard.html">Dashboard</a>
-    <a href="homepage.html" id="logoutBtn">Logout</a>
-    <a href="messages.html">Messages</a>
-  </nav>
+<!-- ============ TOP PANEL (same look on every page) ============ -->
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="brand" href="recruiter-dashboard.html">
+      <span class="brand-mark" aria-hidden="true">G</span>
+      <span>GraduateInHunt</span>
+    </a>
+    <nav class="main-nav" aria-label="Main">
+      <a class="nav-link" href="recruiter-dashboard.html">Dashboard</a>
+      <a class="nav-link" href="recruiter-applications.html" aria-current="page">Applications</a>
+      <a class="nav-link" href="messages.html">Messages</a>
+      <button type="button" class="nav-link cta" id="logoutBtn">Logout</button>
+    </nav>
+  </div>
 </header>
+<!-- ============ END TOP PANEL ============ -->
 
-<div class="container">
-  <h2>Applications Received</h2>
-  <input type="text" id="jobSearch" placeholder="Search by job title...">
+<section class="hero">
+  <h1>Applications received</h1>
+  <p>Review graduates who applied to your jobs, then accept, reject or reply.</p>
+</section>
+
+<main class="container">
+  <input type="text" id="jobSearch" placeholder="Search by job title..." aria-label="Search by job title">
 
   <div id="applicationsContainer" class="applicationsList">
     <p class="loading">Loading applications...</p>
   </div>
-</div>
+</main>
 
+<footer>
+  <p>&copy; <span id="year">2026</span> GraduateInHunt. All rights reserved.</p>
+</footer>
+
+<script>document.getElementById('year').textContent = new Date().getFullYear();</script>
 <script type="module" src="recruiter-applications.js"></script>
 </body>
 </html>
