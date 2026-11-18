@@ -2,87 +2,102 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#1e3a8a">
 <meta name="robots" content="noindex">
 <title>Your profile - GraduateInHunt</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
   :root {
-    --blue-900: #1e3a8a; --blue-700: #16275f; --blue-600: #2563eb; --blue-50: #eef3ff;
-    --gold: #ffd23f; --bg: #f5f7fb; --ink: #0f172a; --muted: #64748b; --line: #e2e8f0;
-    --green: #15803d; --red: #b91c1c; --amber: #b45309;
+    --navy:#1e3a8a; --navy-dark:#16275f; --blue:#3b82f6; --blue-600:#2563eb; --tint:#eef2ff;
+    --bg:#f4f6fb; --ink:#0f172a; --muted:#64748b; --line:#e2e8f0;
+    --green:#15803d; --red:#b91c1c; --gold:#f5b800;
   }
   * { box-sizing: border-box; }
-  body { margin: 0; font-family: 'Inter', system-ui, sans-serif; background: var(--bg); color: var(--ink); line-height: 1.5; }
   [hidden] { display: none !important; }
+  html { -webkit-text-size-adjust: 100%; }
+  body { margin:0; font-family:'Inter',Arial,sans-serif; background:var(--bg); color:var(--ink); line-height:1.5; -webkit-font-smoothing:antialiased; }
   h1, h2, p, dl, dd { margin: 0; }
-  .sr-only { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0,0,0,0); border: 0; }
+  .sr-only { position:absolute; width:1px; height:1px; margin:-1px; padding:0; overflow:hidden; clip:rect(0,0,0,0); border:0; }
 
-  .topbar { position: sticky; top: 0; z-index: 20; background: var(--blue-900); color: #fff; }
-  .topbar-inner { max-width: 1180px; margin: 0 auto; padding: 0 20px; min-height: 60px; display: flex; align-items: center; gap: 24px; }
-  .brand { font-weight: 700; font-size: 1.1rem; letter-spacing: -0.02em; white-space: nowrap; }
-  .brand span { color: var(--gold); }
-  .links { display: flex; gap: 4px; flex: 1; overflow-x: auto; scrollbar-width: none; }
-  .links::-webkit-scrollbar { display: none; }
-  .links a { color: #dbe5ff; text-decoration: none; font-weight: 500; font-size: 0.92rem; padding: 8px 12px; border-radius: 8px; white-space: nowrap; }
-  .links a:hover { background: rgba(255,255,255,0.12); color: #fff; }
-  .links a[aria-current="page"] { background: rgba(255,255,255,0.16); color: #fff; }
-  .logout { font: 600 0.88rem 'Inter', sans-serif; color: #fff; background: rgba(255,255,255,0.14); border: 1px solid rgba(255,255,255,0.3); padding: 8px 14px; border-radius: 8px; cursor: pointer; }
-  .logout:hover { background: rgba(255,255,255,0.24); }
+  /* ============ TOP PANEL (same look on every page) ============ */
+  .topbar { position:sticky; top:0; z-index:100; background:rgba(255,255,255,.9); -webkit-backdrop-filter:blur(12px); backdrop-filter:blur(12px); border-bottom:1px solid var(--line); padding-top:env(safe-area-inset-top,0px); }
+  .topbar-inner { max-width:1180px; margin:0 auto; padding:10px 20px; display:flex; align-items:center; gap:8px 20px; flex-wrap:wrap; }
+  .brand { display:flex; align-items:center; gap:10px; text-decoration:none; color:var(--ink); font-weight:800; font-size:1.1rem; letter-spacing:-.02em; white-space:nowrap; }
+  .brand-mark { display:grid; place-items:center; width:34px; height:34px; border-radius:10px; background:linear-gradient(135deg,var(--navy),var(--blue)); color:#fff; font-weight:800; }
+  .links { display:flex; gap:4px; flex:1; overflow-x:auto; scrollbar-width:none; }
+  .links::-webkit-scrollbar { display:none; }
+  .links a { padding:8px 14px; border-radius:999px; color:var(--muted); font-weight:600; font-size:.93rem; text-decoration:none; white-space:nowrap; transition:background .2s,color .2s; }
+  .links a:hover, .links a[aria-current="page"] { background:var(--tint); color:var(--navy); }
+  .logout { padding:8px 16px; border:none; border-radius:999px; background:linear-gradient(135deg,var(--navy),var(--blue)); color:#fff; font:700 .9rem 'Inter',sans-serif; cursor:pointer; transition:background .2s; }
+  .logout:hover { background:linear-gradient(135deg,var(--navy-dark),var(--blue-600)); }
+  /* ============ END TOP PANEL ============ */
 
-  .wrap { max-width: 680px; margin: 28px auto 60px; padding: 0 20px; }
-  .panel { background: #fff; border: 1px solid var(--line); border-radius: 14px; padding: 26px; margin-top: 16px; }
-  .panel h2 { font-size: 1.05rem; color: var(--blue-900); margin-bottom: 14px; }
-  .wrap > h1, #appView > h1 { font-size: 1.5rem; letter-spacing: -0.02em; color: var(--blue-900); }
-  .state .panel { text-align: center; }
-  .state p { color: var(--muted); }
+  /* ---------- Hero strip ---------- */
+  .hero { background:linear-gradient(135deg,rgba(30,58,138,.95) 0%,rgba(59,130,246,.78) 100%),#1e3a8a; color:#fff; padding:36px 20px 84px; text-align:center; border-radius:0 0 36px 36px; }
+  .hero h1 { font-size:clamp(1.7rem,4.5vw,2.3rem); font-weight:800; letter-spacing:-.03em; line-height:1.15; }
+  .hero p { margin-top:6px; opacity:.95; }
 
-  .pic-row { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; }
-  .avatar { width: 84px; height: 84px; border-radius: 50%; display: grid; place-items: center; overflow: hidden; background: var(--blue-900); color: #fff; font-size: 1.7rem; font-weight: 600; flex: none; }
-  .avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
-  .hint { color: var(--muted); font-size: 0.85rem; margin-top: 6px; }
+  /* ---------- Content ---------- */
+  .wrap { max-width:680px; margin:-52px auto 60px; padding:0 20px; }
+  .panel { background:#fff; border:1px solid var(--line); border-radius:20px; padding:26px; margin-top:16px; box-shadow:0 1px 2px rgba(15,23,42,.06),0 8px 24px rgba(15,23,42,.06); }
+  .wrap > :first-child .panel:first-child, #appView > .panel:first-child { margin-top:0; }
+  .panel h2 { font-size:1.1rem; font-weight:800; color:var(--navy); margin-bottom:14px; }
+  .state .panel { text-align:center; margin-top:0; }
+  .state p { color:var(--muted); }
 
-  .facts { display: grid; grid-template-columns: 1fr 1fr; gap: 14px 20px; }
-  .facts dt { font-size: 0.78rem; color: var(--muted); font-weight: 600; margin-bottom: 2px; }
-  .facts dd { font-size: 0.95rem; word-break: break-word; }
-  .lock-note { margin-top: 16px; padding: 10px 14px; border-radius: 10px; background: var(--blue-50); color: var(--blue-900); font-size: 0.88rem; }
+  .pic-row { display:flex; align-items:center; gap:18px; flex-wrap:wrap; }
+  .avatar { width:84px; height:84px; border-radius:50%; display:grid; place-items:center; overflow:hidden; background:linear-gradient(135deg,var(--navy),var(--blue)); color:#fff; font-size:1.7rem; font-weight:700; flex:none; }
+  .avatar img { width:100%; height:100%; object-fit:cover; display:block; }
+  .hint { color:var(--muted); font-size:.85rem; margin-top:6px; }
 
-  .credits-line { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
-  .credits-line .big { font-size: 1.9rem; font-weight: 700; letter-spacing: -0.03em; color: var(--blue-900); }
-  .credits-line .big.plan { color: var(--green); font-size: 1.5rem; }
+  .facts { display:grid; grid-template-columns:1fr 1fr; gap:14px 20px; }
+  .facts dt { font-size:.78rem; color:var(--muted); font-weight:600; margin-bottom:2px; }
+  .facts dd { font-size:.95rem; font-weight:500; word-break:break-word; }
+  .lock-note { margin-top:16px; padding:10px 14px; border-radius:12px; background:var(--tint); color:var(--navy); font-size:.88rem; }
 
-  .field { margin-top: 14px; }
-  .field label { display: block; font-weight: 600; font-size: 0.88rem; margin-bottom: 6px; }
-  .field input { width: 100%; padding: 11px 13px; border: 1px solid #cbd5e1; border-radius: 10px; font: 400 0.97rem 'Inter', sans-serif; background: #fff; color: var(--ink); }
-  .field input:focus { outline: none; border-color: var(--blue-600); box-shadow: 0 0 0 3px rgba(37,99,235,0.18); }
+  .credits-line { display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; }
+  .credits-line .big { font-size:1.9rem; font-weight:800; letter-spacing:-.03em; color:var(--navy); }
+  .credits-line .big.plan { color:var(--green); font-size:1.5rem; }
 
-  .btn { font: 600 0.95rem 'Inter', sans-serif; padding: 12px 18px; border-radius: 10px; border: 1.5px solid transparent; cursor: pointer; text-decoration: none; display: inline-block; text-align: center; }
-  .btn:disabled { opacity: .55; cursor: not-allowed; }
-  .btn.primary { background: var(--blue-900); color: #fff; }
-  .btn.primary:hover:not(:disabled) { background: var(--blue-700); }
-  .btn.light { background: #fff; color: var(--blue-900); border-color: var(--line); }
-  .btn.light:hover { background: var(--blue-50); }
-  .btn.buy { background: var(--green); color: #fff; padding: 9px 16px; font-size: 0.9rem; }
-  .btn.buy:hover { background: #116530; }
-  #saveBtn { width: 100%; margin-top: 22px; }
-  #msg { margin-top: 14px; font-size: 0.92rem; font-weight: 500; min-height: 1.3em; }
-  #msg.error { color: var(--red); }
-  #msg.success { color: var(--green); }
+  .field { margin-top:14px; }
+  .field label { display:block; font-weight:600; font-size:.88rem; margin-bottom:6px; }
+  .field input { width:100%; padding:11px 13px; border:1px solid #cbd5e1; border-radius:12px; font:400 .97rem 'Inter',sans-serif; background:#fff; color:var(--ink); }
+  .field input:focus { outline:none; border-color:var(--blue-600); box-shadow:0 0 0 3px rgba(37,99,235,.18); }
 
-  a:focus-visible, button:focus-visible, input:focus-visible, label:focus-within { outline: 3px solid var(--gold); outline-offset: 2px; }
-  @media (max-width: 760px) {
-    .topbar-inner { flex-wrap: wrap; gap: 0 12px; padding: 8px 14px; }
-    .links { order: 3; flex-basis: 100%; padding-bottom: 4px; }
-    .logout { margin-left: auto; }
+  .btn { display:inline-block; padding:13px 22px; border-radius:14px; border:2px solid transparent; font:700 .97rem 'Inter',sans-serif; text-align:center; text-decoration:none; cursor:pointer; transition:transform .2s,box-shadow .2s,background .2s; }
+  .btn:hover:not(:disabled) { transform:translateY(-2px); }
+  .btn:disabled { opacity:.55; cursor:not-allowed; }
+  .btn.primary, .btn.buy { background:linear-gradient(135deg,var(--navy),var(--blue)); color:#fff; }
+  .btn.primary:hover:not(:disabled), .btn.buy:hover:not(:disabled) { background:linear-gradient(135deg,var(--navy-dark),var(--blue-600)); box-shadow:0 10px 22px rgba(30,58,138,.3); }
+  .btn.buy { padding:10px 18px; font-size:.92rem; }
+  .btn.light { background:#fff; color:var(--navy); border-color:#c7d2fe; }
+  .btn.light:hover { background:var(--tint); }
+  #saveBtn { width:100%; margin-top:22px; }
+  #msg { margin-top:14px; font-size:.92rem; font-weight:600; min-height:1.3em; }
+  #msg.error { color:var(--red); }
+  #msg.success { color:var(--green); }
+
+  a:focus-visible, button:focus-visible, input:focus-visible, label:focus-within { outline:3px solid var(--gold); outline-offset:2px; }
+  @media (prefers-reduced-motion: reduce) { * { transition:none !important; } .btn:hover { transform:none !important; } }
+  @media (max-width:760px) {
+    .topbar-inner { padding:8px 14px; }
+    .links { order:3; flex-basis:100%; padding-bottom:2px; }
+    .logout { margin-left:auto; }
+    .hero { padding:28px 16px 76px; border-radius:0 0 28px 28px; }
   }
-  @media (max-width: 560px) { .facts { grid-template-columns: 1fr; } .panel { padding: 20px; } }
+  @media (max-width:560px) { .facts { grid-template-columns:1fr; } .panel { padding:20px; } }
 </style>
 </head>
 <body>
 
+<!-- ============ TOP PANEL (same look on every page) ============ -->
 <header class="topbar">
   <div class="topbar-inner">
-    <div class="brand">Graduate<span>In</span>Hunt</div>
+    <a class="brand" href="recruiter-dashboard.html">
+      <span class="brand-mark" aria-hidden="true">G</span>
+      <span>GraduateInHunt</span>
+    </a>
     <nav class="links" aria-label="Recruiter pages">
       <a href="recruiter-dashboard.html">Dashboard</a>
       <a href="recruiter-profile.html" aria-current="page">Profile</a>
@@ -92,6 +107,12 @@
     <button class="logout" id="logoutBtn" type="button">Log out</button>
   </div>
 </header>
+<!-- ============ END TOP PANEL ============ -->
+
+<section class="hero">
+  <h1>Your profile</h1>
+  <p>Manage your picture, account details and password.</p>
+</section>
 
 <main class="wrap">
   <section class="state" id="loadingView">
@@ -106,8 +127,6 @@
   </section>
 
   <div id="appView" hidden>
-    <h1>Your profile</h1>
-
     <section class="panel" aria-label="Profile picture">
       <div class="pic-row">
         <div class="avatar" id="avatar" aria-hidden="true"></div>
