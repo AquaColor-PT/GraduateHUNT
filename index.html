@@ -2,355 +2,478 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Graduate Job Portal</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#1e3a8a">
+<title>GraduateInHunt - Jobs for graduates with no experience</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
-html {
-  -webkit-text-size-adjust: 100%;
-}
+  * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+  html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
 
-body{
-  font-family: 'Inter', sans-serif;
-  margin: 0;
-  padding: 0;
-  background: #f5f7fa;
-  color: #333;
-  overflow-x: hidden;
-}
-
-/* Header */
-header {
-  background: linear-gradient(90deg,#1e3a8a,#3b82f6);
-  color: white;
-  padding: 15px 20px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-  min-height: 64px;
-  box-sizing: border-box;
-}
-
-header h1 {
-  margin: 0;
-  font-weight: 700;
-  font-size: 1.6rem;
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
-  white-space: nowrap;
-}
-.hamburger {
-  font-size: 1.8rem;
-  line-height: 1;
-  cursor: pointer;
-  background: none;
-  border: none;
-  color: white;
-  position: absolute;
-  left: 8px;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 48px;
-  height: 48px;
-}
-
-/* Sidebar */
-.sidebar {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: min(280px, 85vw);
-  height: 100%;
-  height: 100dvh;
-  box-sizing: border-box;
-  background: #1e3a8a;
-  color: white;
-  padding: 20px;
-  padding-top: 60px;
-  transform: translateX(-105%);
-  visibility: hidden;
-  transition: transform 0.3s ease, visibility 0.3s;
-  z-index: 2000;
-  overflow-y: auto;
-}
-.sidebar.active {
-  transform: translateX(0);
-  visibility: visible;
-}
-.sidebar h2 {
-  font-size: 1.4rem;
-  margin-bottom: 15px;
-  color: #ffd700;
-}
-.sidebar p {
-  line-height: 1.6;
-  font-size: 0.95rem;
-}
-.close-btn {
-  background: none;
-  border: none;
-  color: white;
-  font-size: 1.8rem;
-  line-height: 1;
-  cursor: pointer;
-  position: absolute;
-  top: 8px;
-  right: 8px;
-  width: 48px;
-  height: 48px;
-}
-
-/* Dim background behind the sidebar (tap it to close) */
-.overlay {
-  position: fixed;
-  top: 0; left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0,0,0,0.45);
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.3s ease;
-  z-index: 1500;
-}
-.overlay.active {
-  opacity: 1;
-  pointer-events: auto;
-}
-
-/* Hero Section with Background Image */
-.hero {
-  position: relative;
-  background: url('3.jpg') no-repeat center center/cover; /* <-- your image */
-  padding: 100px 20px;
-  text-align: center;
-  border-radius: 0 0 40px 40px;
-  margin-bottom: 40px;
-  box-shadow: 0 6px 20px rgba(0,0,0,0.05);
-  color: white;
-  overflow: hidden;
-}
-
-.hero-overlay {
-  position: absolute;
-  top:0; left:0;
-  width:100%; height:100%;
-  background: rgba(30,58,138,0.6);
-  z-index: 0;
-}
-
-.hero h2,
-.hero p,
-.hero .auth-buttons {
-  position: relative;
-  z-index: 1;
-}
-
-.hero h2 {
-  font-size: 2.5rem;
-  margin-bottom: 20px;
-  font-weight: 700;
-}
-.hero p {
-  font-size: 1.2rem;
-  margin-bottom: 30px;
-  max-width: 600px;
-  margin-left: auto;
-  margin-right: auto;
-}
-.hero .auth-buttons {
-  display: flex;
-  justify-content: center;
-  gap: 20px;
-  flex-wrap: wrap;
-}
-.hero .auth-buttons a,
-.hero .auth-buttons button {
-  padding: 14px 30px;
-  border-radius: 12px;
-  font-weight: 600;
-  font-size: 1rem;
-  border: none;
-  cursor: pointer;
-  transition: 0.3s;
-}
-.hero .auth-buttons a {
-  background: #1e3a8a;
-  color: white;
-  text-decoration: none;
-}
-.hero .auth-buttons a:hover {
-  background: #16275f;
-}
-.hero .auth-buttons button {
-  background: #28a745;
-  color: white;
-}
-.hero .auth-buttons button:hover {
-  background: #1e7e34;
-}
-
-/* How it works */
-.how-it-works {
-  padding: 60px 20px;
-  text-align: center;
-}
-.how-it-works h3 {
-  font-size: 2rem;
-  margin-bottom: 40px;
-  color: #1e3a8a;
-}
-.steps {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 20px;
-  justify-content: center;
-}
-.step {
-  background: white;
-  border-radius: 16px;
-  padding: 30px 20px;
-  flex: 1 1 250px;
-  max-width: 300px;
-  box-shadow: 0 8px 20px rgba(0,0,0,0.08);
-  transition: transform 0.3s;
-}
-.step:hover {
-  transform: translateY(-5px);
-}
-.step h4 {
-  font-size: 1.3rem;
-  margin-bottom: 15px;
-  color: #1e3a8a;
-}
-.step p {
-  font-size: 1rem;
-  color: #555;
-}
-
-/* Footer */
-footer {
-  background: #1e3a8a;
-  color: white;
-  text-align: center;
-  padding: 20px 0;
-  margin-top: 40px;
-}
-footer p {
-  margin: 0;
-}
-
-/* Responsive: tablets and phones */
-@media (max-width:600px){
-  .hero { padding: 70px 18px; border-radius: 0 0 28px 28px; margin-bottom: 24px; }
-  .hero h2 { font-size: 2rem; }
-  .hero p { font-size: 1rem; }
-
-  /* Big, full-width, easy-to-tap buttons */
-  .hero .auth-buttons { flex-direction: column; align-items: center; gap: 14px; }
-  .hero .auth-buttons a,
-  .hero .auth-buttons button {
-    width: 100%;
-    max-width: 320px;
-    box-sizing: border-box;
-    padding: 16px 20px;
-    text-align: center;
+  body {
+    font-family: 'Inter', Arial, sans-serif;
+    background: #f4f6fb;
+    color: #0f172a;
+    margin: 0;
+    padding: 0;
+    line-height: 1.5;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
   }
 
-  .how-it-works { padding: 44px 16px; }
-  .how-it-works h3 { font-size: 1.7rem; margin-bottom: 28px; }
-  .step { max-width: 100%; }
+  /* ============ TOP PANEL (same look on every page) ============ */
+  .topbar {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(255, 255, 255, 0.9);
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid #e2e8f0;
+    padding-top: env(safe-area-inset-top, 0px);
+  }
+  .topbar-inner {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 10px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px 16px;
+  }
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+    color: #0f172a;
+    font-weight: 800;
+    font-size: 1.1rem;
+    letter-spacing: -0.02em;
+  }
+  .brand-mark {
+    display: grid;
+    place-items: center;
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #1e3a8a, #3b82f6);
+    color: #fff;
+    font-weight: 800;
+  }
+  .main-nav { display: flex; gap: 4px; }
+  .nav-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 14px;
+    border: none;
+    border-radius: 999px;
+    background: none;
+    color: #64748b;
+    font-family: inherit;
+    font-weight: 600;
+    font-size: 0.95rem;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+  }
+  .nav-link svg { width: 18px; height: 18px; flex: 0 0 auto; }
+  .nav-link:hover, .nav-link[aria-current="page"] { background: #eef2ff; color: #1e3a8a; }
+  .nav-link.cta { background: linear-gradient(135deg, #1e3a8a, #3b82f6); color: #fff; }
+  .nav-link.cta:hover { background: linear-gradient(135deg, #16275f, #2563eb); color: #fff; }
+  .nav-link:focus-visible, .brand:focus-visible { outline: 3px solid #f5b800; outline-offset: 2px; }
 
-  footer { padding: 18px 16px; }
-}
+  @media (max-width: 640px) {
+    .main-nav { width: 100%; justify-content: space-between; }
+    .nav-link { flex: 1; justify-content: center; padding: 8px 6px; font-size: 0.88rem; gap: 6px; }
+    .nav-link svg { width: 16px; height: 16px; }
+  }
+  /* ============ END TOP PANEL ============ */
 
-/* Small phones */
-@media (max-width:380px){
-  header h1 { font-size: 1.3rem; }
-  .hero { padding: 56px 16px; }
-  .hero h2 { font-size: 1.65rem; }
-  .sidebar h2 { font-size: 1.25rem; }
-}
+  /* ---------- Hero ---------- */
+  .hero {
+    /* The blue overlay sits on top of your photo. If 3.jpg is missing, the blue gradient still shows. */
+    background:
+      linear-gradient(135deg, rgba(30, 58, 138, 0.88) 0%, rgba(59, 130, 246, 0.68) 100%),
+      url('3.jpg') center / cover no-repeat,
+      #1e3a8a;
+    color: #fff;
+    padding: 84px 20px 92px;
+    text-align: center;
+    border-radius: 0 0 36px 36px;
+  }
+  .hero-inner { max-width: 720px; margin: 0 auto; }
+  .eyebrow {
+    display: inline-block;
+    margin: 0 0 16px;
+    padding: 6px 14px;
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.12);
+    font-size: 0.82rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+  }
+  .hero h1 {
+    margin: 0 0 16px;
+    font-size: clamp(2rem, 6vw, 3.2rem);
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 1.12;
+  }
+  .hero p.lead {
+    margin: 0 auto 30px;
+    max-width: 560px;
+    font-size: 1.1rem;
+    opacity: 0.95;
+  }
+  .hero-actions { display: flex; justify-content: center; gap: 14px; flex-wrap: wrap; }
+
+  .btn {
+    display: inline-block;
+    padding: 14px 30px;
+    border-radius: 14px;
+    border: 2px solid transparent;
+    font-family: inherit;
+    font-weight: 700;
+    font-size: 1rem;
+    text-align: center;
+    text-decoration: none;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s, background 0.2s;
+  }
+  .btn:hover { transform: translateY(-2px); }
+  .btn:focus-visible { outline: 3px solid #f5b800; outline-offset: 3px; }
+  .btn-light { background: #fff; color: #1e3a8a; box-shadow: 0 10px 24px rgba(0, 0, 0, 0.2); }
+  .btn-outline { background: transparent; color: #fff; border-color: rgba(255, 255, 255, 0.85); }
+  .btn-outline:hover { background: rgba(255, 255, 255, 0.14); }
+  .btn-blue { background: linear-gradient(135deg, #1e3a8a, #3b82f6); color: #fff; }
+  .btn-blue:hover { box-shadow: 0 10px 22px rgba(30, 58, 138, 0.3); }
+
+  .types { display: flex; justify-content: center; flex-wrap: wrap; gap: 8px; margin-top: 32px; }
+  .types span {
+    padding: 6px 14px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.16);
+    font-size: 0.85rem;
+    font-weight: 600;
+  }
+
+  /* ---------- Sections ---------- */
+  .section { max-width: 1000px; margin: 0 auto; padding: 60px 16px 0; }
+  .section h2 {
+    margin: 0 0 8px;
+    text-align: center;
+    color: #1e3a8a;
+    font-size: clamp(1.5rem, 4vw, 2rem);
+    font-weight: 800;
+    letter-spacing: -0.02em;
+  }
+  .section .sub { margin: 0 auto 30px; max-width: 520px; text-align: center; color: #64748b; }
+
+  .card {
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 20px;
+    padding: 26px 22px;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06), 0 8px 24px rgba(15, 23, 42, 0.06);
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 2px 4px rgba(15, 23, 42, 0.08), 0 16px 32px rgba(15, 23, 42, 0.12);
+  }
+  .card h3 { margin: 0 0 8px; color: #0f172a; font-size: 1.15rem; font-weight: 700; }
+  .card p { margin: 0; color: #64748b; font-size: 0.95rem; }
+
+  .grid { display: grid; gap: 16px; grid-template-columns: 1fr; }
+  @media (min-width: 760px) {
+    .grid.three { grid-template-columns: repeat(3, 1fr); }
+    .grid.two { grid-template-columns: repeat(2, 1fr); }
+  }
+
+  .step-num {
+    display: grid;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    margin-bottom: 14px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #1e3a8a, #3b82f6);
+    color: #fff;
+    font-weight: 800;
+  }
+
+  .audience .tag {
+    display: inline-block;
+    margin-bottom: 12px;
+    padding: 4px 12px;
+    border-radius: 999px;
+    background: #eef2ff;
+    color: #1e3a8a;
+    font-size: 0.8rem;
+    font-weight: 700;
+  }
+  .audience ul { list-style: none; margin: 14px 0 0; padding: 0; display: grid; gap: 10px; }
+  .audience li { position: relative; padding-left: 28px; color: #334155; font-size: 0.95rem; }
+  .audience li::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 3px;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: #dcfce7 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23166534' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m5 12 5 5L20 7'/%3E%3C/svg%3E") center / 11px no-repeat;
+  }
+
+  /* ---------- Call to action ---------- */
+  .cta-band {
+    max-width: 1000px;
+    margin: 60px auto 0;
+    padding: 0 16px;
+  }
+  .cta-inner {
+    padding: 44px 24px;
+    border-radius: 28px;
+    background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+    color: #fff;
+    text-align: center;
+  }
+  .cta-inner h2 { margin: 0 0 8px; font-size: clamp(1.5rem, 4vw, 2rem); font-weight: 800; letter-spacing: -0.02em; }
+  .cta-inner p { margin: 0 auto 24px; max-width: 480px; opacity: 0.92; }
+
+  /* ---------- Footer ---------- */
+  footer {
+    margin-top: 60px;
+    padding: 26px 16px calc(26px + env(safe-area-inset-bottom, 0px));
+    background: #1e3a8a;
+    color: #fff;
+    text-align: center;
+  }
+  footer p { margin: 0; font-size: 0.92rem; opacity: 0.92; }
+
+  /* ---------- Story sidebar ---------- */
+  .overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.5);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+    z-index: 900;
+  }
+  .overlay.active { opacity: 1; pointer-events: auto; }
+
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: min(340px, 88vw);
+    height: 100%;
+    height: 100dvh;
+    padding: 64px 24px 28px;
+    background: #1e3a8a;
+    color: #fff;
+    transform: translateX(-105%);
+    visibility: hidden;
+    transition: transform 0.3s ease, visibility 0.3s;
+    z-index: 1000;
+    overflow-y: auto;
+  }
+  .sidebar.active { transform: translateX(0); visibility: visible; }
+  .sidebar h2 { margin: 0 0 14px; color: #ffd700; font-size: 1.4rem; font-weight: 800; }
+  .sidebar p { margin: 0; font-size: 0.98rem; line-height: 1.7; }
+  .sidebar .btn { margin-top: 24px; width: 100%; }
+  .close-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 46px;
+    height: 46px;
+    border: none;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.12);
+    color: #fff;
+    font-size: 1.6rem;
+    line-height: 1;
+    cursor: pointer;
+  }
+  .close-btn:hover { background: rgba(255, 255, 255, 0.22); }
+  .close-btn:focus-visible { outline: 3px solid #f5b800; outline-offset: 2px; }
+
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    .btn, .card, .nav-link, .sidebar, .overlay { transition: none; }
+    .btn:hover, .card:hover { transform: none; }
+  }
+  @media (max-width: 600px) {
+    .hero { padding: 60px 18px 68px; border-radius: 0 0 28px 28px; }
+    .hero-actions { flex-direction: column; align-items: center; }
+    .hero-actions .btn { width: 100%; max-width: 320px; }
+    .section { padding-top: 44px; }
+  }
 </style>
 </head>
 <body>
 
-<header>
-  <button class="hamburger" id="hamburger" aria-label="Open menu" aria-expanded="false">☰</button>
-  <h1>GraduateInHunt</h1>
-</header>
+<!-- ============ TOP PANEL (same look on every page) ============ -->
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="brand" href="index.html">
+      <span class="brand-mark" aria-hidden="true">G</span>
+      <span>GraduateInHunt</span>
+    </a>
 
-<!-- Sidebar -->
+    <nav class="main-nav" aria-label="Main">
+      <button type="button" class="nav-link" id="openStory" aria-expanded="false" aria-controls="sidebar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+        <span>My Story</span>
+      </button>
+      <a class="nav-link" href="login-type.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><path d="m10 17 5-5-5-5"/><path d="M15 12H3"/></svg>
+        <span>Login</span>
+      </a>
+      <a class="nav-link cta" href="select-role.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M19 8v6"/><path d="M22 11h-6"/></svg>
+        <span>Register</span>
+      </a>
+    </nav>
+  </div>
+</header>
+<!-- ============ END TOP PANEL ============ -->
+
+<!-- Story sidebar -->
 <div class="overlay" id="overlay"></div>
-<div class="sidebar" id="sidebar">
-  <button class="close-btn" id="closeSidebar" aria-label="Close menu">&times;</button>
+<aside class="sidebar" id="sidebar" aria-label="My story" aria-hidden="true">
+  <button type="button" class="close-btn" id="closeSidebar" aria-label="Close my story">&times;</button>
   <h2>My Story</h2>
   <p>Hi, my name is <strong>Tokollo Simbini</strong>, an unemployed Electrical Engineering graduate.
   After finishing my degree, I realized how tough it is for graduates with no experience to find real opportunities.
   I created GraduateInHunt to connect graduates like myself with recruiters willing to give us a chance through internships, learnerships, and entry-level positions.
   This platform is built to inspire hope and create a bridge between education and employment.</p>
-</div>
+  <a class="btn btn-light" href="select-role.html">Join GraduateInHunt</a>
+</aside>
 
-<!-- Hero Section -->
+<!-- Hero -->
 <section class="hero">
-  <div class="hero-overlay"></div>
-  <h2>No Experience? No Problem.</h2>
-  <p>Find internships, learnerships, training programs, and entry-level jobs tailored just for graduates.</p>
-  <div class="auth-buttons">
-    <a href="select-role.html">Register</a>
-    <a href="login-type.html" id="loginBtn">Login</a>
+  <div class="hero-inner">
+    <p class="eyebrow">FOR GRADUATES WITH NO EXPERIENCE</p>
+    <h1>No Experience? No Problem.</h1>
+    <p class="lead">Find internships, learnerships, training programs, and entry-level jobs tailored just for graduates.</p>
+    <div class="hero-actions">
+      <a class="btn btn-light" href="select-role.html">Register</a>
+      <a class="btn btn-outline" href="login-type.html" id="loginBtn">Login</a>
+    </div>
+    <div class="types" aria-label="Types of opportunities">
+      <span>Internships</span>
+      <span>Learnerships</span>
+      <span>Training Programs</span>
+      <span>Entry-level Jobs</span>
+    </div>
   </div>
 </section>
-
 
 <!-- How it works -->
-<section class="how-it-works">
-  <h3>How It Works</h3>
-  <div class="steps">
-    <div class="step">
-      <h4>🎓 Graduates</h4>
+<section class="section" aria-labelledby="howTitle">
+  <h2 id="howTitle">How It Works</h2>
+  <p class="sub">From sign-up to your first application in three simple steps.</p>
+  <div class="grid three">
+    <article class="card">
+      <div class="step-num" aria-hidden="true">1</div>
+      <h3>Create your profile</h3>
+      <p>Register with your qualification and field of study, and save your CV once.</p>
+    </article>
+    <article class="card">
+      <div class="step-num" aria-hidden="true">2</div>
+      <h3>Find jobs that match</h3>
+      <p>Browse openings that fit your studies, and filter by internship, learnership and more.</p>
+    </article>
+    <article class="card">
+      <div class="step-num" aria-hidden="true">3</div>
+      <h3>Apply in minutes</h3>
+      <p>Send your saved CV or upload a new one, with an optional cover letter.</p>
+    </article>
+  </div>
+</section>
+
+<!-- Graduates and recruiters -->
+<section class="section" aria-labelledby="bothTitle">
+  <h2 id="bothTitle">Built for Both Sides</h2>
+  <p class="sub">Graduates get a real chance. Recruiters find fresh talent.</p>
+  <div class="grid two">
+    <article class="card audience">
+      <span class="tag">🎓 Graduates</span>
+      <h3>Start your career</h3>
       <p>Register and start applying to jobs with no experience required.</p>
-    </div>
-    <div class="step">
-      <h4>🏢 Recruiters</h4>
+      <ul>
+        <li>Jobs matched to your qualification and field</li>
+        <li>Apply with your saved CV or a new one</li>
+        <li>Internships, learnerships and entry-level roles</li>
+      </ul>
+    </article>
+    <article class="card audience">
+      <span class="tag">🏢 Recruiters</span>
+      <h3>Find young talent</h3>
       <p>Post job opportunities to help young talent get started.</p>
+      <ul>
+        <li>Post openings for entry-level candidates</li>
+        <li>Receive applications with CVs in one place</li>
+        <li>Reach graduates who are ready to start</li>
+      </ul>
+    </article>
+  </div>
+</section>
+
+<!-- Call to action -->
+<section class="cta-band" aria-labelledby="ctaTitle">
+  <div class="cta-inner">
+    <h2 id="ctaTitle">Ready to take the first step?</h2>
+    <p>Join GraduateInHunt today and connect with opportunities that give you a chance.</p>
+    <div class="hero-actions">
+      <a class="btn btn-light" href="select-role.html">Create an account</a>
+      <a class="btn btn-outline" href="login-type.html">I already have an account</a>
     </div>
   </div>
 </section>
 
-
-
 <footer>
-  <p>&copy; 2025 Graduate Job Portal. All rights reserved.</p>
+  <p>&copy; <span id="year">2026</span> GraduateInHunt. All rights reserved.</p>
 </footer>
 
 <script>
-// Sidebar toggle
-const hamburger = document.getElementById('hamburger');
-const sidebar = document.getElementById('sidebar');
-const closeSidebar = document.getElementById('closeSidebar');
-const overlay = document.getElementById('overlay');
+  var openBtn = document.getElementById('openStory');
+  var closeBtn = document.getElementById('closeSidebar');
+  var sidebar = document.getElementById('sidebar');
+  var overlay = document.getElementById('overlay');
 
-function openMenu() {
-  sidebar.classList.add('active');
-  overlay.classList.add('active');
-  hamburger.setAttribute('aria-expanded', 'true');
-}
+  function openMenu() {
+    sidebar.classList.add('active');
+    overlay.classList.add('active');
+    sidebar.setAttribute('aria-hidden', 'false');
+    openBtn.setAttribute('aria-expanded', 'true');
+    closeBtn.focus();
+  }
 
-function closeMenu() {
-  sidebar.classList.remove('active');
-  overlay.classList.remove('active');
-  hamburger.setAttribute('aria-expanded', 'false');
-}
+  function closeMenu() {
+    sidebar.classList.remove('active');
+    overlay.classList.remove('active');
+    sidebar.setAttribute('aria-hidden', 'true');
+    openBtn.setAttribute('aria-expanded', 'false');
+    openBtn.focus();
+  }
 
-hamburger.addEventListener('click', openMenu);
-closeSidebar.addEventListener('click', closeMenu);
-overlay.addEventListener('click', closeMenu);
-document.addEventListener('keydown', (e) => {
-  if (e.key === 'Escape') closeMenu();
-});
+  openBtn.addEventListener('click', openMenu);
+  closeBtn.addEventListener('click', closeMenu);
+  overlay.addEventListener('click', closeMenu);
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && sidebar.classList.contains('active')) closeMenu();
+  });
+
+  document.getElementById('year').textContent = new Date().getFullYear();
 </script>
 
 </body>
