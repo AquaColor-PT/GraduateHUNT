@@ -7,61 +7,78 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 const studentsContainer = document.getElementById('studentsContainer');
 const logoutBtn = document.getElementById('logoutBtn');
 
+function showMessage(text, color = '#666') {
+  studentsContainer.innerHTML = '';
+  const p = document.createElement('p');
+  p.style.cssText = `text-align:center;color:${color};`;
+  p.textContent = text;
+  studentsContainer.appendChild(p);
+}
+
 async function checkUser() {
   const { data: { session } } = await supabase.auth.getSession();
   if (!session?.user) {
-    window.location.href = "recruiter-login.html";
+    window.location.href = 'recruiter-login.html';
     return;
   }
-  const recruiterId = session.user.id;
-  loadAcceptedStudents(recruiterId);
+  await loadAcceptedStudents(session.user.id);
 }
 
 async function loadAcceptedStudents(recruiterId) {
-  studentsContainer.innerHTML = '<p style="text-align:center;color:#666;">Loading accepted students...</p>';
+  showMessage('Loading accepted students...');
 
   try {
+    // 1. Accepted applications for this recruiter
     const { data: applications, error: appsError } = await supabase
       .from('applications')
       .select('id, student_id, job_id, status')
       .eq('recruiter_id', recruiterId)
       .eq('status', 'Accepted');
     if (appsError) throw appsError;
+
     if (!applications || applications.length === 0) {
-      studentsContainer.innerHTML = '<p style="text-align:center;color:#666;">No accepted students yet.</p>';
+      showMessage('No accepted students yet.');
       return;
     }
 
     const jobIds = [...new Set(applications.map(a => a.job_id))];
     const studentIds = [...new Set(applications.map(a => a.student_id))];
 
-    const { data: students } = await supabase
+    // 2. Students
+    const { data: students, error: studentsError } = await supabase
       .from('graduates')
       .select('id, full_name')
       .in('id', studentIds);
+    if (studentsError) throw studentsError;
 
     const studentMap = {};
-    students.forEach(s => studentMap[s.id] = s);
+    (students || []).forEach(s => { studentMap[s.id] = s; });
 
-    const { data: jobs } = await supabase
+    // 3. Jobs
+    const { data: jobs, error: jobsError } = await supabase
       .from('jobs')
       .select('id, title')
       .in('id', jobIds);
+    if (jobsError) throw jobsError;
 
     const jobMap = {};
-    jobs.forEach(j => jobMap[j.id] = j.title);
+    (jobs || []).forEach(j => { jobMap[j.id] = j.title; });
 
-    const { data: messagesData } = await supabase
+    // 4. Messages (only for these students and jobs)
+    const { data: messagesData, error: msgError } = await supabase
       .from('messages')
       .select('student_id, job_id')
-      .in('student_id', studentIds);
+      .in('student_id', studentIds)
+      .in('job_id', jobIds);
+    if (msgError) throw msgError;
 
     const messageMap = {};
-    messagesData?.forEach(m => {
+    (messagesData || []).forEach(m => {
       const key = `${m.student_id}_${m.job_id}`;
       messageMap[key] = (messageMap[key] || 0) + 1;
     });
 
+    // 5. Group applications by job title
     const grouped = {};
     applications.forEach(app => {
       const jobTitle = jobMap[app.job_id] || 'Unknown Job';
@@ -69,6 +86,7 @@ async function loadAcceptedStudents(recruiterId) {
       grouped[jobTitle].push(app);
     });
 
+    // 6. Render
     studentsContainer.innerHTML = '';
     Object.keys(grouped).forEach(jobTitle => {
       const jobSection = document.createElement('div');
@@ -82,6 +100,7 @@ async function loadAcceptedStudents(recruiterId) {
 
       grouped[jobTitle].forEach(app => {
         const student = studentMap[app.student_id] || {};
+
         const card = document.createElement('div');
         card.classList.add('student-card');
 
@@ -109,7 +128,8 @@ async function loadAcceptedStudents(recruiterId) {
         replyBtn.classList.add('reply-btn');
         replyBtn.textContent = 'Reply';
         replyBtn.addEventListener('click', () => {
-          window.location.href = `recruiter-message.html?studentId=${app.student_id}&jobId=${app.job_id}`;
+          window.location.href =
+            `recruiter-message.html?studentId=${encodeURIComponent(app.student_id)}&jobId=${encodeURIComponent(app.job_id)}`;
         });
 
         card.appendChild(info);
@@ -119,16 +139,17 @@ async function loadAcceptedStudents(recruiterId) {
 
       studentsContainer.appendChild(jobSection);
     });
-
   } catch (err) {
-    studentsContainer.innerHTML = `<p style="text-align:center;color:red;">Error loading students: ${err.message}</p>`;
     console.error(err);
+    showMessage(`Error loading students: ${err.message}`, 'red');
   }
 }
 
-logoutBtn.addEventListener('click', async () => {
+logoutBtn?.addEventListener('click', async (e) => {
+  e.preventDefault(); // wait for signOut before navigating
   await supabase.auth.signOut();
   window.location.href = 'homepage.html';
 });
 
-document.addEventListener('DOMContentLoaded', checkUser);
+// Module scripts are deferred, so the DOM is already ready here
+checkUser();
