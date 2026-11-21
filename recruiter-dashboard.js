@@ -7,12 +7,19 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 const LOGIN_PAGE = 'recruiter-login.html';
 const HOME_PAGE = 'homepage.html';
 
+// Job picture rules (must match the hint text on the page)
+const IMAGE_BUCKET = 'job-images';
+const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
+const IMAGE_TYPES = { 'image/png': 'png', 'image/jpeg': 'jpg', 'image/webp': 'webp' };
+
 const $ = (id) => document.getElementById(id);
 
 let userId = null;
 let recruiter = null;
 let posting = false;
 let loggingOut = false;
+let imageFile = null;
+let previewUrl = null;
 
 /* ---------- Helpers ---------- */
 let toastTimer;
@@ -158,6 +165,46 @@ async function init() {
   }
 }
 
+/* ---------- Job picture (optional) ---------- */
+function clearImage() {
+  if (previewUrl) URL.revokeObjectURL(previewUrl);
+  previewUrl = null;
+  imageFile = null;
+  $('jobImage').value = '';
+  $('imagePreview').hidden = true;
+  $('imagePreview').removeAttribute('src');
+  $('removeImageBtn').hidden = true;
+  $('chooseText').textContent = 'Choose picture';
+}
+
+$('jobImage').addEventListener('change', () => {
+  const file = $('jobImage').files[0];
+  if (!file) return; // the person cancelled the picker: keep what they had
+
+  if (!IMAGE_TYPES[file.type]) {
+    clearImage();
+    return setFormMsg('Please choose a PNG, JPG or WebP picture.', 'error');
+  }
+  if (file.size > MAX_IMAGE_BYTES) {
+    clearImage();
+    return setFormMsg('That picture is bigger than 5 MB. Please choose a smaller one.', 'error');
+  }
+
+  setFormMsg('');
+  if (previewUrl) URL.revokeObjectURL(previewUrl);
+  imageFile = file;
+  previewUrl = URL.createObjectURL(file);
+  $('imagePreview').src = previewUrl;
+  $('imagePreview').hidden = false;
+  $('removeImageBtn').hidden = false;
+  $('chooseText').textContent = 'Change picture';
+});
+
+$('removeImageBtn').addEventListener('click', () => {
+  clearImage();
+  setFormMsg('');
+});
+
 /* ---------- Post a job ---------- */
 const fields = ['jobTitle', 'location', 'jobCompany', 'jobType', 'description', 'requiredQualifications'];
 
@@ -183,29 +230,57 @@ $('jobForm').addEventListener('submit', async (e) => {
   $('postJobBtn').disabled = true;
   $('postJobBtn').textContent = 'Posting...';
 
+  let uploadedPath = null; // set while a picture is uploaded but the job is not saved yet
+
   try {
-    // The database checks approval and credits, saves the job and takes the credit in one step
-    const { error } = await supabase.rpc('post_job', {
+    // 1. Upload the picture first (it cannot be added after the job exists).
+    //    It goes in the recruiter's own folder, which the storage rules allow.
+    if (imageFile) {
+      const ext = IMAGE_TYPES[imageFile.type];
+      const path = `${userId}/${Date.now()}-${Math.random().toString(36).slice(2, 10)}.${ext}`;
+      const { error: uploadError } = await supabase.storage
+        .from(IMAGE_BUCKET)
+        .upload(path, imageFile, { contentType: imageFile.type, cacheControl: '3600', upsert: false });
+      if (uploadError) {
+        console.error('Picture upload error:', uploadError);
+        throw new Error('We could not upload the picture. Please try again, or remove it and post without one.');
+      }
+      uploadedPath = path;
+    }
+
+    // 2. The database checks approval and credits, saves the job and takes the credit in one step
+    const params = {
       p_title: v.jobTitle,
       p_location: v.location,
       p_job_type: v.jobType,
       p_description: v.description,
       p_company_name: v.jobCompany,
       p_required_qualifications: v.requiredQualifications
-    });
-    if (error) throw error;
+    };
+    if (uploadedPath) params.p_image_path = uploadedPath;
 
+    const { error } = await supabase.rpc('post_job', params);
+    if (error) throw error;
+    uploadedPath = null; // the job is saved, so the picture stays
+
+    // 3. Refresh the credit balance. The job is already posted, so a failure here is not an error.
     const before = accessInfo(recruiter);
-    recruiter = (await loadRecruiter()) || recruiter;
+    try { recruiter = (await loadRecruiter()) || recruiter; } catch { /* keep what we have */ }
     const after = accessInfo(recruiter);
 
     $('jobForm').reset();
+    clearImage();
     $('jobCompany').value = recruiter.company_name || v.jobCompany;
     setFormMsg('');
     toast(before.unlimited ? 'Job posted.' : `Job posted. 1 credit used, ${after.credits} left.`);
   } catch (err) {
     console.error('Post job error:', err);
     setFormMsg(err.message || 'Could not post the job. Please try again.', 'error');
+
+    // The job was not saved, so do not leave the uploaded picture behind
+    if (uploadedPath) {
+      try { await supabase.storage.from(IMAGE_BUCKET).remove([uploadedPath]); } catch { /* ignore */ }
+    }
     // The credit balance on screen may be out of date, so refresh it
     try { recruiter = (await loadRecruiter()) || recruiter; } catch { /* keep what we have */ }
   } finally {
