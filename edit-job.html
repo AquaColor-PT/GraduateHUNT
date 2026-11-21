@@ -3,106 +3,282 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Edit Job</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+<title>GraduateInHunt - Edit Job</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
-  body { font-family: 'Inter', sans-serif; background: #f4f7fb; margin:0; padding:0; display:flex; justify-content:center; align-items:flex-start; min-height:100vh; }
-  .container { width:100%; max-width:600px; margin:40px 20px; }
+  :root {
+    --navy: #1e3a8a;
+    --blue: #3b82f6;
+    --ink: #0f172a;
+    --muted: #64748b;
+    --page: #f4f6fb;
+    --line: #e5e9f2;
+  }
+  * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+  body {
+    margin: 0; font-family: 'Inter', system-ui, sans-serif; background: var(--page); color: var(--ink);
+    min-height: 100vh; -webkit-font-smoothing: antialiased; display: flex; flex-direction: column;
+  }
+  a { color: inherit; text-decoration: none; }
+  svg.i { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; flex: none; }
 
-  form { background:white; padding:25px; border-radius:12px; box-shadow:0 6px 18px rgba(0,0,0,0.08); display:flex; flex-direction:column; gap:15px; }
-  form input, form select, form textarea { width:100%; padding:12px; border-radius:8px; border:1px solid #ccc; font-size:1rem; }
-  form button { width:100%; padding:14px; border:none; border-radius:8px; font-size:1rem; font-weight:600; cursor:pointer; background: linear-gradient(90deg,#1e3a8a,#3b82f6); color:white; box-shadow:0 4px 10px rgba(0,0,0,0.15); transition:0.3s; }
-  form button:hover { background: linear-gradient(90deg,#16275f,#2563eb); }
+  /* ===== Top bar ===== */
+  .topbar { background: #fff; }
+  .topbar-inner {
+    max-width: 1100px; margin: 0 auto; padding: 0 24px; height: 64px;
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  }
+  .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 1.15rem; letter-spacing: -0.02em; }
+  .brand-mark {
+    width: 36px; height: 36px; border-radius: 10px; color: #fff; font-weight: 700; font-size: 1.05rem;
+    background: linear-gradient(145deg, var(--navy), var(--blue)); display: grid; place-items: center;
+  }
+  .nav { display: flex; align-items: center; gap: 26px; }
+  .nav a {
+    display: inline-flex; align-items: center; gap: 7px; font-weight: 600; font-size: 0.92rem;
+    color: var(--muted); padding: 6px 0; transition: color .2s;
+  }
+  .nav a:hover, .nav a.active { color: var(--navy); }
 
-  .declaration-section { font-size:0.95rem; }
-  .declaration-section input[type="checkbox"] { margin-bottom:10px; }
-  .declaration-section span { display:block; margin-left:25px; }
+  /* ===== Banner ===== */
+  .hero {
+    background: linear-gradient(100deg, #1e3a8a 0%, #2d5bc4 55%, #3b82f6 100%);
+    color: #fff; padding: 36px 24px 96px; border-radius: 0 0 0 28px;
+  }
+  .hero-inner { max-width: 1100px; margin: 0 auto; }
+  .hero h1 { margin: 0 0 8px; font-size: clamp(1.7rem, 4vw, 2.3rem); font-weight: 800; letter-spacing: -0.035em; line-height: 1.15; }
+  .hero p { margin: 0; font-size: 1rem; opacity: .85; max-width: 560px; }
 
-  h2 { text-align:center; color:#1e3a8a; margin-bottom:20px; }
+  /* ===== Form card ===== */
+  .wrap { width: 100%; max-width: 720px; margin: -60px auto 0; padding: 0 24px 56px; flex: 1; }
+  form {
+    background: #fff; border: 1px solid var(--line); border-radius: 18px; padding: 26px;
+    box-shadow: 0 14px 34px rgba(30,58,138,.10); display: grid; gap: 18px;
+  }
+  .field { display: grid; gap: 6px; }
+  .field > label, .field > .label { font-size: .85rem; font-weight: 600; color: var(--muted); }
+  form input[type="text"], form select, form textarea {
+    width: 100%; padding: 12px 14px; border-radius: 12px; border: 1.5px solid var(--line);
+    font: inherit; font-size: .95rem; background: #fbfcff; color: var(--ink); transition: border-color .2s, box-shadow .2s;
+  }
+  form textarea { resize: vertical; min-height: 120px; }
+  form input:focus, form select:focus, form textarea:focus {
+    outline: none; border-color: var(--blue); background: #fff; box-shadow: 0 0 0 4px rgba(59,130,246,.18);
+  }
+  .hint { font-size: .78rem; color: var(--muted); }
+
+  /* ===== Picture upload ===== */
+  .upload {
+    border: 1.5px dashed #c7d6f7; border-radius: 14px; padding: 16px; background: #f8faff;
+    display: grid; gap: 12px; justify-items: start;
+  }
+  #imagePreview {
+    width: 100%; max-height: 280px; object-fit: contain; border-radius: 12px;
+    background: #fff; border: 1px solid var(--line);
+  }
+  .upload-actions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .attach {
+    display: inline-flex; align-items: center; gap: 8px; padding: 9px 16px; border-radius: 999px; cursor: pointer;
+    font-weight: 600; font-size: .88rem; color: var(--navy); background: #eef3ff; border: 1px solid #d3defa; transition: background .15s;
+  }
+  .attach:hover { background: #e0e9ff; }
+  .attach:focus-within { outline: 3px solid var(--blue); outline-offset: 2px; }
+  .attach input { position: absolute; width: 1px; height: 1px; opacity: 0; overflow: hidden; }
+  #removeImageBtn {
+    padding: 9px 16px; border-radius: 999px; font: inherit; font-weight: 600; font-size: .88rem; cursor: pointer;
+    background: #fff; color: #b91c1c; border: 1px solid #fecaca;
+  }
+  #removeImageBtn:hover { background: #fef2f2; }
+
+  .declaration {
+    display: flex; align-items: flex-start; gap: 12px; padding: 14px 16px; border-radius: 14px;
+    background: #f5f8ff; border: 1px solid #dbe6fd; font-size: .9rem; line-height: 1.5; cursor: pointer;
+  }
+  .declaration input { width: 18px; height: 18px; margin-top: 2px; flex: none; accent-color: var(--navy); }
+
+  .buttons { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+  #saveJobBtn {
+    border: 0; cursor: pointer; font: inherit; font-weight: 700; font-size: .95rem; color: #fff;
+    padding: 12px 30px; border-radius: 999px; background: linear-gradient(145deg, var(--navy), var(--blue)); transition: box-shadow .15s;
+  }
+  #saveJobBtn:hover:not(:disabled) { box-shadow: 0 8px 18px rgba(30,58,138,.3); }
+  #saveJobBtn:disabled { opacity: .65; cursor: not-allowed; }
+  .cancel {
+    padding: 11px 24px; border-radius: 999px; font-weight: 600; font-size: .92rem;
+    background: #fff; border: 1px solid var(--line); cursor: pointer; font-family: inherit; color: var(--ink);
+  }
+  .cancel:hover { box-shadow: 0 4px 12px rgba(30,58,138,.12); }
+
+  #feedback { font-size: .9rem; font-weight: 600; min-height: 1.2em; }
+  #feedback.success { color: #15803d; }
+  #feedback.error { color: #b91c1c; }
+
+  /* ===== Footer ===== */
+  footer {
+    text-align: center; padding: 22px 16px; background: #fff; border-top: 1px solid var(--line);
+    color: var(--muted); font-size: .85rem;
+  }
+
+  :focus-visible { outline: 3px solid var(--blue); outline-offset: 2px; }
+
+  @media (max-width: 760px) {
+    .nav .label { display: none; }
+    .nav { gap: 18px; }
+    .nav svg.i { width: 22px; height: 22px; }
+    .topbar-inner { padding: 0 16px; }
+    .hero { padding: 30px 16px 90px; }
+    .wrap { padding: 0 14px 48px; }
+    form { padding: 20px 16px; }
+    #saveJobBtn, .cancel { width: 100%; text-align: center; }
+  }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
 </style>
 </head>
 <body>
 
-<div class="container">
-  <h2>Edit Job</h2>
-  <form id="editJobForm" novalidate>
-    <input type="text" id="jobTitle" placeholder="Job Title" required>
-    <input type="text" id="jobCompany" placeholder="Company / Agency Name" required>
-    <input type="text" id="location" placeholder="Location" required>
-    <select id="jobType" required>
-      <option value="">-- Select Type --</option>
-      <option value="Internship">Internship</option>
-      <option value="Learnership">Learnership</option>
-      <option value="Training Program">Training Program</option>
-      <option value="Part-time">Part-time</option>
-      <option value="Permanent">Permanent</option>
-      <option value="Contract">Contract</option>
-    </select>
-    <input type="text" id="requiredQualifications" placeholder="Required Qualifications (comma separated)" required>
-    <textarea id="description" placeholder="Job Description" rows="4" required></textarea>
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="brand" href="recruiter-dashboard.html"><span class="brand-mark">G</span>GraduateInHunt</a>
+    <nav class="nav" aria-label="Main">
+      <a href="recruiter-dashboard.html">
+        <svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg><span class="label">Dashboard</span></a>
+      <a href="messages.html">
+        <svg class="i" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg><span class="label">Messages</span></a>
+      <a href="homepage.html" id="logoutBtn">
+        <svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg><span class="label">Logout</span></a>
+    </nav>
+  </div>
+</header>
 
-    <div class="declaration-section">
-      <label>
-        <input type="checkbox" id="declaration" required>
-        <span>I declare that this job is genuine, interviews will be conducted, and no prior experience is required.</span>
-      </label>
+<section class="hero">
+  <div class="hero-inner">
+    <h1>Edit Job</h1>
+    <p>Update the details of your job post and save your changes.</p>
+  </div>
+</section>
+
+<main class="wrap">
+  <form id="editJobForm" novalidate>
+    <div class="field">
+      <label for="jobTitle">Job title</label>
+      <input type="text" id="jobTitle" placeholder="Job Title" required>
     </div>
 
-    <button type="submit" id="saveJobBtn">Save Changes</button>
+    <div class="field">
+      <label for="jobCompany">Company / agency name</label>
+      <input type="text" id="jobCompany" placeholder="Company / Agency Name" required>
+    </div>
+
+    <div class="field">
+      <label for="location">Location</label>
+      <input type="text" id="location" placeholder="Location" required>
+    </div>
+
+    <div class="field">
+      <label for="jobType">Job type</label>
+      <select id="jobType" required>
+        <option value="">-- Select Type --</option>
+        <option value="Internship">Internship</option>
+        <option value="Learnership">Learnership</option>
+        <option value="Training Program">Training Program</option>
+        <option value="Part-time">Part-time</option>
+        <option value="Permanent">Permanent</option>
+        <option value="Contract">Contract</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label for="requiredQualifications">Required qualifications</label>
+      <input type="text" id="requiredQualifications" placeholder="Required Qualifications (comma separated)" required>
+      <span class="hint">Separate each qualification with a comma.</span>
+    </div>
+
+    <div class="field">
+      <label for="description">Job description</label>
+      <textarea id="description" placeholder="Job Description" rows="5" required></textarea>
+    </div>
+
+    <div class="field">
+      <span class="label">Job picture (optional)</span>
+      <div class="upload">
+        <img id="imagePreview" alt="Job picture preview" hidden>
+        <div class="upload-actions">
+          <label class="attach">
+            <svg class="i" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="1.8"/><path d="M21 16l-5-5-9 9"/></svg>
+            <span id="chooseText">Choose picture</span>
+            <input type="file" id="jobImage" accept="image/png,image/jpeg,image/webp">
+          </label>
+          <button type="button" id="removeImageBtn" hidden>Remove picture</button>
+        </div>
+        <span class="hint" id="imageHint">PNG, JPG or WebP, up to 5 MB. A poster or flyer for the job works well.</span>
+      </div>
+    </div>
+
+    <label class="declaration">
+      <input type="checkbox" id="declaration">
+      <span>I declare that this job is genuine, interviews will be conducted, and no prior experience is required.</span>
+    </label>
+
+    <div class="buttons">
+      <button type="submit" id="saveJobBtn">Save Changes</button>
+      <button type="button" class="cancel" id="cancelBtn">Cancel</button>
+    </div>
+    <div id="feedback" aria-live="polite"></div>
   </form>
-</div>
+</main>
+
+<footer>
+  &copy; <span id="year"></span> GraduateInHunt Recruiter Portal
+</footer>
 
 <script type="module">
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
 
 const SUPABASE_URL = 'https://euclknvsppptbfclwxqq.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV1Y2xrbnZzcHBwdGJmY2x3eHFxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc2Mjc2NTQsImV4cCI6MjA3MzIwMzY1NH0.HlGW3kZJ4CPnF2JuZGs_4ObkhxwVFTSedb7O8HHDEag';
+const SUPABASE_KEY = 'sb_publishable_90JbyFsa4BuuyeuLCIActg_yXfbHQ30';
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+const $ = id => document.getElementById(id);
+const form = $('editJobForm');
+const saveBtn = $('saveJobBtn');
+const feedback = $('feedback');
+const imageInput = $('jobImage');
+const imagePreview = $('imagePreview');
+const removeImageBtn = $('removeImageBtn');
+const chooseText = $('chooseText');
+
+const BUCKET = 'attachments';
+const MAX_IMAGE_MB = 5;
+const ALLOWED_TYPES = ['image/png', 'image/jpeg', 'image/webp'];
 
 const params = new URLSearchParams(window.location.search);
 const jobId = params.get('jobId');
-const form = document.getElementById('editJobForm');
 
-async function loadJob() {
-  if (!jobId) return alert('No job ID provided');
+let userId = null;
+let saving = false;
+let currentImageUrl = null; // picture already saved on this job
+let newImageFile = null;    // picture chosen in this session, not uploaded yet
+let removeImage = false;    // recruiter pressed Remove on the saved picture
+let previewObjectUrl = null;
 
-  const { data: job, error } = await supabase.from('jobs').select('*').eq('id', jobId).single();
-  if (error || !job) return alert('Job not found');
+$('year').textContent = new Date().getFullYear();
 
-  document.getElementById('jobTitle').value = job.title;
-  document.getElementById('jobCompany').value = job.company_name;
-  document.getElementById('location').value = job.location;
-  document.getElementById('jobType').value = job.job_type;
-  document.getElementById('requiredQualifications').value = job.required_qualifications || '';
-  document.getElementById('description').value = job.description;
+const safeUrl = u => (typeof u === 'string' && /^https?:\/\//i.test(u)) ? u : '';
+
+function setFeedback(text, type = '') {
+  feedback.textContent = text;
+  feedback.className = type;
 }
 
-form.addEventListener('submit', async e => {
-  e.preventDefault();
-  if (!document.getElementById('declaration').checked) return alert('Please agree to declaration');
+function lockForm(message) {
+  setFeedback(message, 'error');
+  saveBtn.disabled = true;
+  form.querySelectorAll('input, select, textarea, button').forEach(el => {
+    if (el.id !== 'cancelBtn') el.disabled = true;
+  });
+}
 
-  const updates = {
-    title: document.getElementById('jobTitle').value.trim(),
-    company_name: document.getElementById('jobCompany').value.trim(),
-    location: document.getElementById('location').value.trim(),
-    job_type: document.getElementById('jobType').value,
-    required_qualifications: document.getElementById('requiredQualifications').value.trim(),
-    description: document.getElementById('description').value.trim()
-  };
-
-  try {
-    const { error } = await supabase.from('jobs').update(updates).eq('id', jobId);
-    if (error) throw error;
-    alert('Job updated successfully!');
-    window.location.href = 'recruiter-dashboard.html';
-  } catch (err) {
-    console.error(err);
-    alert('Failed to update job');
-  }
-});
-
-loadJob();
-</script>
-
-</body>
-</html>
+// ---------- logout ----------
+$('logoutBtn').addEventListener('click', async e => {
+  e.preventDefault(); // wait for signOut before navigating
