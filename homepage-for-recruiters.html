@@ -54,22 +54,27 @@
   .search-card {
     background: #fff; border: 1px solid var(--line); border-radius: 18px; padding: 18px;
     box-shadow: 0 14px 34px rgba(30,58,138,.10);
-    display: grid; grid-template-columns: repeat(3, 1fr) auto; gap: 12px;
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;
   }
-  .search-card input {
+  .search-card input, .search-card select {
     width: 100%; padding: 12px 14px; border-radius: 12px; border: 1.5px solid var(--line);
     font: inherit; font-size: .95rem; background: #fbfcff; color: var(--ink); transition: border-color .2s, box-shadow .2s;
   }
-  .search-card input:focus { outline: none; border-color: var(--blue); background: #fff; box-shadow: 0 0 0 4px rgba(59,130,246,.18); }
-  .search-card button#searchBtn {
-    border: 0; cursor: pointer; font: inherit; font-weight: 700; font-size: .92rem; color: #fff;
-    padding: 12px 30px; border-radius: 999px; background: linear-gradient(145deg, var(--navy), var(--blue)); transition: box-shadow .15s;
+  .search-card select { cursor: pointer; }
+  .search-card input:focus, .search-card select:focus { outline: none; border-color: var(--blue); background: #fff; box-shadow: 0 0 0 4px rgba(59,130,246,.18); }
+  .search-actions { grid-column: 1 / -1; display: flex; gap: 10px; justify-content: flex-end; flex-wrap: wrap; }
+  .search-card button {
+    font: inherit; font-weight: 700; font-size: .92rem; padding: 12px 30px; border-radius: 999px; cursor: pointer; transition: box-shadow .15s, background .2s;
   }
+  .search-card button#searchBtn { border: 0; color: #fff; background: linear-gradient(145deg, var(--navy), var(--blue)); }
   .search-card button#searchBtn:hover { box-shadow: 0 8px 18px rgba(30,58,138,.3); }
+  .search-card button#clearBtn { color: var(--navy); background: #fff; border: 1.5px solid var(--line); }
+  .search-card button#clearBtn:hover { background: #eef3ff; }
 
   /* ===== Graduate cards ===== */
+  .result-count { margin: 22px 2px 0; font-size: .9rem; color: var(--muted); font-weight: 500; }
   .graduate-list {
-    display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 20px; margin-top: 28px;
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 20px; margin-top: 14px;
   }
   .graduate-list > p { grid-column: 1 / -1; text-align: center; color: var(--muted); font-size: .95rem; margin: 30px 0; }
 
@@ -87,6 +92,7 @@
   .graduate-item p { margin: 4px 0; font-size: .9rem; color: var(--ink); word-break: break-word; }
   .graduate-item p strong { color: var(--muted); font-weight: 600; }
   .graduate-item .skills { color: var(--ink); }
+  .graduate-item .divider { width: 100%; height: 1px; background: var(--line); margin: 10px 0 6px; }
 
   /* ===== Footer ===== */
   footer {
@@ -97,8 +103,7 @@
   :focus-visible { outline: 3px solid var(--blue); outline-offset: 2px; }
 
   @media (max-width: 900px) {
-    .search-card { grid-template-columns: 1fr; }
-    .search-card button#searchBtn { width: 100%; }
+    .search-card { grid-template-columns: repeat(2, 1fr); }
   }
   @media (max-width: 760px) {
     .nav .label { display: none; }
@@ -107,6 +112,11 @@
     .topbar-inner { padding: 0 16px; }
     .hero { padding: 30px 16px 90px; }
     .wrap { padding: 0 14px 48px; }
+  }
+  @media (max-width: 560px) {
+    .search-card { grid-template-columns: 1fr; }
+    .search-actions { justify-content: stretch; }
+    .search-card button { flex: 1; }
   }
   @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
 </style>
@@ -130,7 +140,7 @@
 <section class="hero">
   <div class="hero-inner">
     <h1>Find Graduates</h1>
-    <p>Search and view graduates by name, skills and qualifications.</p>
+    <p>Search and view graduates by name, skills, qualifications, age, gender, race and disability status.</p>
   </div>
 </section>
 
@@ -139,8 +149,40 @@
     <input type="text" id="searchName" placeholder="Search by name" aria-label="Search by name">
     <input type="text" id="searchSkills" placeholder="Search by skills" aria-label="Search by skills">
     <input type="text" id="searchQualification" placeholder="Search by qualification" aria-label="Search by qualification">
-    <button id="searchBtn" type="button">Search</button>
+
+    <select id="searchGender" aria-label="Filter by gender">
+      <option value="">Any gender</option>
+      <option value="Female">Female</option>
+      <option value="Male">Male</option>
+      <option value="Non-binary">Non-binary</option>
+      <option value="Prefer not to say">Prefer not to say</option>
+    </select>
+    <select id="searchRace" aria-label="Filter by race">
+      <option value="">Any race</option>
+      <option value="Black African">Black African</option>
+      <option value="Coloured">Coloured</option>
+      <option value="Indian/Asian">Indian/Asian</option>
+      <option value="White">White</option>
+      <option value="Other">Other</option>
+      <option value="Prefer not to say">Prefer not to say</option>
+    </select>
+    <select id="searchDisability" aria-label="Filter by disability status">
+      <option value="">Any disability status</option>
+      <option value="No disability">No disability</option>
+      <option value="Yes, I have a disability">Has a disability</option>
+      <option value="Prefer not to say">Prefer not to say</option>
+    </select>
+
+    <input type="number" id="searchMinAge" placeholder="Minimum age" min="14" max="100" inputmode="numeric" aria-label="Minimum age">
+    <input type="number" id="searchMaxAge" placeholder="Maximum age" min="14" max="100" inputmode="numeric" aria-label="Maximum age">
+
+    <div class="search-actions">
+      <button id="clearBtn" type="button">Clear</button>
+      <button id="searchBtn" type="button">Search</button>
+    </div>
   </div>
+
+  <p class="result-count" id="resultCount" aria-live="polite"></p>
 
   <div class="graduate-list" id="graduateList" aria-live="polite">
     <!-- Graduates will load here -->
@@ -151,7 +193,7 @@
   &copy; <span id="year"></span> GraduateInHunt Recruiter Portal
 </footer>
 
-<script type="module" src="homepage-for-recruiters.js"></script>
+<script type="module" src="homepage-for-recruiters.js?v=2"></script>
 <script>
   document.getElementById("year").textContent = new Date().getFullYear();
 
