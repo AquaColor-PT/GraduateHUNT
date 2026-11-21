@@ -11,6 +11,7 @@ const phoneInput = $('phone');
 const dobInput = $('dob');
 const genderInput = $('gender');
 const raceInput = $('race');
+const disabilityInput = $('disability');
 const qualificationInput = $('qualification');
 const skillsInput = $('skills');
 const skillChips = $('skillChips');
@@ -39,7 +40,7 @@ const DOCS = {
     col: 'qualification_doc_url', folder: 'qualification/', types: PDF_OR_IMG, label: 'Qualification certificate', current: null
   }
 };
-const TOTAL = 11; // name, phone, dob, gender, race, qualification, skills, picture, CV, ID, certificate
+const TOTAL = 12; // name, phone, dob, gender, race, disability, qualification, skills, picture, CV, ID, certificate
 
 let currentUserId = null;
 let currentEmail = '';
@@ -123,6 +124,7 @@ function refreshProgress() {
     dobInput.value,
     genderInput.value,
     raceInput.value,
+    disabilityInput.value,
     qualificationInput.value.trim(),
     skillsInput.value.trim(),
     profilePicInput.files[0] || currentPicUrl,
@@ -359,6 +361,7 @@ async function loadProfile() {
     dobInput.value = data.date_of_birth || '';
     genderInput.value = data.gender || '';
     raceInput.value = data.race || '';
+    disabilityInput.value = data.disability_status || '';
     qualificationInput.value = data.qualification || '';
     skillsInput.value = data.skills || '';
     currentPicUrl = data.profile_pic_url || null;
@@ -370,7 +373,7 @@ async function loadProfile() {
 }
 
 /* ---------- Live updates ---------- */
-[nameInput, phoneInput, dobInput, genderInput, raceInput, qualificationInput, skillsInput]
+[nameInput, phoneInput, dobInput, genderInput, raceInput, disabilityInput, qualificationInput, skillsInput]
   .forEach(el => el.addEventListener('input', refreshAll));
 
 profilePicInput.addEventListener('change', () => {
@@ -479,6 +482,7 @@ saveBtn.addEventListener('click', async () => {
       date_of_birth: dobInput.value || null,
       gender: genderInput.value || null,
       race: raceInput.value || null,
+      disability_status: disabilityInput.value || null,
       qualification,
       skills: skillsInput.value.trim(),
       profile_pic_url: picUrl,
