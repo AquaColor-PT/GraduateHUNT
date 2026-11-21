@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>GraduateInHunt - Accepted Students</title>
+<title>GraduateInHunt - Find Graduates</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -16,12 +16,8 @@
   }
   * { box-sizing: border-box; }
   body {
-    margin: 0;
-    font-family: 'Inter', system-ui, sans-serif;
-    background: var(--page);
-    color: var(--ink);
-    min-height: 100vh;
-    -webkit-font-smoothing: antialiased;
+    margin: 0; font-family: 'Inter', system-ui, sans-serif; background: var(--page); color: var(--ink);
+    min-height: 100vh; -webkit-font-smoothing: antialiased; display: flex; flex-direction: column;
   }
   a { color: inherit; text-decoration: none; }
   svg.i { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; flex: none; }
@@ -38,65 +34,79 @@
     background: linear-gradient(145deg, var(--navy), var(--blue)); display: grid; place-items: center;
   }
   .nav { display: flex; align-items: center; gap: 26px; }
-  .nav a, .nav button {
-    display: inline-flex; align-items: center; gap: 7px; font: inherit; font-weight: 600; font-size: 0.92rem;
-    color: var(--muted); background: none; border: 0; padding: 6px 0; cursor: pointer; transition: color .2s;
+  .nav a {
+    display: inline-flex; align-items: center; gap: 7px; font-weight: 600; font-size: 0.92rem;
+    color: var(--muted); padding: 6px 0; transition: color .2s;
   }
-  .nav a:hover, .nav button:hover, .nav a.active { color: var(--navy); }
+  .nav a:hover, .nav a.active { color: var(--navy); }
 
-  /* ===== Hero ===== */
+  /* ===== Banner ===== */
   .hero {
     background: linear-gradient(100deg, #1e3a8a 0%, #2d5bc4 55%, #3b82f6 100%);
-    color: #fff; padding: 36px 24px 44px; border-radius: 0 0 0 28px;
+    color: #fff; padding: 36px 24px 96px; border-radius: 0 0 0 28px;
   }
   .hero-inner { max-width: 1100px; margin: 0 auto; }
-  .hero h1 { margin: 0 0 8px; font-size: clamp(1.8rem, 4vw, 2.4rem); font-weight: 800; letter-spacing: -0.035em; line-height: 1.1; }
-  .hero p { margin: 0; max-width: 520px; font-size: 1rem; line-height: 1.5; color: rgba(255,255,255,.9); }
+  .hero h1 { margin: 0 0 8px; font-size: clamp(1.7rem, 4vw, 2.3rem); font-weight: 800; letter-spacing: -0.035em; line-height: 1.15; }
+  .hero p { margin: 0; font-size: 1rem; opacity: .85; max-width: 560px; }
 
-  /* ===== Content ===== */
-  .wrap { max-width: 1100px; margin: 0 auto; padding: 24px 24px 56px; }
-
-  #studentsContainer h2 {
-    margin: 4px 0 14px !important;
-    font-size: 1.05rem; font-weight: 700; letter-spacing: -0.01em;
-    color: var(--ink) !important;
-    display: flex; align-items: center; gap: 10px;
+  /* ===== Search card ===== */
+  .wrap { width: 100%; max-width: 1100px; margin: -60px auto 0; padding: 0 24px 56px; flex: 1; }
+  .search-card {
+    background: #fff; border: 1px solid var(--line); border-radius: 18px; padding: 18px;
+    box-shadow: 0 14px 34px rgba(30,58,138,.10);
+    display: grid; grid-template-columns: repeat(3, 1fr) auto; gap: 12px;
   }
-  #studentsContainer h2::before {
-    content: ""; width: 4px; height: 18px; border-radius: 2px;
-    background: linear-gradient(180deg, var(--navy), var(--blue));
+  .search-card input {
+    width: 100%; padding: 12px 14px; border-radius: 12px; border: 1.5px solid var(--line);
+    font: inherit; font-size: .95rem; background: #fbfcff; color: var(--ink); transition: border-color .2s, box-shadow .2s;
   }
-
-  .student-card {
-    display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;
-    background: #fff; border: 1px solid var(--line); border-radius: 16px;
-    padding: 18px 20px; margin-bottom: 12px;
-    transition: box-shadow .2s, transform .2s;
+  .search-card input:focus { outline: none; border-color: var(--blue); background: #fff; box-shadow: 0 0 0 4px rgba(59,130,246,.18); }
+  .search-card button#searchBtn {
+    border: 0; cursor: pointer; font: inherit; font-weight: 700; font-size: .92rem; color: #fff;
+    padding: 12px 30px; border-radius: 999px; background: linear-gradient(145deg, var(--navy), var(--blue)); transition: box-shadow .15s;
   }
-  .student-card:hover { box-shadow: 0 10px 26px rgba(30,58,138,.12); transform: translateY(-2px); }
+  .search-card button#searchBtn:hover { box-shadow: 0 8px 18px rgba(30,58,138,.3); }
 
-  .student-info { display: flex; flex-direction: column; gap: 2px; }
-  .student-name { font-weight: 700; color: var(--navy); font-size: 1.05rem; }
-  .message-indicator { font-size: .88rem; color: var(--muted); }
-
-  .reply-btn {
-    background: linear-gradient(145deg, var(--navy), var(--blue));
-    color: #fff; border: 0; border-radius: 12px;
-    padding: 11px 22px; cursor: pointer; font: inherit; font-weight: 700; font-size: .92rem;
-    transition: box-shadow .2s;
+  /* ===== Graduate cards ===== */
+  .graduate-list {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 20px; margin-top: 28px;
   }
-  .reply-btn:hover { box-shadow: 0 8px 20px rgba(30,58,138,.35); }
+  .graduate-list > p { grid-column: 1 / -1; text-align: center; color: var(--muted); font-size: .95rem; margin: 30px 0; }
+
+  .graduate-item {
+    background: #fff; border: 1px solid var(--line); border-radius: 18px; padding: 26px 20px 22px;
+    display: flex; flex-direction: column; align-items: center; text-align: center;
+    box-shadow: 0 4px 14px rgba(30,58,138,.06); transition: transform .2s, box-shadow .2s;
+  }
+  .graduate-item:hover { transform: translateY(-4px); box-shadow: 0 14px 28px rgba(30,58,138,.14); }
+  .graduate-item img {
+    width: 88px; height: 88px; border-radius: 50%; object-fit: cover; margin-bottom: 14px;
+    border: 3px solid #dbe6fd; background: #eef3ff;
+  }
+  .graduate-item h3 { margin: 0 0 10px; font-weight: 700; color: var(--navy); font-size: 1.1rem; letter-spacing: -0.01em; }
+  .graduate-item p { margin: 4px 0; font-size: .9rem; color: var(--ink); word-break: break-word; }
+  .graduate-item p strong { color: var(--muted); font-weight: 600; }
+  .graduate-item .skills { color: var(--ink); }
+
+  /* ===== Footer ===== */
+  footer {
+    text-align: center; padding: 22px 16px; background: #fff; border-top: 1px solid var(--line);
+    color: var(--muted); font-size: .85rem;
+  }
 
   :focus-visible { outline: 3px solid var(--blue); outline-offset: 2px; }
 
+  @media (max-width: 900px) {
+    .search-card { grid-template-columns: 1fr; }
+    .search-card button#searchBtn { width: 100%; }
+  }
   @media (max-width: 760px) {
     .nav .label { display: none; }
     .nav { gap: 18px; }
     .nav svg.i { width: 22px; height: 22px; }
-    .topbar-inner, .wrap { padding-left: 16px; padding-right: 16px; }
-    .hero { padding: 28px 16px 36px; }
-    .student-card { flex-direction: column; align-items: flex-start; }
-    .reply-btn { width: 100%; }
+    .topbar-inner { padding: 0 16px; }
+    .hero { padding: 30px 16px 90px; }
+    .wrap { padding: 0 14px 48px; }
   }
   @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
 </style>
@@ -107,29 +117,53 @@
   <div class="topbar-inner">
     <a class="brand" href="recruiter-dashboard.html"><span class="brand-mark">G</span>GraduateInHunt</a>
     <nav class="nav" aria-label="Main">
-      <a href="recruiter-dashboard.html">
-        <svg class="i" viewBox="0 0 24 24"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg><span class="label">Dashboard</span></a>
-      <a href="recruiter-messages.html" class="active">
-        <svg class="i" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg><span class="label">Messages</span></a>
-      <button id="logoutBtn" type="button">
-        <svg class="i" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg><span class="label">Logout</span></button>
+      <a href="recruiter-dashboard.html" id="dashboardBtn">
+        <svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg><span class="label">Dashboard</span></a>
+      <a href="homepage-for-recruiters.html" class="active">
+        <svg class="i" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg><span class="label">Graduates</span></a>
+      <a href="messages.html">
+        <svg class="i" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg><span class="label">Messages</span></a>
+      <a href="homepage.html" id="logoutBtn">
+        <svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg><span class="label">Logout</span></a>
     </nav>
   </div>
 </header>
 
 <section class="hero">
   <div class="hero-inner">
-    <h1>Accepted Students</h1>
-    <p>Message the graduates you've accepted, grouped by job.</p>
+    <h1>Find Graduates</h1>
+    <p>Search and view graduates by name, skills and qualifications.</p>
   </div>
 </section>
 
 <main class="wrap">
-  <div id="studentsContainer">
-    <p style="text-align:center;color:#666;">Loading accepted students...</p>
+  <div class="search-card">
+    <input type="text" id="searchName" placeholder="Search by name" aria-label="Search by name">
+    <input type="text" id="searchSkills" placeholder="Search by skills" aria-label="Search by skills">
+    <input type="text" id="searchQualification" placeholder="Search by qualification" aria-label="Search by qualification">
+    <button id="searchBtn" type="button">Search</button>
+  </div>
+
+  <div class="graduate-list" id="graduateList" aria-live="polite">
+    <!-- Graduates will load here -->
   </div>
 </main>
 
-<script type="module" src="messages.js"></script>
+<footer>
+  &copy; <span id="year"></span> GraduateInHunt Recruiter Portal
+</footer>
+
+<script type="module" src="homepage-for-recruiters.js"></script>
+<script>
+  document.getElementById("year").textContent = new Date().getFullYear();
+
+  document.getElementById("logoutBtn").addEventListener("click", async (e) => {
+    e.preventDefault();
+    const { createClient } = await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm');
+    const supabase = createClient('https://euclknvsppptbfclwxqq.supabase.co', 'sb_publishable_90JbyFsa4BuuyeuLCIActg_yXfbHQ30');
+    await supabase.auth.signOut();
+    window.location.href = "homepage.html";
+  });
+</script>
 </body>
 </html>
