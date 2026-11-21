@@ -12,6 +12,8 @@ const resultCount = document.getElementById('resultCount');
 
 let allJobs = [];
 let activeType = '';   // the job type being filtered on ('' means all)
+let requestId = 0;     // ignores slow, out-of-date responses
+let liveStarted = false;
 
 /* ---------- icons (fixed strings only, never job data) ---------- */
 const svg = inner =>
@@ -167,6 +169,9 @@ function renderChips() {
         groups.get(key).count++;
     });
 
+    // If the job type being filtered on has disappeared (for example the job was removed), go back to All
+    if (activeType && !groups.has(activeType)) activeType = '';
+
     typeChips.hidden = allJobs.length === 0;
     typeChips.appendChild(makeChip('', 'All', allJobs.length));
 
@@ -232,17 +237,31 @@ function qualificationMatches(gradText, jobQualification) {
 }
 
 /* ---------- load data ---------- */
-async function loadJobs() {
-    showSkeletons();
-    showNotice('');
+// silent = true is used by live updates: it refreshes the list in the background
+// without the loading skeletons, and never replaces the list with an error message.
+async function loadJobs({ silent = false } = {}) {
+    const thisRequest = ++requestId;
+
+    if (!silent) {
+        showSkeletons();
+        showNotice('');
+    }
+
+    // Normal loads show the problem on the page; background refreshes just log it
+    const report = (title, text = '', options = {}) => {
+        if (silent) console.warn(title, text);
+        else showState(title, text, options);
+    };
 
     try {
         const { data: { session } } = await supabase.auth.getSession();
+        if (thisRequest !== requestId) return;
         if (!session?.user) {
-            showState('Please log in to view jobs', '', { linkText: 'Log in', linkHref: 'login-type.html' });
+            report('Please log in to view jobs', '', { linkText: 'Log in', linkHref: 'login-type.html' });
             return;
         }
         const studentId = session.user.id;
+        startLive(studentId);
 
         let { data: graduate, error: gradError } = await supabase
             .from('graduates')
@@ -259,12 +278,14 @@ async function loadJobs() {
                 .maybeSingle());
         }
 
+        if (thisRequest !== requestId) return;
+
         if (gradError) {
-            showState('Could not load your profile', gradError.message, { isError: true });
+            report('Could not load your profile', gradError.message, { isError: true });
             return;
         }
         if (!graduate) {
-            showState('We could not find your graduate profile', '', {
+            report('We could not find your graduate profile', '', {
                 linkText: 'Complete your profile', linkHref: 'graduate-profile.html'
             });
             return;
@@ -279,8 +300,10 @@ async function loadJobs() {
             .eq('visible', true)
             .order('created_at', { ascending: false });
 
+        if (thisRequest !== requestId) return;
+
         if (jobsError) {
-            showState('Could not load jobs', jobsError.message, { isError: true });
+            report('Could not load jobs', jobsError.message, { isError: true });
             return;
         }
 
@@ -290,13 +313,15 @@ async function loadJobs() {
             .eq('student_id', studentId);
         if (appError) console.warn('Could not load your applications:', appError.message);
 
+        if (thisRequest !== requestId) return;
+
         const appliedJobIds = new Set((applications || []).map(a => a.job_id));
 
         // No qualification on the profile: show everything instead of an empty page
         const filterByQualification = gradQualification.length > 0;
-        if (!filterByQualification) {
-            showNotice('Add your qualification to your profile to see jobs that match it. Showing all jobs for now.');
-        }
+        showNotice(filterByQualification
+            ? ''
+            : 'Add your qualification to your profile to see jobs that match it. Showing all jobs for now.');
 
         allJobs = (jobs || [])
             .filter(job => !filterByQualification || qualificationMatches(gradText, job.required_qualifications))
@@ -306,9 +331,46 @@ async function loadJobs() {
         filterJobs();
     } catch (err) {
         console.error(err);
-        showState('Something went wrong', err && err.message ? err.message : 'Please refresh the page and try again.', { isError: true });
+        report('Something went wrong', err && err.message ? err.message : 'Please refresh the page and try again.', { isError: true });
     }
 }
+
+/* ---------- live updates ---------- */
+// When a recruiter posts, edits or removes a job, when this graduate applies for a job,
+// or when this graduate changes their own profile, the list refreshes by itself.
+let refreshTimer;
+function refreshLive() {
+    clearTimeout(refreshTimer);
+    refreshTimer = setTimeout(() => loadJobs({ silent: true }), 400);
+}
+
+function startLive(studentId) {
+    if (liveStarted) return;
+    liveStarted = true;
+
+    let hasConnectedBefore = false;
+    supabase
+        .channel('browse-jobs-live')
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'jobs' }, refreshLive)
+        .on('postgres_changes',
+            { event: '*', schema: 'public', table: 'applications', filter: `student_id=eq.${studentId}` },
+            refreshLive)
+        .on('postgres_changes',
+            { event: '*', schema: 'public', table: 'graduates', filter: `id=eq.${studentId}` },
+            refreshLive)
+        .subscribe((status) => {
+            if (status === 'SUBSCRIBED') {
+                // After a dropped connection comes back, catch up on anything missed meanwhile
+                if (hasConnectedBefore) refreshLive();
+                hasConnectedBefore = true;
+            }
+        });
+}
+
+// Phones pause background tabs, so refresh when the graduate returns to the page
+document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible' && liveStarted) refreshLive();
+});
 
 /* ---------- display ---------- */
 function displayJobs(jobs) {
