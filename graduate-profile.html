@@ -276,8 +276,8 @@
     <p class="email" id="email">Loading...</p>
 
     <div class="progress-wrap">
-      <div class="progress-text"><span id="progressText">Profile 0 of 11 complete</span><span>A full profile finds better jobs</span></div>
-      <div class="progress" role="progressbar" aria-valuemin="0" aria-valuemax="11" aria-valuenow="0" id="progressTrack"><div id="progressBar"></div></div>
+      <div class="progress-text"><span id="progressText">Profile 0 of 12 complete</span><span>A full profile finds better jobs</span></div>
+      <div class="progress" role="progressbar" aria-valuemin="0" aria-valuemax="12" aria-valuenow="0" id="progressTrack"><div id="progressBar"></div></div>
     </div>
   </section>
 
@@ -333,6 +333,16 @@
           <option value="Prefer not to say">Prefer not to say</option>
         </select>
         <p class="hint">Some learnerships and SETA programmes need this for equity reporting. It is only shared with recruiters you apply to.</p>
+      </div>
+      <div class="field full">
+        <label for="disability">Disability status</label>
+        <select id="disability">
+          <option value="">Select...</option>
+          <option value="No disability">No disability</option>
+          <option value="Yes, I have a disability">Yes, I have a disability</option>
+          <option value="Prefer not to say">Prefer not to say</option>
+        </select>
+        <p class="hint">Optional. Some learnerships and SETA programmes need this for equity reporting. It is only shared with recruiters you apply to.</p>
       </div>
     </div>
   </section>
@@ -446,6 +456,6 @@
 
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
-<script type="module" src="graduate-profile.js?v=3"></script>
+<script type="module" src="graduate-profile.js?v=4"></script>
 </body>
 </html>
